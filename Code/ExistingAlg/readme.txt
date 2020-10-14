@@ -14,7 +14,7 @@ This package contains all source codes for
 11. UtilityApprox
 
 This package also provides the real datasets.
-Make sure there is a folder called "input/" and a folder "output/" under the working directory.
+Make sure there is a folder called "input/" and a folder called "output/" under the working directory.
 They will be used for storing the input/output files and some intermediate results.
 
 Usage Step
