@@ -1,12 +1,12 @@
-Readme (Baselines in Interactive Top-k Points Searching)
+Readme (Baselines in Interactive Search for One of the Top-k)
 =========================
 This package contains all source codes for 
 1. Active-Ranking
 2. Preference-Learning
-3. Median (only work on 2-dimensonal datasets)
-4. Median-Adapt (only work on 2-dimensonal datasets)
-5. Hull (only work on 2-dimensonal datasets)
-6. Hull-Adapt (only work on 2-dimensonal datasets)
+3. Median (only works for 2-dimensional datasets)
+4. Median-Adapt (only works for 2-dimensional datasets)
+5. Hull (only works for 2-dimensional datasets)
+6. Hull-Adapt (only works for 2-dimensional datasets)
 7. UH-Simplex
 8. UH-Simplex-Adapt
 9. UH-Random

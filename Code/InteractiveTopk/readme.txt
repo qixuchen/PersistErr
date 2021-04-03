@@ -1,7 +1,7 @@
-Readme (Interactive Top-k Points Searching)
+Readme (Interactive Search for One of the Top-k)
 =========================
 This package contains all source codes for 
-1. 2D-PI (only work on 2-dimensonal datasets)
+1. 2D-PI (only works for 2-dimensional datasets)
 2. HD-PI (sampling and accurate)
 3. RH
 

@@ -148,7 +148,7 @@ int demo()
     r[0] = Preference_Learning(wPtr, p_set, P0, k, questions[0]);
 
     printf("=========================Round 3=========================\n");
-    //Algorithm1
+    //Algorithm: RH
     r[2] = RH(wPtr, p_set, P0, k, questions[2]);
 
     printf("=========================Round 4=========================\n");
@@ -160,19 +160,20 @@ int demo()
     r[1] = Active_Ranking(wPtr, p_2, P0, k, questions[1]);
 
     printf("=========================Round 6=========================\n");
-    //Algorithm2
+    //Algorithm HDPI
     r[3] = HDPI_sampling(wPtr, p_set, P0, k, questions[3]);
 
     printf("=========================Round 7=========================\n");
     r[4] = HDPI_accurate(wPtr, p_set, P0, k, questions[4]);
 
+    int Rindex[7] = {2, 5, 3, 6, 7, 4, 1};
     printf("Now comes to the comparison section\n");
     for(int i = 2; i < 6; i++)
     {
         for(int j = i + 1; j< 7; j++)
         {
-            printf("=========================== Round %d ===========================\n", i);
-            fprintf(wPtr, "=========================== Round %d ===========================\n", i);
+            printf("=========================== Round %d ===========================\n", Rindex[i]);
+            fprintf(wPtr, "=========================== Round %d ===========================\n", Rindex[i]);
             printf("No. of questions asked: %d \n", questions[i]);
             fprintf(wPtr, "No. of questions asked: %d \n", questions[i]);
             printf("Recommended cars:\n");
@@ -189,8 +190,8 @@ int demo()
                     P0->points[r[i]->id]->coord[2], P0->points[r[i]->id]->coord[3]);
             printf("---------------------------------------------------------\n");
             fprintf(wPtr, "---------------------------------------------------------\n");
-            printf("=========================== Round %d ===========================\n", j);
-            fprintf(wPtr, "=========================== Round %d ===========================\n", j);
+            printf("=========================== Round %d ===========================\n", Rindex[j]);
+            fprintf(wPtr, "=========================== Round %d ===========================\n", Rindex[j]);
             printf("No. of questions asked: %d \n", questions[j]);
             fprintf(wPtr, "No. of questions asked: %d \n", questions[j]);
             printf("Recommended cars:\n");
@@ -215,7 +216,7 @@ int demo()
                    "Note that all car(s) returned by each round must be one of your 20 most favorite cars\n"
                    "in our used car database. Please answer these based on two criteria at the same time:\n"
                    "(a) No. of questions asked and (b) The recommended car(s)\n"
-                   "You answer: ", i, j, i ,j);
+                   "You answer: ", Rindex[i], Rindex[j], Rindex[i], Rindex[j]);
             int sat = 4;
             while(sat!= 1 && sat!= 2 && sat!= 3)
             {

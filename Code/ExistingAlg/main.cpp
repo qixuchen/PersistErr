@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
     printf("---------------------------------------------------------\n");
 
     //Algorithm: Active Ranking
-    Active_Ranking(p_set, u, k);
+    //Active_Ranking(p_set, u, k);
     //Algorithm: Preference Learning
-    Preference_Learning_accuracy(p_set, u, k);
+    //Preference_Learning_accuracy(p_set, u, k);
 
     // initial parameters
     int s = 2, maxRound = 1000;
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     // the UH-Simplex algorithm
     max_utility(P, u, s, epsilon, maxRound, cmp_option, stop_option, prune_option, dom_option);
     // the UH-Simplex-Adapt algorithm
-    Simplex_Adapt(p_set, u, epsilon, k);
+    //Simplex_Adapt(p_set, u, epsilon, k);
 
     cmp_option = RANDOM;
     // the UH-Random algorithm

@@ -1,4 +1,4 @@
-Readme (Recommending Car System)
+Readme (Recommending Car System for Interactive Search for One of the Top-k)
 =========================
 This package contains all source codes for user study on
 1. UH-Simplex
@@ -6,8 +6,7 @@ This package contains all source codes for user study on
 3. RH
 4. UH-Random
 5. Active-Ranking
-6. HDPI_sampling
-7. HDPI_accurate
+6. HDPI (sampling and accurate)
 
 This package also provides the used car dataset from
 https://www.kaggle.com/orgesleka/used-cars-database.
@@ -57,11 +56,22 @@ For input/car.txt (the used car dataset with four attributes: price, year, power
 	
 Appendix B. Format of Console Output
 ------------------------------------
-The console output consists of three components: (a) interaction, (b) evaluation and (c) comparison
-The recommending car system interacts with you for different rounds.
+The console output consists of two components: (a) Interaction and Evaluation; and (b) Comparison
 
-a. Interaction
-	At each round, you will be presented consecutive questions correspond to a method in
+a. Interaction and Evaluation
+(1).The recommending car system will interact with you in 7 rounds.
+	You will see the following at the beginning of each round
+	=========================Round i=========================
+	where, 
+	Round 1 is the interacting process of algorithm UH-Simplex (i = 1),
+	Round 2 is the interacting process of algorithm Preference-Learning (i = 2),
+	Round 3 is the interacting process of algorithm RH (i = 3),
+	Round 4 is the interacting process of algorithm UH-Random (i = 4),
+	Round 5 is the interacting process of algorithm Active-Ranking (i = 5),
+	Round 6 is the interacting process of algorithm HDPI_sampling (i = 6),
+	and Round 7 is the interacting process of algorithm HDPI_accurate (i = 7).
+
+(2).In each round, you will be presented consecutive questions correspond to a method in
 	our system (two cars and you are asked to choose the one you favor more).
 	For example, you might see:
 	Please choose the car you favor more:
@@ -74,8 +84,7 @@ a. Interaction
 	--------------------------------------------------------
 	Your choice: 
 	
-b. Evaluation
-	At the end of each round, it will ask you to give a score to indicate how bored you
+(3).At the end of each round, you will be asked to give a score to indicate how bored you
 	feel when you are asked with XX questions for this round in order to obtain one of 
 	your 20 most favorite cars. 
 	For example, you might see:
@@ -94,10 +103,12 @@ b. Evaluation
 	that you feel the most bored and 1 denotes that you feel the least bored.)
 	You answer:
 
-c. Comparison
-	After all the rounds. it will ask you to compare different rounds. You will be presented 
-	two rounds (including number of questions and recommended car) each time and you need to 
-	choose the round you favor more.
+b. Comparison
+	After all the rounds, it will ask you to compare different rounds, including
+	Round 1 (UH-Simplex), Round 3 (RH), Round 4 (UH-Random), Round 6 (HDPI_sampling)
+	and Round 7 (HDPI_accurate). 
+	You will be presented the results of two rounds (including the number of questions 
+	asked and recommended car) each time and you need to choose the round you favor more.
 	For example, you might see:
 	=========================== Round 2 ===========================
 	No. of questions asked: 8 
@@ -131,6 +142,15 @@ Appendix C. Format of User Log
 	It contains two parts: (a) Results of Rounds and (b) Results of comparison
 
 a.  Results of Rounds
+(1).You will see the results of 7 rounds (algorithms) in order: 
+	1). UH-Simplex
+	2). Preference-Learning 
+	3). RH, UH-Random
+	4). Active-Ranking
+	5). HDPI_sampling 
+	6). HDPI_accurate.
+
+(2).The result of each round (algorithm) is shown in 13 lines.
 	Lines 1-3 show the algorithm name and the number of questions asked.
 	Lines 4-9 show the recommended car.
 	Lines 10-13 show the evaluation result.
@@ -150,6 +170,19 @@ a.  Results of Rounds
 	that you feel the most bored and 1 denotes that you feel the least bored.) 4
 	
 b. Results of comparison
+(1).You will see the result of 10 comparisons:
+	1). Round 3 (RH) and Round 1 (UH-Simplex)
+	2). Round 3 (RH) and Round 4 (UH-Random)
+	3). Round 3 (RH) and Round 6 (HDPI-sampling)
+	4). Round 3 (RH) and Round 7 (HDPI-accurate)
+	5). Round 4 (UH-Random) and Round 1 (UH-Simplex)
+	6). Round 4 (UH-Random) and Round 6 (HDPI-sampling)
+	7). Round 4 (UH-Random) and Round 7 (HDPI-accurate)
+	8). Round 6 (HDPI-sampling) and Round 1 (UH-Simplex)
+	9). Round 6 (HDPI-sampling) and Round 7 (HDPI-accurate)
+	10). Round 7 (HDPI-accurate) and Round 1 (UH-Simplex)
+
+(2).The result of each comparison is shown in 17 lines.
 	Lines 1-8 show the result of a round, including the number of 
 	questions and the recommended car.
 	Lines 9-16 show the result of another round, including the number of 

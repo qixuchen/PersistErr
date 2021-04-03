@@ -429,7 +429,7 @@ int modify_choose_item_table(std::vector<choose_item *> &choose_item_set,
         int M_positive = choose_item_set[item_count]->positive_side.size();
         int M_negative = choose_item_set[item_count]->negative_side.size();
         int M_intersect = choose_item_set[item_count]->intersect_case.size();
-        if (M_positive + M_negative == 0 || M_positive + M_intersect == 0)// || M_negative + M_intersect == 0)
+        if (M_negative + M_intersect == 0 || M_positive + M_intersect == 0)// || M_positive + M_negative == 0)
         {
             choose_item_set.erase(choose_item_set.begin() + item_count);
         }

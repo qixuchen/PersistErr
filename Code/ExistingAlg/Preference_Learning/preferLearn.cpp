@@ -685,7 +685,7 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
     point_t *estimate_u = find_estimate(V);
     point_nomarlize(estimate_u);
 
-    while (accuracy < 0.999999 && de_accuracy > 0)
+    while (accuracy < 0.99999 && de_accuracy > 0)
     {
         numOfQuestion++;
         hyperplane_t *best = NULL;
