@@ -33,6 +33,18 @@ using namespace std;
  */
 int halfspace(FILE* rPtr, FILE* wPtr);
 
+/**
+ * @brief Conduct convexhull computation
+ * @param rPtr   Contains the data of all vertex points
+ * @param wPtr   The set of hyperplanes comprises the convex hull
+ */
+int conv_hull(FILE *rPtr, FILE *wPtr);
+
+/**    @brief Call conv_hull to compute the convex hull
+ *              The results are written to output/conv_hull_hyperplanes.txt
+ * 
+ */
+void compute_conv_hull();
 
 /**
  * @brief Get the set of extreme points of R (bounded by the extreme vectors)
