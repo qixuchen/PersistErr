@@ -31,7 +31,7 @@ void construct_halfspace_set(std::vector<point_t *> &p_set, halfspace_set_t *R, 
                 half_set->halfspaces.push_back(h);
             }
         }
-        bool result = get_extreme_pts_refine_from_halfspaces(half_set);
+        bool result = get_extreme_pts_refine_halfspaces_alg1(half_set);
         if (result)
         {
             half_set->represent_point.push_back(p_set[i]);
@@ -39,6 +39,9 @@ void construct_halfspace_set(std::vector<point_t *> &p_set, halfspace_set_t *R, 
             choose_item_points.push_back(p_set[i]);
             considered_half_set.push_back(half_set_set.size() - 1);
         }
+        // else{
+        //     std::cout << "Constructing half_set failed." << std::endl;
+        // }
     }
 }
 
@@ -68,11 +71,11 @@ int build_choose_item_table(std::vector<halfspace_set_t *> half_set_set, std::ve
     {
         for (int j = i + 1; j < M; j++)
         {
+            if(is_same_point(p_set[i], p_set[j])) continue;
             //printf("hyperplane %d %d\n", i, j);
             hyperplane_t *h = alloc_hyperplane(p_set[i], p_set[j], 0);
             //new a choose_item
-            choose_item *c_item = (choose_item *) malloc(sizeof(choose_item));
-            memset(c_item, 0, sizeof(choose_item));
+            choose_item *c_item = alloc_choose_item();
             c_item->hyper = h;
 
             //classify the halfspace sets to the hyperplane
@@ -124,7 +127,12 @@ int build_choose_item_table(std::vector<halfspace_set_t *> half_set_set, std::ve
 }
 
 /**
- * @brief Based on the answer from the user, modify the choose_item table
+ * @brief   Based on the answer from the user, modify the choose_item table
+ *          This function does the following:
+ *          1. Update considered_half_set to remove those partitions that are on the negative side of the tested halfspace h (choose_item_set[H_num])
+ *          2. Delete all the removed partitions from other hyperplanes in choose_item_set
+ *          3. Update all partitions that intersect with h
+ *          4. Update the relation between the updated partition and other hyperplanes in choose_item_set
  * @param choose_item_set 		The choose_item table which will be modified
  * @param half_set_set 			All the partitions
  * @param considered_half_set 	Based on the user's answer, the partitions still considered
@@ -144,7 +152,9 @@ int modify_choose_item_table(std::vector<choose_item *> &choose_item_set,
         printf("%s\n", "Error: no item is in the choose_item_table.");
         return -1;
     }
-    //refine the considered half_set
+
+    // refine the considered half_set
+    // 1. Update considered_half_set to remove those partitions that are on the negative side of the tested halfspace h (choose_item_set[H_num])
     if (direction == true)//delete all the negative side partitions
     {
         int consider_count = 0; //index for scanning the considered_half_set
@@ -185,7 +195,8 @@ int modify_choose_item_table(std::vector<choose_item *> &choose_item_set,
         }
     }
 
-    //delete all the half_sets which are on the non-direction side
+    // delete all the half_sets which are on the non-direction side
+    // 2. Delete all the removed partitions from other hyperplanes in choose_item_set
     if (direction)
     {
         //delete negative side
@@ -317,7 +328,8 @@ int modify_choose_item_table(std::vector<choose_item *> &choose_item_set,
         }
     }
 
-    //build a halfspace based on choose_item[H_num]
+    // 3. Update all partitions that intersects with h
+    // build a halfspace based on choose_item[H_num]
     halfspace_t *half;
     if (direction == true)
     {
@@ -328,16 +340,19 @@ int modify_choose_item_table(std::vector<choose_item *> &choose_item_set,
         half = alloc_halfspace(choose_item_set[H_num]->hyper->point1, choose_item_set[H_num]->hyper->point2, 0, true);
     }
 
-    //refine all the half_set in the intersect.case
+    // update all the half_set in the intersected case
     for (int i = 0; i < choose_item_set[H_num]->intersect_case.size(); i++)
     {
         //num_set: index of the halfspace_set in half_set_set
         int num_set = choose_item_set[H_num]->intersect_case[i];
         half_set_set[num_set]->halfspaces.push_back(half);
-        get_extreme_pts_refine_from_halfspaces(half_set_set[num_set]);
+        get_extreme_pts_refine_halfspaces_alg1(half_set_set[num_set]);
     }
 
-    //deal with the refined half_set
+    // 4. Update the relation between the updated partition and other hyperplanes in choose_item_set
+    // deal with the refined half_set 
+    // check the updated intersected half_set and see if it still intersect with some other hyperplane h
+    // if not, update this half_set to the positive/negative side of h
     for (int i = 0; i < choose_item_set[H_num]->intersect_case.size(); i++)
     {
         int num_set = choose_item_set[H_num]->intersect_case[i];
@@ -652,6 +667,21 @@ int HDPI_accurate(std::vector<point_t *> p_set, point_t *u, int k)
             v2 = dot_prod(u, choose_item_set[index]->hyper->point2);
         }
     }
+
+    // free the related data structures
+    release_halfspace_set(R_half_set);
+    while(half_set_set.size() > 0){
+        halfspace_set_t * hs_s_ptr = half_set_set[half_set_set.size() - 1];
+        release_halfspace_set(hs_s_ptr);
+        half_set_set.pop_back();
+    }
+    while(choose_item_set.size() > 0){
+        choose_item * item_ptr = choose_item_set[choose_item_set.size() - 1];
+        release_choose_item(item_ptr);
+        choose_item_set.pop_back();
+    }
+
+
     printf("|%30s |%10d |%10s |\n", "HDPI-accurate", numOfQuestion, "--");
     for(int i = 0; i < p_result.size(); ++i)
         printf("|%30s |%10d |%10d |\n", "Point", i + 1, p_result[i]->id);

@@ -14,7 +14,7 @@
 
 int main(int argc, char *argv[])
 {
-    point_set_t *P0 = read_points((char*)"4d.txt");
+    point_set_t *P0 = read_points((char*)"4d1k.txt");
     int k = 20, dim = P0->points[0]->dim;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, k);

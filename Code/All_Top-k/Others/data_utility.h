@@ -59,6 +59,8 @@ halfspace_set_t* alloc_halfspace_set(int dim);
 halfspace_set_t* alloc_halfspace_set(halfspace_set_t *hset);
 void release_halfspace_set(halfspace_set_t* &halfspace_set_v);
 
+choose_item *alloc_choose_item();
+void release_choose_item(choose_item *item_ptr);
 
 // print informaiton
 void print_point(point_t* point_v);
