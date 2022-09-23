@@ -1,6 +1,7 @@
 //#include "stdafx.h"
 
 #include "data_utility.h"
+#include "pruning.h"
 
 
 /*
@@ -309,6 +310,37 @@ halfspace_set_t *alloc_halfspace_set(int dim)
 }
 
 
+/**
+ * @brief Initial utility range
+ * @param hset  The halfspace
+ * @return      The new copied halfspace
+ */
+halfspace_set_t* alloc_halfspace_set(halfspace_set_t *hset)
+{
+    int dim = hset->halfspaces[0]->normal->dim;
+    halfspace_set_t *halfspace_set_v;
+    halfspace_set_v = (halfspace_set_t *) malloc(sizeof(halfspace_set_t));
+    memset(halfspace_set_v, 0, sizeof(halfspace_set_t));
+
+    for(int i=0; i < hset->halfspaces.size();++i)
+    {
+        halfspace_t *h = alloc_halfspace(hset->halfspaces[i]->point1, hset->halfspaces[i]->point2, 0, true);
+        halfspace_set_v->halfspaces.push_back(h);
+    }
+    halfspace_set_v->in_center = alloc_point(dim);
+    halfspace_set_v->out_center = alloc_point(dim);
+    halfspace_set_v->check_point = alloc_point(dim);
+
+    //set extreme points
+    get_extreme_pts_refine_halfspaces_alg1(halfspace_set_v);
+
+
+
+    return halfspace_set_v;
+}
+
+
+
 /*
  *	Release memory for halfspace_set
  */
@@ -345,6 +377,31 @@ void release_halfspace_set(halfspace_set_t *&halfspace_set_v)
     //halfspace_set_v->halfspaces.shrink_to_fit();
     free(halfspace_set_v);
     halfspace_set_v = NULL;
+}
+
+
+/**  @brief dynamically allocate space for choose_item 
+ * 
+ * 
+ */
+choose_item *alloc_choose_item(){
+    choose_item *item_ptr = (choose_item *) malloc(sizeof(choose_item));;
+    memset(item_ptr, 0, sizeof(choose_item));
+    return item_ptr;
+}
+
+/**  @brief destory the dynamically allocated choose_item 
+ * 
+ * 
+ */
+void release_choose_item(choose_item *item_ptr){
+    if (item_ptr == 0) return;
+
+    if(item_ptr->hyper != 0){
+        release_hyperplane(item_ptr->hyper);
+    }
+    free(item_ptr);
+    item_ptr = NULL;
 }
 
 

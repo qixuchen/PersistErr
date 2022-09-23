@@ -332,7 +332,7 @@ halfspace_set_t* alloc_halfspace_set(halfspace_set_t *hset)
     halfspace_set_v->check_point = alloc_point(dim);
 
     //set extreme points
-    get_extreme_pts_refine_from_halfspaces(halfspace_set_v);
+    get_extreme_pts_refine_halfspaces_alg1(halfspace_set_v);
 
 
 
@@ -377,6 +377,31 @@ void release_halfspace_set(halfspace_set_t *&halfspace_set_v)
     //halfspace_set_v->halfspaces.shrink_to_fit();
     free(halfspace_set_v);
     halfspace_set_v = NULL;
+}
+
+
+/**  @brief dynamically allocate space for choose_item 
+ * 
+ * 
+ */
+choose_item *alloc_choose_item(){
+    choose_item *item_ptr = (choose_item *) malloc(sizeof(choose_item));;
+    memset(item_ptr, 0, sizeof(choose_item));
+    return item_ptr;
+}
+
+/**  @brief destory the dynamically allocated choose_item 
+ * 
+ * 
+ */
+void release_choose_item(choose_item *item_ptr){
+    if (item_ptr == 0) return;
+
+    if(item_ptr->hyper != 0){
+        release_hyperplane(item_ptr->hyper);
+    }
+    free(item_ptr);
+    item_ptr = NULL;
 }
 
 
