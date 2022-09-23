@@ -21,9 +21,6 @@ add_executable(InteractiveTopk
         2DPI/2dPI.h
         HDPI/HDPI.cpp
         HDPI/HDPI.h
-        input/2d.txt
-        input/4d.txt
-        input/weather.txt
         Others/data_struct.h
         Others/data_utility.cpp
         Others/data_utility.h

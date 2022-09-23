@@ -579,7 +579,7 @@ int HDPI_accurate(std::vector<point_t *> p_set, point_t *u, int k)
 
     /* half_set_set          contains all the partitions(intersection of halfspaces)
      * considered_half_set   contains all the possible partitions considered
-     * choose_item_points    contains all the points used to construce hyperplanes(questions)
+     * choose_item_points    contains all the points used to construct hyperplanes(questions)
      * choose_item_set       contains all the hyperplanes(questions) which can be asked user
      * R_half_set            The utility range R
      */

@@ -49,7 +49,9 @@ int main(int argc, char *argv[])
     //Algorithm HDPI-accurate
     HDPI_accurate(p_set, u, k);
 
+    release_point(u);
     release_point_set(P, true);
+    release_point_set(P0, true);
 
     return 0;
 }
