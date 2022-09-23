@@ -114,6 +114,45 @@ int halfspace(FILE *rPtr, FILE *wPtr)
     return exitcode;
 }
 
+
+/**
+ * @brief Conduct convexhull computation
+ * @param rPtr   Contains the data of all vertex points
+ * @param wPtr   The set of hyperplanes comprises the convex hull
+ */
+int conv_hull(FILE *rPtr, FILE *wPtr){
+    std::system("qconvex n < ../output/all_points.txt > ../output/conv_hull_hyperplanes.txt");
+    return 0;
+}
+
+
+/**    @brief Call conv_hull to compute the convex hull
+ *              The results are written to output/conv_hull_hyperplanes.txt
+ * 
+ */
+void compute_conv_hull(){
+
+    char file1[MAX_FILENAME_LENG];
+    sprintf(file1, "../output/all_points.txt");
+    char file2[MAX_FILENAME_LENG];
+    sprintf(file2, "../output/conv_hull_hyperplanes.txt");
+
+    FILE *rPtr;
+    FILE *wPtr;
+    if ((rPtr = fopen(file1, "r")) == NULL)
+    {
+        fprintf(stderr, "Cannot open the data file.\n");
+        exit(0);
+    }
+    wPtr = (FILE *) fopen(file2, "w");
+    conv_hull(rPtr, wPtr);
+    fclose(rPtr);
+    fclose(wPtr);
+}
+
+
+
+
 /**
  * @brief Get the set of extreme points of R (bounded by the extreme vectors)
  * @param ext_vec    The hyperplanes(in the form of point) bounding the utility range R
