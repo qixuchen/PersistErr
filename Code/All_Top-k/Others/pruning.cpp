@@ -120,8 +120,19 @@ int halfspace(FILE *rPtr, FILE *wPtr)
  * @param rPtr   Contains the data of all vertex points
  * @param wPtr   The set of hyperplanes comprises the convex hull
  */
-int conv_hull(FILE *rPtr, FILE *wPtr){
-    std::system("qconvex n < ../output/all_points.txt > ../output/conv_hull_hyperplanes.txt");
+int conv_hull(string rfile, string wfile){
+
+    // check if the input file is ok
+    FILE *rPtr;
+    if ((rPtr = fopen(rfile.c_str(), "r")) == NULL)
+    {
+        fprintf(stderr, "Cannot open the data file.\n");
+        exit(0);
+    }
+    fclose(rPtr);
+
+    string commmand_str= "qconvex n < " + rfile + " > " + wfile;
+    std::system(commmand_str.c_str());
     return 0;
 }
 
@@ -131,23 +142,9 @@ int conv_hull(FILE *rPtr, FILE *wPtr){
  * 
  */
 void compute_conv_hull(){
-
-    char file1[MAX_FILENAME_LENG];
-    sprintf(file1, "../output/all_points.txt");
-    char file2[MAX_FILENAME_LENG];
-    sprintf(file2, "../output/conv_hull_hyperplanes.txt");
-
-    FILE *rPtr;
-    FILE *wPtr;
-    if ((rPtr = fopen(file1, "r")) == NULL)
-    {
-        fprintf(stderr, "Cannot open the data file.\n");
-        exit(0);
-    }
-    wPtr = (FILE *) fopen(file2, "w");
-    conv_hull(rPtr, wPtr);
-    fclose(rPtr);
-    fclose(wPtr);
+    string file1 =  "../output/all_points.txt";
+    string file2 =  "../output/conv_hull_hyperplanes.txt";
+    conv_hull(file1, file2);
 }
 
 

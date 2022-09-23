@@ -10,6 +10,7 @@
 #include "read_write.h"
 #include "../Qhull/io.h"
 #include <queue>
+#include <string>
 
 // the domination options
 #define HYPER_PLANE 1
@@ -35,10 +36,10 @@ int halfspace(FILE* rPtr, FILE* wPtr);
 
 /**
  * @brief Conduct convexhull computation
- * @param rPtr   Contains the data of all vertex points
- * @param wPtr   The set of hyperplanes comprises the convex hull
+ * @param rfile   Contains the data of all vertex points
+ * @param wfile   The set of hyperplanes comprises the convex hull
  */
-int conv_hull(FILE *rPtr, FILE *wPtr);
+int conv_hull(string rfile, string wfile);
 
 /**    @brief Call conv_hull to compute the convex hull
  *              The results are written to output/conv_hull_hyperplanes.txt
