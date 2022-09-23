@@ -497,14 +497,14 @@ bool get_extreme_pts_refine_halfspaces_alg1(halfspace_set_t *half_set)
     fscanf(rPtr, "%i%i", &dim, &size);
 
     point_t *pt;
-    while (half_set->ext_pts.size() > 0)
+    while (half_set->ext_pts.size() > 0) // clear old extreme points set
     {
         pt = half_set->ext_pts[half_set->ext_pts.size()-1];
         half_set->ext_pts.pop_back();
         release_point(pt);
     }
     half_set->ext_pts.clear();
-    point_t *p_c = alloc_point(dim);
+    point_t *p_c = alloc_point(dim); // p_c is the arithmetic mean of all extreme points
     for (int i = 0; i < dim; i++)
         p_c->coord[i] = 0;
 
@@ -533,13 +533,14 @@ bool get_extreme_pts_refine_halfspaces_alg1(halfspace_set_t *half_set)
     }
     for (int i = 0; i < dim; i++)
         p_c->coord[i] = p_c->coord[i] / half_set->ext_pts.size();
-    half_set->ext_pts.push_back(p_c);
+    half_set->ext_pts.push_back(p_c); // why push back p_c?
 
     //update the bounding ball
     update_bounding_sphere(half_set);
 
     //update the bounding rectangle
     //update_bounding_rectangle(half_set);
+
     // update the set of halfspaces
     fscanf(rPtr, "%i", &size);
 

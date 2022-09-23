@@ -6,7 +6,7 @@ point_set_t* read_points(char* input)
 	FILE* c_fp;
 
 	char filename[MAX_FILENAME_LENG];
-	sprintf(filename, "../input/%s", input);
+	sprintf(filename, "../../input/%s", input);
 	printf("%s\n", filename);
 	if ((c_fp = fopen(filename, "r")) == NULL)
 	{
