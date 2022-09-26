@@ -3,6 +3,7 @@
 #include "Others/read_write.h"
 #include "Others/pruning.h"
 #include "HDPI/HDPI.h"
+#include "rev_HDPI/rev_HDPI.h"
 #include "RH/alg_one.h"
 #include "2DPI/2dPI.h"
 #include "Others/qhull_build.h"
@@ -13,9 +14,10 @@
 
 int main(int argc, char *argv[])
 {
-    point_set_t *P0 = read_points((char*)"2d.txt");
+    srand(time(NULL));
+    point_set_t *P0 = read_points((char*)"4d1k.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
-    int k = 50;
+    int k = 1;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, k);
     point_set_t *P = point_reload(p_set);
@@ -41,13 +43,15 @@ int main(int argc, char *argv[])
         printf("|%30s |%8s%2d |%10d |\n", "Point", "top -", i + 1, top_current[i]->id);
     printf("---------------------------------------------------------\n");
 
+    item *it = new item;
+    it->positive_side.insert(0);
+    // //Algorithm RH
+    // Random_half(p_set, u, k);
 
-    //Algorithm RH
-    Random_half(p_set, u, k);
-
-    //Algorithm HDPI
-    HDPI_sampling(p_set, u, k);
-    HDPI_accurate(p_set, u, k);
+    // //Algorithm HDPI
+    // HDPI_sampling(p_set, u, k);
+    // HDPI_accurate(p_set, u, k);
+    rev_HDPI(p_set, u, k);
 
     //Algorithm 2DPI
     if (dim == 2)

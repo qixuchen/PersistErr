@@ -7,6 +7,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include <vector>
+#include <set>
 #include <iostream>
 #include <iterator>
 
@@ -133,6 +134,15 @@ typedef struct choose_item
 	std::vector<int> negative_side;
 	std::vector<int> intersect_case;
 }choose_item_t;
+
+typedef struct item
+{
+	hyperplane* hyper;
+	std::set<int> positive_side;
+	std::set<int> negative_side;
+	std::set<int> intersect_case;
+}item_t;
+
 
 typedef struct point_count
 {
