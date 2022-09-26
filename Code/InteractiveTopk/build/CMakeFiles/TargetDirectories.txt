@@ -1,3 +1,0 @@
-/home/qchenax/PersistErr/Code/InteractiveTopk/build/CMakeFiles/rebuild_cache.dir
-/home/qchenax/PersistErr/Code/InteractiveTopk/build/CMakeFiles/edit_cache.dir
-/home/qchenax/PersistErr/Code/InteractiveTopk/build/CMakeFiles/InteractiveTopk.dir

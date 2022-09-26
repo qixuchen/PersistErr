@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(InteractiveTopk)
 
+enable_testing()
+
 set(CMAKE_CXX_STANDARD 14)
 
 set(INC_DIR /usr/local/Cellar/glpk/4.65/include)
@@ -17,6 +19,8 @@ add_executable(InteractiveTopk
         RH/alg_one.h
         HDPI/HDPI.cpp
         HDPI/HDPI.h
+        rev_HDPI/rev_HDPI.cpp
+        rev_HDPI/rev_HDPI.h
         Others/data_struct.h
         Others/data_utility.cpp
         Others/data_utility.h

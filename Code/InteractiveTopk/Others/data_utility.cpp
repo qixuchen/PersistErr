@@ -405,6 +405,30 @@ void release_choose_item(choose_item *item_ptr){
 }
 
 
+/**  @brief dynamically allocate space for item 
+ * 
+ * 
+ */
+item *alloc_item(){
+    return new item;
+}
+
+
+/**  @brief destory the dynamically allocated choose_item 
+ * 
+ * 
+ */
+void release_item(item *item_ptr){
+    if (item_ptr == 0) return;
+
+    if(item_ptr->hyper != 0){
+        release_hyperplane(item_ptr->hyper);
+    }
+    free(item_ptr);
+    item_ptr = NULL;
+}
+
+
 /*
 *	For degug purpose, print the coordinates for a given point
 */
