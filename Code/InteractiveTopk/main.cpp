@@ -43,8 +43,6 @@ int main(int argc, char *argv[])
         printf("|%30s |%8s%2d |%10d |\n", "Point", "top -", i + 1, top_current[i]->id);
     printf("---------------------------------------------------------\n");
 
-    item *it = new item;
-    it->positive_side.insert(0);
     // //Algorithm RH
     // Random_half(p_set, u, k);
 

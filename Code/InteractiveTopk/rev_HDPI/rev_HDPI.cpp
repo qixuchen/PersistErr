@@ -1,7 +1,6 @@
 #include "rev_HDPI.h"
 #include <sys/time.h>
 
-
 /**
  * @brief Build all the partition(intersection of the halfspace), each partition corresponds to a top-1 point
  * @param p_set 				The set containing all the points which are possible to be the top-1 point
