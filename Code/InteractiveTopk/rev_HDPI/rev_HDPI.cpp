@@ -1,6 +1,14 @@
 #include "rev_HDPI.h"
 #include <sys/time.h>
 
+int total_ext_pt(std::vector<halfspace_set_t *> &half_set_set){
+    int total_num = 0;
+    for(auto hss_ptr = half_set_set.cbegin(); hss_ptr != half_set_set.cend(); hss_ptr++){
+        total_num += (*hss_ptr)->ext_pts.size();
+    }
+    return total_num;
+}
+
 /**
  * @brief Build all the partition(intersection of the halfspace), each partition corresponds to a top-1 point
  * @param p_set 				The set containing all the points which are possible to be the top-1 point

@@ -1,5 +1,7 @@
 #include "../Others/used_function.h"
 
+#ifndef REV_HDPI
+#define REV_HDPI
 
 /**
  * @brief Asking user question and return one of the top-k point
@@ -9,3 +11,5 @@
  * @param k 			 The parameter
  */
 int rev_HDPI(std::vector<point_t *> p_set, point_t *u, int k);
+
+#endif

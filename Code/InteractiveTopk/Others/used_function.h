@@ -93,6 +93,13 @@ void find_top1_sampling(std::vector<point_t*> p_set, std::vector<point_t*> &top_
 
 void find_top1(std::vector<point_t *> p_set, std::vector<point_t *> &top);
 
+
+/** @brief          Find all convex points in p_set
+ *  @param  p_set   Input dataset
+ *  @param  convh   stores the computed convex points
+ */
+void find_convh_vertices(std::vector<point_t *> &p_set, std::vector<point_t *> &convh);
+
 //@brief Find all the points which are not dominated by >=k points
 //param p_set 			The original dataset
 //param return_point 	The returned points which are not dominated by >=k points

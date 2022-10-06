@@ -319,8 +319,7 @@ halfspace_set_t* alloc_halfspace_set(halfspace_set_t *hset)
 {
     int dim = hset->halfspaces[0]->normal->dim;
     halfspace_set_t *halfspace_set_v;
-    halfspace_set_v = (halfspace_set_t *) malloc(sizeof(halfspace_set_t));
-    memset(halfspace_set_v, 0, sizeof(halfspace_set_t));
+    halfspace_set_v = new halfspace_set_t;
 
     for(int i=0; i < hset->halfspaces.size();++i)
     {
@@ -375,7 +374,7 @@ void release_halfspace_set(halfspace_set_t *&halfspace_set_v)
     }
     halfspace_set_v->halfspaces.clear();
     //halfspace_set_v->halfspaces.shrink_to_fit();
-    free(halfspace_set_v);
+    delete halfspace_set_v;
     halfspace_set_v = NULL;
 }
 
@@ -406,8 +405,6 @@ void release_choose_item(choose_item *item_ptr){
 
 
 /**  @brief dynamically allocate space for item 
- * 
- * 
  */
 item *alloc_item(){
     return new item;
@@ -415,8 +412,6 @@ item *alloc_item(){
 
 
 /**  @brief destory the dynamically allocated choose_item 
- * 
- * 
  */
 void release_item(item *item_ptr){
     if (item_ptr == 0) return;
@@ -424,9 +419,25 @@ void release_item(item *item_ptr){
     if(item_ptr->hyper != 0){
         release_hyperplane(item_ptr->hyper);
     }
-    free(item_ptr);
+    delete item_ptr;
     item_ptr = NULL;
 }
+
+
+/**  @brief dynamically allocate space for partition_fragement 
+ */
+frag_t *alloc_fragment(){
+    return new frag_t;
+}
+
+/**  @brief destory the dynamically allocated partition_fragement
+ */
+void release_fragment(frag_t *frag_ptr){
+    if (frag_ptr == 0) return;
+    free(frag_ptr);
+    frag_ptr = NULL;
+}
+
 
 
 /*
