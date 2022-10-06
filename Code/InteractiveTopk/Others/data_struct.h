@@ -120,6 +120,7 @@ typedef struct halfspace_set
 	std::vector<point_t*> ext_pts;
 	std::vector<point_t*> rec;
 	std::vector<point_t*> represent_point;
+	std::set<frag_t *> frag_set;
 	point_t* in_center;
 	point_t* out_center;
 	point_t* check_point;
@@ -142,6 +143,13 @@ typedef struct item
 	std::set<int> negative_side;
 	std::set<int> intersect_case;
 }item_t;
+
+
+typedef struct partition_fragment
+{
+	point_t *point_belongs=0;
+	std::set<point_t *> ext_pts;
+} frag_t;
 
 
 typedef struct point_count

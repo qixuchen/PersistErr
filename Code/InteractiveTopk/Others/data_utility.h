@@ -65,6 +65,9 @@ void release_choose_item(choose_item *item_ptr);
 item *alloc_item();
 void release_item(item *iten_ptr); 
 
+frag_t *alloc_fragment();
+void release_fragment(frag_t *frag_ptr);
+
 // print informaiton
 void print_point(point_t* point_v);
 void print_point_set(point_set_t* point_set_v);
