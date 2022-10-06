@@ -1,6 +1,76 @@
 #include "exact.h"
 
-/** @brief          construct the partition fragment in the initialized R0/R1/.../Rt 
+
+std::vector<point_t *> extract_frags(const Region &r){
+    std::vector<point_t *> results;
+    for(auto f: r.frag_set) results.push_back(f.first);
+    return results;
+}
+
+
+/** @brief      Compute the priority of an item's related hyperplane
+ */
+double compute_hy_priority(const item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
+    int k = points_in_region.size()-1;
+    double score = 0;
+    for(int i=0; i<=k; ++i){
+        double weight = pow(Alpha, i);
+        int pos_count = 0, neg_count = 0;
+        for(auto f: points_in_region[i]){
+            if(item_ptr->pos_points.find(f) != item_ptr->pos_points.end()) pos_count++;
+            else if(item_ptr->neg_points.find(f) != item_ptr->neg_points.end()) neg_count++;
+        }
+        score += weight * min(pos_count, neg_count);
+    }
+    return score;
+}
+
+
+/** @brief       Find the best hyperplane to ask
+ */
+int find_best_hyperplane(const std::vector<item *> &choose_item_set, 
+                            std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<Region> &regions){
+    int k = regions.size()-1;
+    std::vector<std::vector<point_t*>> points_in_region;
+    std::vector<int> cand_to_be_removed;
+    for(int i=0; i<=k; ++i){
+        std::vector<point_t*> frags = extract_frags(regions[i]);
+        points_in_region.push_back(frags);
+    }
+    double highest_priority = 0;
+    int highest_index = -1;
+    hyperplane_t *hy_res = 0;
+    for(auto c : hyperplane_candidates){
+        item_t *item_ptr = choose_item_set[c.first];
+        double priority = compute_hy_priority(item_ptr, points_in_region);
+        if(priority > highest_priority){
+            highest_priority = priority;
+            highest_index = c.first;
+            hy_res = c.second;
+        }
+        if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
+            cand_to_be_removed.push_back(c.first);
+        }
+    }
+    // MUST: remove the selected candidate
+    if(highest_index >= 0) hyperplane_candidates.erase(highest_index);
+
+    for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
+
+    return highest_index;
+}
+
+
+/** @brief      Initialize the hyperplane candidates 
+ */
+void construct_hy_candidates(std::map<int, hyperplane_t *> &hyperplane_candidates, const std::vector<item *> &choose_item_set){
+    for(int i = 0; i<choose_item_set.size(); ++i){
+        hyperplane_candidates.insert(make_pair(i, choose_item_set[i]->hyper));
+    }
+}
+
+
+/** @brief      construct the partition fragment in the initialized R0/R1/.../Rt 
  */
 void construct_fragment_in_initialized_R(const std::vector<halfspace_set_t *> &half_set_set, std::map<point_t *, frag_t *> &frag_set){
     for(auto hss_ptr = half_set_set.cbegin(); hss_ptr != half_set_set.cend(); ++hss_ptr){
@@ -14,6 +84,8 @@ void construct_fragment_in_initialized_R(const std::vector<halfspace_set_t *> &h
 }
 
 
+/** @brief       Record the ext_pt belonging to frag into frag_carry
+ */
 void record_ext_pt(const frag_t *frag, point_t *ext_pt, std::map<point_t *, frag_t *> &frag_carry){
     point_t *target_point = frag->point_belongs;
     auto crspd_frag = frag_carry.find(target_point);
@@ -28,6 +100,10 @@ void record_ext_pt(const frag_t *frag, point_t *ext_pt, std::map<point_t *, frag
     }
 }
 
+
+/** @brief      Erase the extreme points in Region r that is not supported by hs_ptr
+ *              Record the erased points in frag_carry to insert them to other Region later
+ */
 void erase_fragments(Region &r, halfspace_t *hs_ptr, std::map<point_t *, frag_t *> &frag_carry){
     std::vector<point_t *> frag_remove;
     for(auto frag_ptr = r.frag_set.begin(); frag_ptr != r.frag_set.end(); ++frag_ptr){
@@ -58,6 +134,9 @@ void erase_fragments(Region &r, halfspace_t *hs_ptr, std::map<point_t *, frag_t 
     return;
 }
 
+
+/** @brief      Add fragments in frag_carry into Region r
+ */
 void add_fragments(Region &r, std::map<point_t *, frag_t *> &frag_carry){
     for(auto frag_pair : frag_carry){
         point_t *pt = frag_pair.first;
@@ -78,6 +157,15 @@ void add_fragments(Region &r, std::map<point_t *, frag_t *> &frag_carry){
         }
     }
 }
+
+
+/** @brief        Clear the fragments in frag_carry since they are dynamically created
+ */
+void clear_frag_map(std::map<point_t *, frag_t *> &frag_carry){
+    for(auto frag_pair : frag_carry) delete frag_pair.second;
+    frag_carry.clear();
+}
+
 
 /** @brief          The recurrence relation of the exact algorithm
  */
@@ -100,12 +188,6 @@ void rt_recurrence(std::vector<Region> &regions, halfspace_t* hs_ptr){
     }
 }
 
-/** @brief        Clear the fragments in frag_carry since they are dynamically created
- */
-void clear_frag_map(std::map<point_t *, frag_t *> &frag_carry){
-    for(auto frag_pair : frag_carry) delete frag_pair.second;
-    frag_carry.clear();
-}
 
 /**
  * @brief Build all the partition(intersection of the halfspace), each partition corresponds to a top-1 point
@@ -190,17 +272,21 @@ int build_choose_item_table(std::vector<halfspace_set_t *> half_set_set, std::ve
             for (int k = 0; k < H_M; k++)
             {
                 int which_side = check_situation_accelerate(h, half_set_set[k], 0);
+                point_t *pt = half_set_set[k]->represent_point[0];
                 if (which_side == 1)
                 {
                     c_item->positive_side.insert(k);
+                    c_item->pos_points.insert(pt);
                 }
                 else if (which_side == -1)
                 {
                     c_item->negative_side.insert(k);
+                    c_item->neg_points.insert(pt);
                 }
                 else if (which_side == 0)
                 {
                     c_item->intersect_case.insert(k);
+                    c_item->int_points.insert(pt);
                 }
                 else
                 {
@@ -242,4 +328,9 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
     }
     construct_fragment_in_initialized_R(half_set_set, regions[0].frag_set);
 
+    // key: index of the item in choose_item_set; value: pointer to the hyperplane
+    std::map<int, hyperplane_t *> hyperplane_candidates;
+    construct_hy_candidates(hyperplane_candidates, choose_item_set);
+
+    return 0;
 }

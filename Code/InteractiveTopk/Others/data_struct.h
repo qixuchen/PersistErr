@@ -113,6 +113,14 @@ typedef struct halfspace
 	point_t*    point2;
 }	halfspace_t;
 
+
+typedef struct partition_fragment
+{
+	point_t *point_belongs=0;
+	std::set<point_t *> ext_pts;
+} frag_t;
+
+
 // data structure for storing halfspace set.
 typedef struct halfspace_set
 {
@@ -142,14 +150,11 @@ typedef struct item
 	std::set<int> positive_side;
 	std::set<int> negative_side;
 	std::set<int> intersect_case;
+
+	std::set<point_t *> pos_points;
+	std::set<point_t *> neg_points;
+	std::set<point_t *> int_points;
 }item_t;
-
-
-typedef struct partition_fragment
-{
-	point_t *point_belongs=0;
-	std::set<point_t *> ext_pts;
-} frag_t;
 
 
 typedef struct point_count
