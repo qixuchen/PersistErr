@@ -5,21 +5,31 @@
  */
 std::vector<point_t *> extract_frags(const Region &r){
     std::vector<point_t *> results;
-    for(auto f: r.frag_set) results.push_back(f.first);
+    if(r.frag_set.size() != 0){ // debug purpose
+        for(auto f: r.frag_set) results.push_back(f.first);
+    }
     return results;
 }
 
 
-/** @brief      decide whether to stop the algorithm
+bool check_correctness(const std::set<point_t *> &considered_points, point_t *u, double best_score){
+    for(auto p : considered_points){
+        if(dot_prod(u, p) == best_score) return true;
+    }
+    return false;
+}
+
+
+/** @brief      Find the points still not pruned
  */
-bool decide_stop(const std::vector<Region> &regions, const int w){
+std::set<point_t *> compute_considered_set(const std::vector<Region> &regions){
     int k = regions.size() - 1;
     std::set<point_t *> considered_points;
     for(int i=0; i <= k; i++){
         std::vector<point_t *> point_set = extract_frags(regions[i]);
         for(auto p : point_set) considered_points.insert(p);
     }
-    return (considered_points.size() <= w);
+    return considered_points;
 }
 
 
@@ -125,7 +135,7 @@ void erase_fragments(Region &r, halfspace_t *hs_ptr, std::map<point_t *, frag_t 
         for(auto p_ptr = (*frag).ext_pts.cbegin(); p_ptr != (*frag).ext_pts.cend(); ++p_ptr){
             // if this ext point is not supported, first record it in frag_return, then erase it
             // The normals are outward-pointing, thus remove those dot product > 0
-            if(dot_prod(*p_ptr, hs_ptr->normal) > -Precision/2){ 
+            if(dot_prod(*p_ptr, hs_ptr->normal) > Precision/2){ 
                 record_ext_pt(frag, *p_ptr, frag_carry);
                 ext_pt_remove.push_back(*p_ptr);
             }
@@ -345,7 +355,7 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
     std::map<int, hyperplane_t *> hyperplane_candidates;
     construct_hy_candidates(hyperplane_candidates, choose_item_set);
     int round = 0;
-    while(!decide_stop(regions, w)){
+    while(compute_considered_set(regions).size() > w){
         int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, regions);
         if(best_idx < 0) break;
         point_t* p1 = choose_item_set[best_idx]->hyper->point1;
@@ -360,5 +370,11 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
         rt_recurrence(regions, hs);
         round++;
     }
+
+    std::set<point_t *> points_return = compute_considered_set(regions);
+    bool success = check_correctness(points_return, u, best_score);
+    if(success) ++correct_count;
+    question_num += round;
+    return_size += points_return.size();
     return 0;
 }
