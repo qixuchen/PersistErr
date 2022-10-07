@@ -16,4 +16,7 @@ struct Region
 	std::map<point_t *, frag_t *> frag_set;
 };
 
+
+int Exact(std::vector<point_t *> p_set, point_t *u, int k);
+
 #endif

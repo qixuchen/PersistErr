@@ -1,7 +1,7 @@
 #define Beta 0.01
 #define Precision 0.0000015
 #define RandRate 0.5
-#define Alpha 0.1
+#define Alpha 0.05
 
 #include "../Others/data_utility.h"
 #include "../Others/data_struct.h"
