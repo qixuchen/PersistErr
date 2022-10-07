@@ -1,10 +1,25 @@
 #include "exact.h"
 
 
+/** @brief      Compute the number of fragments in a Region r
+ */
 std::vector<point_t *> extract_frags(const Region &r){
     std::vector<point_t *> results;
     for(auto f: r.frag_set) results.push_back(f.first);
     return results;
+}
+
+
+/** @brief      decide whether to stop the algorithm
+ */
+bool decide_stop(const std::vector<Region> &regions, const int w){
+    int k = regions.size() - 1;
+    std::set<point_t *> considered_points;
+    for(int i=0; i <= k; i++){
+        std::vector<point_t *> point_set = extract_frags(regions[i]);
+        for(auto p : point_set) considered_points.insert(p);
+    }
+    return (considered_points.size() <= w);
 }
 
 
@@ -54,9 +69,7 @@ int find_best_hyperplane(const std::vector<item *> &choose_item_set,
     }
     // MUST: remove the selected candidate
     if(highest_index >= 0) hyperplane_candidates.erase(highest_index);
-
     for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
-
     return highest_index;
 }
 
@@ -112,7 +125,7 @@ void erase_fragments(Region &r, halfspace_t *hs_ptr, std::map<point_t *, frag_t 
         for(auto p_ptr = (*frag).ext_pts.cbegin(); p_ptr != (*frag).ext_pts.cend(); ++p_ptr){
             // if this ext point is not supported, first record it in frag_return, then erase it
             // The normals are outward-pointing, thus remove those dot product > 0
-            if(dot_prod(*p_ptr, hs_ptr->normal) > 0){ 
+            if(dot_prod(*p_ptr, hs_ptr->normal) > -Precision/2){ 
                 record_ext_pt(frag, *p_ptr, frag_carry);
                 ext_pt_remove.push_back(*p_ptr);
             }
@@ -174,14 +187,14 @@ void rt_recurrence(std::vector<Region> &regions, halfspace_t* hs_ptr){
     std::map<point_t *, frag_t *> frag_carry;
 
     // base case: remove those inside Rk and not supported by hs_ptr
-    Region cur_region = regions[k];
+    Region &cur_region = regions[k];
     erase_fragments(cur_region, hs_ptr, frag_carry);
     clear_frag_map(frag_carry);
 
     // non-base case: first remove frags from cur_region, then add these frags to prev_region
     // e.g., first remove fragments in R0, then add them to R1
     for(int i=k-1; i>=0; --i){
-        Region cur_region = regions[i], prev_region=regions[i+1];
+        Region &cur_region = regions[i], &prev_region=regions[i+1];
         erase_fragments(cur_region, hs_ptr, frag_carry);
         add_fragments(prev_region, frag_carry);
         clear_frag_map(frag_carry);
@@ -303,7 +316,7 @@ int build_choose_item_table(std::vector<halfspace_set_t *> half_set_set, std::ve
 
 int Exact(std::vector<point_t *> p_set, point_t *u, int k){
     using std::vector;
-
+    int w = 4;
     int dim = p_set[0]->dim;
     vector<point_t *> convh;
     find_convh_vertices(p_set, convh);
@@ -331,6 +344,21 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
     // key: index of the item in choose_item_set; value: pointer to the hyperplane
     std::map<int, hyperplane_t *> hyperplane_candidates;
     construct_hy_candidates(hyperplane_candidates, choose_item_set);
-
+    int round = 0;
+    while(!decide_stop(regions, w)){
+        int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, regions);
+        if(best_idx < 0) break;
+        point_t* p1 = choose_item_set[best_idx]->hyper->point1;
+        point_t* p2 = choose_item_set[best_idx]->hyper->point2;
+        halfspace_t *hs = 0;
+        if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
+            hs = alloc_halfspace(p2, p1, 0, true);
+        }
+        else{
+            hs = alloc_halfspace(p1, p2, 0, true);
+        }
+        rt_recurrence(regions, hs);
+        round++;
+    }
     return 0;
 }
