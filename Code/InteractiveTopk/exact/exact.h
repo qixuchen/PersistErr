@@ -1,14 +1,11 @@
 #include "../Others/used_function.h"
+#include "../exp_stats.h"
 #include <map>
 #include <math.h>
 
 #ifndef EXACT_ALG
 #define EXACT_ALG
 
-extern double best_score;
-extern int correct_count;
-extern double question_num;
-extern double return_size;
 struct Region
 {
 	Region() = default;
