@@ -93,6 +93,26 @@ void construct_hy_candidates(std::map<int, hyperplane_t *> &hyperplane_candidate
 }
 
 
+/** @brief      insert the center to each fragment to avoid precision problem 
+ */
+void insert_center_point(std::map<point_t *, frag_t *> &frag_set){
+    for(auto pairs : frag_set){
+        frag_t *f = pairs.second;
+        int pt_size = f->ext_pts.size();
+        int dim = (*(f->ext_pts.begin()))->dim;
+        point_t *center = alloc_point(dim); //LEAK: centers are not deleted
+        for(auto p : f->ext_pts){
+            for(int i=0; i< dim; i++){
+                center->coord[i] += (*p).coord[i];
+            }
+        }
+        for(int i=0; i< dim; i++){
+            center->coord[i] /= pt_size;
+        }
+        f->ext_pts.insert(center);
+    }
+}
+
 /** @brief      construct the partition fragment in the initialized R0/R1/.../Rt 
  */
 void construct_fragment_in_initialized_R(const std::vector<halfspace_set_t *> &half_set_set, std::map<point_t *, frag_t *> &frag_set){
@@ -104,6 +124,7 @@ void construct_fragment_in_initialized_R(const std::vector<halfspace_set_t *> &h
         }
         frag_set.insert(make_pair(frag_ptr->point_belongs, frag_ptr));
     }
+    //insert_center_point(frag_set);
 }
 
 
@@ -135,7 +156,7 @@ void erase_fragments(Region &r, halfspace_t *hs_ptr, std::map<point_t *, frag_t 
         for(auto p_ptr = (*frag).ext_pts.cbegin(); p_ptr != (*frag).ext_pts.cend(); ++p_ptr){
             // if this ext point is not supported, first record it in frag_return, then erase it
             // The normals are outward-pointing, thus remove those dot product > 0
-            if(dot_prod(*p_ptr, hs_ptr->normal) > Precision/2){ 
+            if(dot_prod(*p_ptr, hs_ptr->normal) > Precision/2000){ 
                 record_ext_pt(frag, *p_ptr, frag_carry);
                 ext_pt_remove.push_back(*p_ptr);
             }
@@ -368,7 +389,20 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
             hs = alloc_halfspace(p1, p2, 0, true);
         }
         rt_recurrence(regions, hs);
+        release_halfspace(hs);
         round++;
+    }
+
+    // free the related data structures
+    while(half_set_set.size() > 0){
+        halfspace_set_t * hs_s_ptr = half_set_set[half_set_set.size() - 1];
+        release_halfspace_set(hs_s_ptr);
+        half_set_set.pop_back();
+    }
+    while(choose_item_set.size() > 0){
+        item * item_ptr = choose_item_set[choose_item_set.size() - 1];
+        release_item(item_ptr);
+        choose_item_set.pop_back();
     }
 
     std::set<point_t *> points_return = compute_considered_set(regions);

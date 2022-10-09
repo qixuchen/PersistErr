@@ -13,25 +13,20 @@
 #include <iostream>
 #include <sys/time.h>
 
-
-double best_score = 0;
-double question_num = 0;
-double return_size = 0;
-int correct_count = 0;
-
-
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
     point_set_t *P0 = read_points((char*)"4d1k.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
-    int k = 1, num_repeat = 100;
+    int k = 1, num_repeat = 20;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
     point_set_t *P = point_reload(p_set);
 
 
     for(int i=0; i< num_repeat; i++){
+        cout << "round " << i << endl;
+
         // generate the utility vector
         point_t *u = alloc_point(dim);
         double sum = 0;
@@ -47,11 +42,11 @@ int main(int argc, char *argv[])
         // look for the ground truth top-k point
         std::vector<point_t *> top_current;
         find_top_k(u, P, top_current, k);
-        printf("---------------------------------------------------------\n");
-        printf("|%30s |%10s |%10s |\n", "Ground Truth", "--", "--");
-        for (int i = 0; i < k; i++)
-            printf("|%30s |%8s%2d |%10d |\n", "Point", "top -", i + 1, top_current[i]->id);
-        printf("---------------------------------------------------------\n");
+        // printf("---------------------------------------------------------\n");
+        // printf("|%30s |%10s |%10s |\n", "Ground Truth", "--", "--");
+        // for (int i = 0; i < k; i++)
+        //     printf("|%30s |%8s%2d |%10d |\n", "Point", "top -", i + 1, top_current[i]->id);
+        // printf("---------------------------------------------------------\n");
         best_score = dot_prod(u, top_current[0]);
 
         // //Algorithm RH
@@ -61,7 +56,7 @@ int main(int argc, char *argv[])
         // HDPI_sampling(p_set, u, k);
         // HDPI_accurate(p_set, u, k);
         // rev_HDPI(p_set, u, k);
-        Exact(p_set, u, 1);
+        Exact(p_set, u, 2);
     }
 
     std::cout << "correct count: " << correct_count << std::endl;

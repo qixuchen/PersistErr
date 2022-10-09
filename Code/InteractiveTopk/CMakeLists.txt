@@ -38,6 +38,8 @@ add_executable(InteractiveTopk
         Qhull/libqhull.h
         lp.cpp
         lp.h
+        exp_stats.cpp
+        exp_stats.h
         main.cpp
         Qhull/mem.cpp
         Qhull/mem.h
