@@ -53,6 +53,7 @@ void release_cluster(cluster_t* cluster_v);
 s_node_t* alloc_s_node(int dim);
 point_count_t* alloc_point_count();
 
+halfspace_t *alloc_halfspace(int dim);
 halfspace_t* alloc_halfspace(point_t* p_1, point_t* p_2, double offset, bool direction);
 void release_halfspace(halfspace_t* &halfspace_v);
 halfspace_set_t* alloc_halfspace_set(int dim);

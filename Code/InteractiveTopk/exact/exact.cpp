@@ -156,7 +156,7 @@ void erase_fragments(Region &r, halfspace_t *hs_ptr, std::map<point_t *, frag_t 
         for(auto p_ptr = (*frag).ext_pts.cbegin(); p_ptr != (*frag).ext_pts.cend(); ++p_ptr){
             // if this ext point is not supported, first record it in frag_return, then erase it
             // The normals are outward-pointing, thus remove those dot product > 0
-            if(dot_prod(*p_ptr, hs_ptr->normal) > Precision/2000){ 
+            if(dot_prod(*p_ptr, hs_ptr->normal) > Precision/2000){ // no need to add offset because the offset of hyperplane is typically 0
                 record_ext_pt(frag, *p_ptr, frag_carry);
                 ext_pt_remove.push_back(*p_ptr);
             }
@@ -346,7 +346,6 @@ int build_choose_item_table(std::vector<halfspace_set_t *> half_set_set, std::ve
 
 
 int Exact(std::vector<point_t *> p_set, point_t *u, int k){
-    using std::vector;
     int w = 4;
     int dim = p_set[0]->dim;
     vector<point_t *> convh;
@@ -356,7 +355,6 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
     //considered_half_set   contains all the possible partitions considered
     //choose_item_points    contains all the points used to construct hyperplanes(questions)
     //choose_item_set       contains all the hyperplanes(questions) which can be asked user
-    //R_half_set            The utility range R
     std::vector<halfspace_set_t *> half_set_set;
     std::set<int> considered_half_set;   //[i] shows the index in half_set_set
     std::vector<point_t *> choose_item_points;
