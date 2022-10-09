@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     // rev_HDPI(p_set, u, k);
     // Exact(p_set, u, 2);
     // compute_convh_hyperplanes(p_set);
-    Approx(p_set, u, 0);
+    Approx(p_set, u, 2);
 
     
 

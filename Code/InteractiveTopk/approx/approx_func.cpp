@@ -3,6 +3,31 @@
 using std::vector; 
 using std::string;
 
+
+/** @brief      Compute the number of fragments in a Region r
+ */
+vector<point_t *> extract_frags(const Enclosure &e){
+    vector<point_t *> results;
+    if(e.frag_set.size() != 0){ // debug purpose
+        for(auto f: e.frag_set) results.push_back(f.first);
+    }
+    return results;
+}
+
+
+/** @brief      Find the points still not pruned
+ */
+std::set<point_t *> enclosure_compute_considered_set(const std::vector<Enclosure> &enclosures){
+    int k = enclosures.size() - 1;
+    std::set<point_t *> considered_points;
+    for(int i=0; i <= k; i++){
+        std::vector<point_t *> point_set = extract_frags(enclosures[i]);
+        for(auto p : point_set) considered_points.insert(p);
+    }
+    return considered_points;
+}
+
+
 /** 
  * @brief          Put points in p_set in to p_filename 
 */
@@ -76,4 +101,12 @@ halfspace_set_t * compute_convh_hyperplanes(const std::vector<point_t *> &p_set)
     std::system(conv_command.c_str());
 
     return read_convh_hyperplanes(h_filename);
+}
+
+
+/**
+ * @brief      Given a halfspace hs, get the other halfspace
+*/
+halfspace_t *get_hs_counterpart(halfspace_t *hs){
+    return alloc_halfspace(hs->point2, hs->point1, hs->offset, hs->direction);
 }

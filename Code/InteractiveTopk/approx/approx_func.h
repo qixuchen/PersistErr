@@ -23,10 +23,26 @@ struct Enclosure
 };
 
 
+/** @brief      Compute the number of fragments in a Region r
+ */
+vector<point_t *> extract_frags(const Enclosure &e);
+
+
+/** @brief      Find the points still not pruned
+ */
+std::set<point_t *> enclosure_compute_considered_set(const std::vector<Enclosure> &enclosures);
+
 
 /** @brief          Put points in p_set in to p_filename 
 */
 void record_point_set(const std::vector<point_t *> &p_set, const string &p_filename);
+
+
+/**
+ * @brief      Given a halfspace hs, get the other halfspace
+*/
+halfspace_t *get_hs_counterpart(halfspace_t *hs);
+
 
 halfspace_set_t * compute_convh_hyperplanes(const std::vector<point_t *> &p_set);
 

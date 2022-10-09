@@ -1,6 +1,7 @@
 #include "../Others/used_function.h"
 #include "approx_func.h"
 #include "../exact/exact.h"
+#include "../exp_stats.h"
 #ifndef APPROX_ALG
 #define APPROX_ALG
 
