@@ -23,6 +23,10 @@ add_executable(InteractiveTopk
         rev_HDPI/rev_HDPI.h
         exact/exact.h
         exact/exact.cpp
+        approx/approx_func.h
+        approx/approx_func.cpp
+        approx/approx.h
+        approx/approx.cpp
         Others/data_struct.h
         Others/data_utility.cpp
         Others/data_utility.h

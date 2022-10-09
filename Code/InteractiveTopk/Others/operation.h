@@ -16,6 +16,7 @@ DIST_TYPE calc_l1_dist( point_t* point_v1, point_t* point_v2);
 DIST_TYPE calc_len(point_t* point_v);
 point_t* copy(point_t * point_v2);
 double dot_prod(point_t* point_v1, point_t* point_v2);
+double dot_prod(const point_t* point_v1, const point_t* point_v2);
 double dot_prod(point_t* point_v1, double* v);
 double dot_prod(double* v1, double* v2, int dim);
 point_t* sub(point_t* point_v1, point_t* point_v2);

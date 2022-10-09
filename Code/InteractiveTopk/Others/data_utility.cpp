@@ -167,6 +167,23 @@ point_count_t *alloc_point_count()
     return point_count_v;
 }
 
+
+/*
+ *	Allocate memory for a halfspace in dim-dimensional space
+ */
+halfspace_t *alloc_halfspace(int dim)
+{
+    halfspace_t *halfspace_v;
+    halfspace_v = (halfspace_t *) malloc(sizeof(halfspace_t));
+    memset(halfspace_v, 0, sizeof(halfspace_t));
+
+    halfspace_v->normal = alloc_point(dim);
+    for (int i = 0; i < dim; i++) halfspace_v->normal->coord[i] = 0;
+    halfspace_v->direction = true;
+    halfspace_v->offset = 0;
+    return halfspace_v;
+}
+
 /*
  *	Allocate memory for a halfspace in dim-dimensional space
  	The coordinate of the halfspace is p1-p2

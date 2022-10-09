@@ -79,6 +79,24 @@ double dot_prod(point_t* point_v1, point_t* point_v2)
 	return result;
 }
 
+
+/*
+ *	Calculate the dot product between two points (const version)
+ */
+double dot_prod(const point_t* point_v1, const point_t* point_v2)
+{
+	int dim = point_v1->dim;
+	double result = 0;
+
+	int i;
+	for(i = 0; i < dim; i++)
+	{
+		result += point_v1->coord[i]*point_v2->coord[i];
+	}
+	return result;
+}
+
+
 /*
  *	Calculate the dot product between two points
  */
