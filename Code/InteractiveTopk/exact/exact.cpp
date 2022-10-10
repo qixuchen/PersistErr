@@ -403,6 +403,7 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
         choose_item_set.pop_back();
     }
 
+    //TODO: clear regions
     std::set<point_t *> points_return = compute_considered_set(regions);
     bool success = check_correctness(points_return, u, best_score);
     if(success) ++correct_count;
