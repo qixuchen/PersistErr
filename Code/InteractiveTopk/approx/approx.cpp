@@ -80,8 +80,16 @@ void et_recurrence(vector<Enclosure> &enclosures, halfspace_t *hs){
         else{   // r1 exists
             if(r2_exists){ // r1 and r2 both exist
                 vector<point_t *> aggre_ext_pts;
-                for(auto p : enclosures[i].half_set->ext_pts) aggre_ext_pt.push_back(p);
-                for(auto p : last_record->ext_pts) aggre_ext_pt.push_back(p);
+                for(auto p : enclosures[i].half_set->ext_pts){
+                    if(coord_sum(p) > 1 - Precision/2000 && coord_sum(p) < 1 + Precision/2000){
+                        aggre_ext_pt.push_back(p);
+                    }
+                }
+                for(auto p : last_record->ext_pts){
+                     if(coord_sum(p) > 1 - Precision/2000 && coord_sum(p) < 1 + Precision/2000){
+                        aggre_ext_pt.push_back(p);
+                    }
+                }
                 halfspace_set_t *convh_half_set = compute_convh_hyperplanes(aggre_ext_pt); 
                 release_halfspace_set(enclosures[i].half_set);
                 enclosures[i].half_set = convh_half_set;
@@ -96,9 +104,6 @@ void et_recurrence(vector<Enclosure> &enclosures, halfspace_t *hs){
         cur_record = 0;
     }
     release_halfspace_set(last_record);
-    for(int i = 0; i <= k; i++){
-        enclosure_erase_fragments(enclosures[i], hs);
-    }
 }
 
 
@@ -154,7 +159,7 @@ void construct_fragment_in_initialized_Enclosure(const std::vector<halfspace_set
 
 
 int Approx(vector<point_t *> p_set, point_t *u, int k){
-    int w = 4;
+    int w = 5;
     int dim = p_set[0]->dim;
     vector<point_t *> convh;
     find_convh_vertices(p_set, convh);
@@ -181,7 +186,7 @@ int Approx(vector<point_t *> p_set, point_t *u, int k){
     std::map<int, hyperplane_t *> hyperplane_candidates;
     construct_hy_candidates(hyperplane_candidates, choose_item_set);
     int round = 0;
-    while(enclosures[0].frag_set.size() > w){
+    while(enclosure_compute_considered_set(enclosures).size() > w){
         int best_idx = enclosure_find_best_hyperplane(choose_item_set, hyperplane_candidates, enclosures);
         if(best_idx < 0){ 
             break;
@@ -195,7 +200,13 @@ int Approx(vector<point_t *> p_set, point_t *u, int k){
         else{
             hs = alloc_halfspace(p1, p2, 0, true);
         }
+
         et_recurrence(enclosures, hs);
+
+        for(int i = 0; i <= k; i++){
+            enclosure_erase_fragments(enclosures[i], hs);
+            if(extract_frags(enclosures[i]).size() > 2 * w) break;
+        }
         round++;
     }
 
@@ -215,6 +226,9 @@ int Approx(vector<point_t *> p_set, point_t *u, int k){
 
     std::set<point_t *> points_return = enclosure_compute_considered_set(enclosures);
     bool success = check_correctness(points_return, u, best_score);
+    if(success) ++correct_count;
+    question_num += round;
+    return_size += points_return.size();
 
     return 0;
 }   
