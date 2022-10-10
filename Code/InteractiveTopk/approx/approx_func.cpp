@@ -3,6 +3,26 @@
 using std::vector; 
 using std::string;
 
+/** @brief      Small checking function, sum of point coordinates
+ */    
+double coord_sum(point_t * p){
+    if(p == 0) return 0;
+    int dim = p->dim;
+    double sum = 0;
+    for(int i = 0; i < dim; i++){
+        sum += p->coord[i];
+    }
+    return sum;
+}
+
+
+int check_ext_pt_validity(std::vector<point_t *> &aggre_ext_pts){
+    for(int i = 0; i < aggre_ext_pts.size(); i++){
+        if(coord_sum(aggre_ext_pts[i]) != 1) return i;
+    }
+    return -1;
+}
+
 
 /** @brief      Compute the number of fragments in a Region r
  */
@@ -97,7 +117,7 @@ halfspace_set_t * compute_convh_hyperplanes(const std::vector<point_t *> &p_set)
     record_point_set(p_set, p_filename);
 
     // call qhull to compute the convex hull hyperplanes and write into output/conv_hyper.txt
-    string conv_command = "qconvex n < " + p_filename + " > " + h_filename;
+    string conv_command = "qconvex n QV0 < " + p_filename + " > " + h_filename;
     std::system(conv_command.c_str());
 
     return read_convh_hyperplanes(h_filename);

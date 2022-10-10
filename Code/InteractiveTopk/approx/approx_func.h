@@ -23,6 +23,14 @@ struct Enclosure
 };
 
 
+/** @brief      Small checking function, sum of point coordinates
+ */    
+double coord_sum(point_t * p);
+
+
+int check_ext_pt_validity(std::vector<point_t *> &aggre_ext_pts);
+
+
 /** @brief      Compute the number of fragments in a Region r
  */
 vector<point_t *> extract_frags(const Enclosure &e);
