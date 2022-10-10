@@ -130,3 +130,14 @@ halfspace_set_t * compute_convh_hyperplanes(const std::vector<point_t *> &p_set)
 halfspace_t *get_hs_counterpart(halfspace_t *hs){
     return alloc_halfspace(hs->point2, hs->point1, hs->offset, hs->direction);
 }
+
+
+bool check_enclosure_emptiness(halfspace_set_t * half_set, halfspace_t *h){
+    if(half_set == 0) return true;
+    double max_dist = -1;
+    for(auto p : half_set->ext_pts){
+        if(dot_prod(p, h->normal) > max_dist) max_dist = dot_prod(p, h->normal);
+    }
+    return (max_dist > 0.005) ? false : true; // this threshold is set since all ext points
+                                            // coordinates sums to 10,000
+}

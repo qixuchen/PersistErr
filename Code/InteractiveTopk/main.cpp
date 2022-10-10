@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     srand(time(NULL));
     point_set_t *P0 = read_points((char*)"4d1k.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
-    int k = 1, num_repeat = 10;
+    int k = 1, num_repeat = 50;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
     point_set_t *P = point_reload(p_set);

@@ -14,9 +14,10 @@
 struct Enclosure
 {
     Enclosure() = default;
-    Enclosure(int t): level(t){};
+    Enclosure(int t): level(t), empty(false){};
 
 	int level;
+    bool empty = false;
     std::vector<point_t *> ext_pts;
     halfspace_set_t *half_set;
     std::map<point_t *, frag_t *> frag_set;
@@ -53,5 +54,8 @@ halfspace_t *get_hs_counterpart(halfspace_t *hs);
 
 
 halfspace_set_t * compute_convh_hyperplanes(const std::vector<point_t *> &p_set);
+
+
+bool check_enclosure_emptiness(halfspace_set_t * half_set, halfspace_t *h);
 
 #endif

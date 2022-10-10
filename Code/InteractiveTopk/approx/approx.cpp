@@ -67,39 +67,57 @@ void et_recurrence(vector<Enclosure> &enclosures, halfspace_t *hs){
     halfspace_set_t *cur_record = 0, *last_record = 0;
     bool r1_exists = false, r2_exists = false; 
     for(int i = 0; i <= k; i++){
-        cur_record = alloc_halfspace_set_normal_only(enclosures[i].half_set); 
-        // first make a copy since the original hs will be removed
-        halfspace_t *hs_cpy = alloc_halfspace(hs->point1, hs->point2, hs->offset, hs->direction);
-        enclosures[i].half_set->halfspaces.push_back(hs_cpy);
-        r1_exists= get_extreme_pts_refine_halfspaces_alg1(enclosures[i].half_set);
-        // Summarize the extreme points in r1 and r2 (if exists) and compute the conv hull
-        vector<point_t *> aggre_ext_pt;
-        if(!r1_exists){ // if r1 does not exist, clear all fragments in r1
-            clear_enclosure_fragments(enclosures[i]);
+        if(enclosures[i].empty){
+            r1_exists = false;
         }
-        else{   // r1 exists
-            if(r2_exists){ // r1 and r2 both exist
-                vector<point_t *> aggre_ext_pts;
-                for(auto p : enclosures[i].half_set->ext_pts){
-                    if(coord_sum(p) > 1 - Precision/2000 && coord_sum(p) < 1 + Precision/2000){
-                        aggre_ext_pt.push_back(p);
+        else{
+            cur_record = alloc_halfspace_set_normal_only(enclosures[i].half_set);
+            if(check_enclosure_emptiness(enclosures[i].half_set, hs)){
+                enclosures[i].empty = true;
+                r1_exists = false;
+            } 
+            else{
+                // first make a copy since the original hs will be removed
+                halfspace_t *hs_cpy = alloc_halfspace(hs->point1, hs->point2, hs->offset, hs->direction);
+                enclosures[i].half_set->halfspaces.push_back(hs_cpy);
+                r1_exists= get_extreme_pts_refine_halfspaces_alg1(enclosures[i].half_set);
+            }
+            // Summarize the extreme points in r1 and r2 (if exists) and compute the conv hull
+            vector<point_t *> aggre_ext_pt;
+            if(!r1_exists){ // if r1 does not exist, clear all fragments in r1
+                clear_enclosure_fragments(enclosures[i]);
+            }
+            else{   // r1 exists
+                if(r2_exists){ // r1 and r2 both exist
+                    vector<point_t *> aggre_ext_pts;
+                    for(auto p : enclosures[i].half_set->ext_pts){
+                        if(coord_sum(p) > 1 - Precision/2000 && coord_sum(p) < 1 + Precision/2000){
+                            aggre_ext_pt.push_back(p);
+                        }
                     }
-                }
-                for(auto p : last_record->ext_pts){
-                     if(coord_sum(p) > 1 - Precision/2000 && coord_sum(p) < 1 + Precision/2000){
-                        aggre_ext_pt.push_back(p);
+                    for(auto p : last_record->ext_pts){
+                        if(coord_sum(p) > 1 - Precision/2000 && coord_sum(p) < 1 + Precision/2000){
+                            aggre_ext_pt.push_back(p);
+                        }
                     }
+                    halfspace_set_t *convh_half_set = compute_convh_hyperplanes(aggre_ext_pt); 
+                    release_halfspace_set(enclosures[i].half_set);
+                    enclosures[i].half_set = convh_half_set;
+                    get_extreme_pts_refine_halfspaces_alg1(enclosures[i].half_set);
                 }
-                halfspace_set_t *convh_half_set = compute_convh_hyperplanes(aggre_ext_pt); 
-                release_halfspace_set(enclosures[i].half_set);
-                enclosures[i].half_set = convh_half_set;
-                get_extreme_pts_refine_halfspaces_alg1(enclosures[i].half_set);
             }
         }
         release_halfspace_set(last_record);
         halfspace_t *counterpart = get_hs_counterpart(hs);
-        cur_record->halfspaces.push_back(counterpart);
-        r2_exists = get_extreme_pts_refine_halfspaces_alg1(cur_record);
+        if(check_enclosure_emptiness(cur_record, counterpart)){
+            release_halfspace(counterpart);
+            release_halfspace_set(cur_record);
+            r2_exists = false;
+        }
+        else{
+            cur_record->halfspaces.push_back(counterpart);
+            r2_exists = get_extreme_pts_refine_halfspaces_alg1(cur_record);
+        }
         last_record = cur_record;
         cur_record = 0;
     }
@@ -159,7 +177,7 @@ void construct_fragment_in_initialized_Enclosure(const std::vector<halfspace_set
 
 
 int Approx(vector<point_t *> p_set, point_t *u, int k){
-    int w = 5;
+    int w = 4;
     int dim = p_set[0]->dim;
     vector<point_t *> convh;
     find_convh_vertices(p_set, convh);
@@ -186,7 +204,8 @@ int Approx(vector<point_t *> p_set, point_t *u, int k){
     std::map<int, hyperplane_t *> hyperplane_candidates;
     construct_hy_candidates(hyperplane_candidates, choose_item_set);
     int round = 0;
-    while(enclosure_compute_considered_set(enclosures).size() > w){
+    std::set<point_t *> points_return = enclosure_compute_considered_set(enclosures);
+    while(points_return.size() > w){
         int best_idx = enclosure_find_best_hyperplane(choose_item_set, hyperplane_candidates, enclosures);
         if(best_idx < 0){ 
             break;
@@ -195,10 +214,12 @@ int Approx(vector<point_t *> p_set, point_t *u, int k){
         point_t* p2 = choose_item_set[best_idx]->hyper->point2;
         halfspace_t *hs = 0;
         if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-            hs = alloc_halfspace(p2, p1, 0, true);
+            if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p2, p1, 0, true);
+            else hs = alloc_halfspace(p1, p2, 0, true);
         }
         else{
-            hs = alloc_halfspace(p1, p2, 0, true);
+            if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p1, p2, 0, true);
+            else hs = alloc_halfspace(p2, p1, 0, true);
         }
 
         et_recurrence(enclosures, hs);
@@ -207,6 +228,10 @@ int Approx(vector<point_t *> p_set, point_t *u, int k){
             enclosure_erase_fragments(enclosures[i], hs);
             if(extract_frags(enclosures[i]).size() > 2 * w) break;
         }
+
+        std::set<point_t *> considered_points = enclosure_compute_considered_set(enclosures);
+        if(considered_points.size() == 0) break;
+        points_return = considered_points;
         round++;
     }
 
@@ -222,9 +247,9 @@ int Approx(vector<point_t *> p_set, point_t *u, int k){
         release_item(item_ptr);
         choose_item_set.pop_back();
     }
-    //TODO clear the enclosures
-
-    std::set<point_t *> points_return = enclosure_compute_considered_set(enclosures);
+    for(int i = 0; i <= k; i++){
+        clear_enclosure_fragments(enclosures[i]);
+    }
     bool success = check_correctness(points_return, u, best_score);
     if(success) ++correct_count;
     question_num += round;
