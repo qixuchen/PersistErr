@@ -167,6 +167,39 @@ point_count_t *alloc_point_count()
     return point_count_v;
 }
 
+
+/*
+ *	Allocate memory for a halfspace in dim-dimensional space
+ */
+halfspace_t *alloc_halfspace(int dim)
+{
+    halfspace_t *halfspace_v;
+    halfspace_v = (halfspace_t *) malloc(sizeof(halfspace_t));
+    memset(halfspace_v, 0, sizeof(halfspace_t));
+
+    halfspace_v->normal = alloc_point(dim);
+    for (int i = 0; i < dim; i++) halfspace_v->normal->coord[i] = 0;
+    halfspace_v->direction = true;
+    halfspace_v->offset = 0;
+    return halfspace_v;
+}
+
+
+/*
+ *	Allocate memory for a halfspace in dim-dimensional space
+ */
+halfspace_t *alloc_halfspace(point_t *normal, double offset)
+{
+    halfspace_t *halfspace_v;
+    halfspace_v = (halfspace_t *) malloc(sizeof(halfspace_t));
+    memset(halfspace_v, 0, sizeof(halfspace_t));
+
+    halfspace_v->normal = alloc_point(normal->dim);
+    for (int i = 0; i < normal->dim; i++) halfspace_v->normal->coord[i] = normal->coord[i];
+    halfspace_v->offset = offset;
+    return halfspace_v;
+}
+
 /*
  *	Allocate memory for a halfspace in dim-dimensional space
  	The coordinate of the halfspace is p1-p2
@@ -319,8 +352,7 @@ halfspace_set_t* alloc_halfspace_set(halfspace_set_t *hset)
 {
     int dim = hset->halfspaces[0]->normal->dim;
     halfspace_set_t *halfspace_set_v;
-    halfspace_set_v = (halfspace_set_t *) malloc(sizeof(halfspace_set_t));
-    memset(halfspace_set_v, 0, sizeof(halfspace_set_t));
+    halfspace_set_v = new halfspace_set_t;
 
     for(int i=0; i < hset->halfspaces.size();++i)
     {
@@ -339,6 +371,29 @@ halfspace_set_t* alloc_halfspace_set(halfspace_set_t *hset)
     return halfspace_set_v;
 }
 
+
+halfspace_set_t* alloc_halfspace_set_normal_only(halfspace_set_t *hset)
+{
+    int dim = hset->halfspaces[0]->normal->dim;
+    halfspace_set_t *halfspace_set_v;
+    halfspace_set_v = new halfspace_set_t;
+
+    for(int i=0; i < hset->halfspaces.size();++i)
+    {
+        halfspace_t *h = alloc_halfspace(hset->halfspaces[i]->normal, hset->halfspaces[i]->offset);
+        halfspace_set_v->halfspaces.push_back(h);
+    }
+    halfspace_set_v->in_center = alloc_point(dim);
+    halfspace_set_v->out_center = alloc_point(dim);
+    halfspace_set_v->check_point = alloc_point(dim);
+
+    //set extreme points
+    get_extreme_pts_refine_halfspaces_alg1(halfspace_set_v);
+
+
+
+    return halfspace_set_v;
+}
 
 
 /*
@@ -375,7 +430,7 @@ void release_halfspace_set(halfspace_set_t *&halfspace_set_v)
     }
     halfspace_set_v->halfspaces.clear();
     //halfspace_set_v->halfspaces.shrink_to_fit();
-    free(halfspace_set_v);
+    delete halfspace_set_v;
     halfspace_set_v = NULL;
 }
 
@@ -406,8 +461,6 @@ void release_choose_item(choose_item *item_ptr){
 
 
 /**  @brief dynamically allocate space for item 
- * 
- * 
  */
 item *alloc_item(){
     return new item;
@@ -415,8 +468,6 @@ item *alloc_item(){
 
 
 /**  @brief destory the dynamically allocated choose_item 
- * 
- * 
  */
 void release_item(item *item_ptr){
     if (item_ptr == 0) return;
@@ -424,9 +475,25 @@ void release_item(item *item_ptr){
     if(item_ptr->hyper != 0){
         release_hyperplane(item_ptr->hyper);
     }
-    free(item_ptr);
+    delete item_ptr;
     item_ptr = NULL;
 }
+
+
+/**  @brief dynamically allocate space for partition_fragement 
+ */
+frag_t *alloc_fragment(){
+    return new frag_t;
+}
+
+/**  @brief destory the dynamically allocated partition_fragement
+ */
+void release_fragment(frag_t *frag_ptr){
+    if (frag_ptr == 0) return;
+    free(frag_ptr);
+    frag_ptr = NULL;
+}
+
 
 
 /*

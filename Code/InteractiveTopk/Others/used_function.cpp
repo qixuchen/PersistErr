@@ -656,6 +656,16 @@ void find_top1(std::vector<point_t *> p_set, std::vector<point_t *> &top)
     fclose(wPtr);
 }
 
+/** @brief          Find all convex points in p_set
+ *  @param  p_set   Input dataset
+ *  @param  convh   stores the computed convex points
+ */
+void find_convh_vertices(std::vector<point_t *> &p_set, std::vector<point_t *> &convh){
+    std::vector<point_t *> top;
+    find_top1(p_set, top);
+    skyline_c(top, convh);
+}
+
 /**
  * @brief Find all the points which are not dominated by >=k points
  * @param p_set 			The original dataset

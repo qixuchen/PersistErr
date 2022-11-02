@@ -1,6 +1,7 @@
 #define Beta 0.01
 #define Precision 0.0000015
 #define RandRate 0.5
+#define Alpha 0.05
 
 #include "../Others/data_utility.h"
 #include "../Others/data_struct.h"
@@ -92,6 +93,13 @@ void find_top_k(point_t* u, std::vector<point_t*> p_set, std::vector<point_t*> &
 void find_top1_sampling(std::vector<point_t*> p_set, std::vector<point_t*> &top_set, point_t* u, int level, int used_seg);
 
 void find_top1(std::vector<point_t *> p_set, std::vector<point_t *> &top);
+
+
+/** @brief          Find all convex points in p_set
+ *  @param  p_set   Input dataset
+ *  @param  convh   stores the computed convex points
+ */
+void find_convh_vertices(std::vector<point_t *> &p_set, std::vector<point_t *> &convh);
 
 //@brief Find all the points which are not dominated by >=k points
 //param p_set 			The original dataset

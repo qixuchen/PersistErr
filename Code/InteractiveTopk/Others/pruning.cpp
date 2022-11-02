@@ -565,7 +565,7 @@ bool get_extreme_pts_refine_halfspaces_alg1(halfspace_set_t *half_set)
     {
         if (half_set->halfspaces[count_num]->offset == 0)
         {
-            half_set->halfspaces.erase(half_set->halfspaces.begin() + count_num);
+            half_set->halfspaces.erase(half_set->halfspaces.begin() + count_num); // LEAK
         }
         else
         {
