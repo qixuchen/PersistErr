@@ -373,21 +373,28 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
     // key: index of the item in choose_item_set; value: pointer to the hyperplane
     std::map<int, hyperplane_t *> hyperplane_candidates;
     construct_hy_candidates(hyperplane_candidates, choose_item_set);
+    std::set<point_t *> points_return = compute_considered_set(regions);
     int round = 0;
-    while(compute_considered_set(regions).size() > w){
+    while(points_return.size() > w){
         int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, regions);
         if(best_idx < 0) break;
         point_t* p1 = choose_item_set[best_idx]->hyper->point1;
         point_t* p2 = choose_item_set[best_idx]->hyper->point2;
         halfspace_t *hs = 0;
         if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-            hs = alloc_halfspace(p2, p1, 0, true);
+            if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p2, p1, 0, true);
+            else hs = alloc_halfspace(p1, p2, 0, true);
         }
         else{
-            hs = alloc_halfspace(p1, p2, 0, true);
+            if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p1, p2, 0, true);
+            else hs = alloc_halfspace(p2, p1, 0, true);
         }
         rt_recurrence(regions, hs);
         release_halfspace(hs);
+
+        std::set<point_t *> considered_points = compute_considered_set(regions);
+        if(considered_points.size() == 0) break;
+        points_return = considered_points;
         round++;
     }
 
@@ -404,7 +411,6 @@ int Exact(std::vector<point_t *> p_set, point_t *u, int k){
     }
 
     //TODO: clear regions
-    std::set<point_t *> points_return = compute_considered_set(regions);
     bool success = check_correctness(points_return, u, best_score);
     if(success) ++correct_count;
     question_num += round;

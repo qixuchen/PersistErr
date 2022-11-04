@@ -177,7 +177,7 @@ void construct_fragment_in_initialized_Enclosure(const std::vector<halfspace_set
 
 
 int Approx(vector<point_t *> p_set, point_t *u, int k){
-    int w = 4;
+    int w = 8;
     int dim = p_set[0]->dim;
     vector<point_t *> convh;
     find_convh_vertices(p_set, convh);
