@@ -5,6 +5,7 @@
 #include "HDPI/HDPI.h"
 #include "rev_HDPI/rev_HDPI.h"
 #include "exact/exact.h"
+#include "exact/Exact_revised.h"
 #include "exact/optimal.h"
 #include "approx/approx.h"
 #include "RH/alg_one.h"
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
     srand(time(NULL));
     point_set_t *P0 = read_points((char*)"4d.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
-    int k = 3, num_repeat = 50;
+    int k = 2, num_repeat = 1;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
     point_set_t *P = point_reload(p_set);
@@ -49,7 +50,8 @@ int main(int argc, char *argv[])
         // compute_convh_hyperplanes(p_set);
         // Approx(p_set, u, k);
         // Exact(p_set, u, k);
-        Optimal(p_set, u, k);
+        // Optimal(p_set, u, k);
+        exact_rev::Exact_revised(p_set, u, k);
     }
     
 

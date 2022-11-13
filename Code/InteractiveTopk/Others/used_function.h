@@ -129,6 +129,27 @@ halfspace_set_t* R_initial(int dim);
  */
 int print_choose_item_situation(std::vector<choose_item*> choose_item_set, int i);
 
+
+/** @brief reverse the halfspace 
+ * 
+*/
+halfspace_t * reverse_halfspace(const halfspace_t *hs);
+
+
+/*
+ * @brief Check the relation between the halfspace and the half_set
+ *		 Use bounding sphere/bounding rectangle to accelerate
+ *		 Since the extreme points of the half_set can not be accurate enough, we set "Precision" to solve the error
+ * @param hyper 		The halfspace (outward pointing)
+ * @param half_set	The half_set/Intersection of the halfspace
+ * @return The relation	1: half_set inside halfspace
+ *						-1: half_set outside halfspace
+ *						0: half_set intersects with the hyperplane
+ *						-2: Error for check situation
+ */
+int check_situation(halfspace_t *hs, halfspace_set_t *half_set);
+
+
 /*
  * @brief Check the relation between the hyperplane and the half_set
  *		 Use bounding sphere/bounding rectangle to accelerate

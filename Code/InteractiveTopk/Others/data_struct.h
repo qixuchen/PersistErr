@@ -113,7 +113,7 @@ typedef struct halfspace
 	point_t*    point2;
 }	halfspace_t;
 
-
+// data structure used in experimental algorithms
 typedef struct partition_fragment
 {
 	point_t *point_belongs=0;
