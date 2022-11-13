@@ -888,6 +888,76 @@ int print_choose_item_situation(std::vector<choose_item *> choose_item_set, int 
     return 1;
 }
 
+
+/** @brief reverse the halfspace 
+ * 
+*/
+halfspace_t * reverse_halfspace(const halfspace_t *hs){
+    if(hs->normal == NULL){
+        return NULL;
+    }
+    halfspace_t *ret = alloc_halfspace(hs->normal, hs->offset);
+    int dim = hs->normal->dim;
+    for(int i = 0; i < dim; i++){
+        ret->normal->coord[i] *= -1;
+    }
+    return ret;
+}
+
+/*
+ * @brief Check the relation between the halfspace and the half_set
+ *		 Use bounding sphere/bounding rectangle to accelerate
+ *		 Since the extreme points of the half_set can not be accurate enough, we set "Precision" to solve the error
+ * @param hyper 		The halfspace (outward pointing)
+ * @param half_set	The half_set/Intersection of the halfspace
+ * @return The relation	1: half_set inside halfspace
+ *						-1: half_set outside halfspace
+ *						0: half_set intersects with the hyperplane
+ *						-2: Error for check situation
+ */
+int check_situation(halfspace_t *hs, halfspace_set_t *half_set){
+    int M = half_set->ext_pts.size();
+    if (M < 1)
+    {
+        printf("%s\n", "None of the ext_pts in the set.");
+        return -2;
+    }
+    int D = half_set->ext_pts[0]->dim;
+    int posi = 0, nega = 0;
+    for (int i = 0; i < M; i++)
+    {
+        double sum = 0;
+        for (int j = 0; j < D; j++)
+        {
+            sum += (hs->normal->coord[j] * half_set->ext_pts[i]->coord[j]);
+        }
+        if (sum > Precision / 2)
+        {
+            posi++;
+        }
+        else if (sum < -Precision / 2)
+        {
+            nega++;
+        }
+
+        if (posi > 0 && nega > 0)
+        {
+            return 0;
+        }
+    }
+    if (posi > 0)
+    {
+        return -1; // outward pointing halfspace
+    }
+    else if (nega > 0)
+    {
+        return 1;
+    }
+    //printf("%s\n", "Error for check situation.");
+    return 0;
+}
+
+
 /*
  * @brief Check the relation between the hyperplane and the half_set
  *		 Use bounding sphere/bounding rectangle to accelerate
