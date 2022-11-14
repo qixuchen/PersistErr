@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     srand(time(NULL));
     point_set_t *P0 = read_points((char*)"4d.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
-    int k = 2, num_repeat = 1;
+    int k = 2, num_repeat = 50;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
     point_set_t *P = point_reload(p_set);
@@ -38,8 +38,6 @@ int main(int argc, char *argv[])
         }
         for (int i = 0; i < dim; i++)
             u->coord[i] = u->coord[i]/sum;
-
-
         // look for the ground truth top-k point
         std::vector<point_t *> top_current;
         find_top_k(u, P, top_current, k);

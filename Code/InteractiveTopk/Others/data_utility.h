@@ -36,6 +36,7 @@ struct valueCmp
 // allocate/release memory for points/hyperplanes 
 point_t* alloc_point(int dim);
 point_t* alloc_point(int dim, int id);
+point_t *alloc_point(const point_t *p);
 void release_point( point_t* &point_v);
 point_t* rand_point(int dim);
 point_set_t* alloc_point_set(int numberOfPoints);

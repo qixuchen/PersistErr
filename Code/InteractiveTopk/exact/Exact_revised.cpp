@@ -99,7 +99,7 @@ namespace exact_rev{
     */
     void initialize_conf_region(conf_region &cr, std::vector<halfspace_set_t *> &half_set_set){
         for(int i = 0; i < half_set_set.size(); i++){
-            halfspace_set_t *half_set = alloc_halfspace_set_normal_only(half_set_set[i]);
+            halfspace_set_t *half_set = alloc_halfspace_set(half_set_set[i]);
             point_t *correspond_point = half_set_set[i]->represent_point[0];
             if(correspond_point == NULL){ // check this point must not be empty
                 cout << "ERROR: the represent point is empty" << endl;
@@ -242,7 +242,7 @@ namespace exact_rev{
                 }
                 else if(pos == -1){ // the partition lies completely outside hs
                     if(i == k){
-                        // need to free the allocated memory 
+                        // LEAK: need to free the allocated memory 
                         release_halfspace_set(*it);
                         it = conf_regions[i].partitions.erase(it);
                     }
@@ -253,19 +253,26 @@ namespace exact_rev{
                     }
                 }
                 else{ // the partition intersects with hs
-                    halfspace_set_t * other_half =  alloc_halfspace_set_normal_only(*it);
+                    halfspace_set_t * other_half = alloc_halfspace_set(*it);
                     halfspace_t * hs_minus = reverse_halfspace(hs);
+                    
 
                     // first update the partition in this conf region
-                    (*it)->halfspaces.push_back(alloc_halfspace(hs->normal,hs->offset));
+                    (*it)->halfspaces.push_back(alloc_halfspace(hs->point1, hs->point2, hs->offset, hs->direction));
                     get_extreme_pts_refine_halfspaces_alg1(*it);
 
-                    // then move the pruned part of this partition to the outer conf region
-                    other_half->halfspaces.push_back(hs_minus);
-                    get_extreme_pts_refine_halfspaces_alg1(other_half);
-                    other_half->represent_point.push_back((*it)->represent_point[0]);
-                    conf_regions[i+1].partitions.push_back(other_half);
-
+                    // then move the pruned part of this partition to the outer conf region (but only when i < k)
+                    if(i < k){
+                        other_half->halfspaces.push_back(hs_minus);
+                        get_extreme_pts_refine_halfspaces_alg1(other_half);
+                        other_half->represent_point.push_back((*it)->represent_point[0]);
+                        conf_regions[i+1].partitions.push_back(other_half);
+                    }
+                    else{
+                        release_halfspace_set(other_half);
+                        release_halfspace(hs_minus);
+                    }
+                    
                     ++it;
                 }
             }
@@ -313,14 +320,15 @@ namespace exact_rev{
             point_t* p2 = choose_item_set[best_idx]->hyper->point2;
             halfspace_t *hs = 0;
             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-                hs = alloc_halfspace(p2, p1, 0, true);
+                if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p2, p1, 0, true);
+                else hs = alloc_halfspace(p1, p2, 0, true);
             }
             else{
-                hs = alloc_halfspace(p1, p2, 0, true);
+                if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p1, p2, 0, true);
+                else hs = alloc_halfspace(p2, p1, 0, true);
             }
             exact_recur(conf_regions, hs);
             release_halfspace(hs);
-
             std::set<point_t *> considered_points = compute_considered_set(conf_regions);
             if(considered_points.size() == 0) break;
             points_return = considered_points;
@@ -347,7 +355,6 @@ namespace exact_rev{
                 ++it;
             }
         } 
-
         bool success = check_correctness(points_return, u, best_score);
         if(success) ++correct_count;
         question_num += round;
