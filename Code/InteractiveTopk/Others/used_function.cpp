@@ -656,6 +656,7 @@ void find_top1(std::vector<point_t *> p_set, std::vector<point_t *> &top)
     fclose(wPtr);
 }
 
+
 /** @brief          Find all convex points in p_set
  *  @param  p_set   Input dataset
  *  @param  convh   stores the computed convex points
@@ -665,6 +666,7 @@ void find_convh_vertices(std::vector<point_t *> &p_set, std::vector<point_t *> &
     find_top1(p_set, top);
     skyline_c(top, convh);
 }
+
 
 /**
  * @brief Find all the points which are not dominated by >=k points
@@ -896,11 +898,7 @@ halfspace_t * reverse_halfspace(const halfspace_t *hs){
     if(hs->normal == NULL){
         return NULL;
     }
-    halfspace_t *ret = alloc_halfspace(hs->normal, hs->offset);
-    int dim = hs->normal->dim;
-    for(int i = 0; i < dim; i++){
-        ret->normal->coord[i] *= -1;
-    }
+    halfspace_t *ret = alloc_halfspace(hs->point2, hs->point1, hs->offset, hs->direction);
     return ret;
 }
 

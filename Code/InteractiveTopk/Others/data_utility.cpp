@@ -37,6 +37,22 @@ point_t *alloc_point(int dim, int id)
 }
 
 
+/*
+ *	Allocate memory for a point in dim-dimensional space with id
+ */
+point_t *alloc_point(const point_t * p)
+{
+    if(p == NULL) return NULL;
+    point_t *point_v = alloc_point(p->dim);
+    point_v->id = p->id;
+    for(int i = 0; i < p->dim; i++){
+        point_v->coord[i] = p->coord[i];
+    }
+    return point_v;
+}
+
+
+
 utility_t *alloc_utility()
 {
     utility_t *utility_v;
@@ -396,6 +412,8 @@ halfspace_set_t* alloc_halfspace_set_normal_only(halfspace_set_t *hset)
 }
 
 
+
+
 /*
  *	Release memory for halfspace_set
  */
@@ -430,7 +448,6 @@ void release_halfspace_set(halfspace_set_t *&halfspace_set_v)
     }
     halfspace_set_v->halfspaces.clear();
     //halfspace_set_v->halfspaces.shrink_to_fit();
-    delete halfspace_set_v;
     halfspace_set_v = NULL;
 }
 
