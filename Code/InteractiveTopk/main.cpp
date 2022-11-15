@@ -7,6 +7,7 @@
 #include "exact/exact.h"
 #include "exact/Exact_revised.h"
 #include "exact/optimal.h"
+#include "sampling/sampling.h"
 #include "approx/approx.h"
 #include "RH/alg_one.h"
 #include "2DPI/2dPI.h"
@@ -19,9 +20,9 @@
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"4d.txt");
+    point_set_t *P0 = read_points((char*)"4d1k.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
-    int k = 2, num_repeat = 50;
+    int k = 1, num_repeat = 50;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
     point_set_t *P = point_reload(p_set);
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
             u->coord[i] = u->coord[i]/sum;
         // look for the ground truth top-k point
         std::vector<point_t *> top_current;
-        find_top_k(u, P, top_current, k);
+        find_top_k(u, P, top_current, 1);
         best_score = dot_prod(u, top_current[0]);
 
         // rev_HDPI(p_set, u, k);
@@ -49,7 +50,8 @@ int main(int argc, char *argv[])
         // Approx(p_set, u, k);
         // Exact(p_set, u, k);
         // Optimal(p_set, u, k);
-        exact_rev::Exact_revised(p_set, u, k);
+        // exact_rev::Exact_revised(p_set, u, k);
+        sampling::sampling(p_set, u, k);
     }
     
 
