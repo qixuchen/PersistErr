@@ -136,6 +136,14 @@ int print_choose_item_situation(std::vector<choose_item*> choose_item_set, int i
 halfspace_t * reverse_halfspace(const halfspace_t *hs);
 
 
+/** @brief      check if a point is inside or outside a half_set
+ *  @return     1: point inside the half_set
+ *              0: ...... outside ......
+ *              -1: error occurs
+*/
+int check_point_halfset_relation(const point_t *p, const halfspace_set_t *half_set);
+
+
 /*
  * @brief Check the relation between the halfspace and the half_set
  *		 Use bounding sphere/bounding rectangle to accelerate

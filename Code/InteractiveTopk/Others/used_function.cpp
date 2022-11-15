@@ -902,13 +902,41 @@ halfspace_t * reverse_halfspace(const halfspace_t *hs){
     return ret;
 }
 
-/*
- * @brief Check the relation between the halfspace and the half_set
- *		 Use bounding sphere/bounding rectangle to accelerate
- *		 Since the extreme points of the half_set can not be accurate enough, we set "Precision" to solve the error
- * @param hyper 		The halfspace (outward pointing)
- * @param half_set	The half_set/Intersection of the halfspace
- * @return The relation	1: half_set inside halfspace
+/** @brief      check if a point is inside or outside a half_set
+ *  @return     1: point inside the half_set
+ *              0: ...... outside ......
+ *              -1: error occurs
+*/
+int check_point_halfset_relation(const point_t *p, const halfspace_set_t *half_set){
+    if(p == NULL){
+        cout << __func__ << "ERROR: Invalid input point" << endl;
+        return -1;
+    }
+    int dim = p->dim;
+    int size = half_set->halfspaces.size();
+    if(size == 0){
+        cout << __func__ << "ERROR: Invalid input half_set" << endl;
+        return -1;
+    }
+
+    for(int i = 0; i < size; i++){
+        double sum = 0;
+        for(int j = 0; j < dim; j++){
+            sum += p->coord[j] * half_set->halfspaces[i]->normal->coord[j];
+        }
+        if(sum > 0) return 0; // the normal is outward pointing
+    }
+    return 1;
+}
+
+
+/** @brief Check the relation between the halfspace and the half_set
+ *		   Use bounding sphere/bounding rectangle to accelerate
+ *		   Since the extreme points of the half_set can not be accurate enough, we set "Precision" to solve the error
+ *  @param hyper 		The halfspace (outward pointing)
+ *  @param half_set	    The half_set/Intersection of the halfspace
+ *  @return             The relation	
+ *                      1: half_set inside halfspace
  *						-1: half_set outside halfspace
  *						0: half_set intersects with the hyperplane
  *						-2: Error for check situation
