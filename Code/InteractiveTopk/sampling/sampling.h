@@ -22,14 +22,6 @@
 #define SAMPLING
 
 namespace sampling{
-    struct Region
-    {
-        Region() = default;
-        Region(int t): level(t){};
-
-        int level;
-        std::map<point_t *, frag_t *> frag_set;
-    };
 
     struct sample_set
     {
