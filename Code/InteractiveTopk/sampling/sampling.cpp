@@ -194,26 +194,9 @@ namespace sampling{
         update_points_in_region(s_sets[0], lookup);
     }
 
-    double max_score(std::vector<point_t *> points, point_t *u){
-        double cur_max = 0;
-        for(auto p: points){
-            double score = dot_prod(u, p);
-            cur_max = max(cur_max, score);
-        }
-        return cur_max;
-    }
-        
-    /** @brief      Compute the number of fragments in a Region r
+    /**
+     * @brief   Check if the best point is returned in considered_points
      */
-    std::vector<point_t *> extract_frags(const Region &r){
-        std::vector<point_t *> results;
-        if(r.frag_set.size() != 0){ // debug purpose
-            for(auto f: r.frag_set) results.push_back(f.first);
-        }
-        return results;
-    }
-
-
     bool check_correctness(const std::vector<point_t *> &considered_points, point_t *u, double best_score){
         for(auto p : considered_points){
             if(dot_prod(u, p) == best_score) return true;
@@ -294,124 +277,6 @@ namespace sampling{
     }
 
 
-    /** @brief      insert the center to each fragment to avoid precision problem 
-     */
-    void insert_center_point(std::map<point_t *, frag_t *> &frag_set){
-        for(auto pairs : frag_set){
-            frag_t *f = pairs.second;
-            int pt_size = f->ext_pts.size();
-            int dim = (*(f->ext_pts.begin()))->dim;
-            point_t *center = alloc_point(dim); //LEAK: centers are not deleted
-            for(auto p : f->ext_pts){
-                for(int i=0; i< dim; i++){
-                    center->coord[i] += (*p).coord[i];
-                }
-            }
-            for(int i=0; i< dim; i++){
-                center->coord[i] /= pt_size;
-            }
-            f->ext_pts.insert(center);
-        }
-    }
-
-    /** @brief      construct the partition fragment in the initialized R0/R1/.../Rt 
-     */
-    void construct_fragment_in_initialized_R(const std::vector<halfspace_set_t *> &half_set_set, std::map<point_t *, frag_t *> &frag_set){
-        for(auto hss_ptr = half_set_set.cbegin(); hss_ptr != half_set_set.cend(); ++hss_ptr){
-            frag_t *frag_ptr = alloc_fragment(); // LEAK
-            frag_ptr->point_belongs = (*hss_ptr)->represent_point[0];
-            for(auto ext_pt_ptr = (*hss_ptr)->ext_pts.cbegin(); ext_pt_ptr != (*hss_ptr)->ext_pts.cend(); ++ext_pt_ptr){
-                frag_ptr->ext_pts.insert(*ext_pt_ptr);
-            }
-            frag_set.insert(make_pair(frag_ptr->point_belongs, frag_ptr));
-        }
-        //insert_center_point(frag_set);
-    }
-
-
-    /** @brief       Record the ext_pt belonging to frag into frag_carry
-     */
-    void record_ext_pt(const frag_t *frag, point_t *ext_pt, std::map<point_t *, frag_t *> &frag_carry){
-        point_t *target_point = frag->point_belongs;
-        auto crspd_frag = frag_carry.find(target_point);
-        if(crspd_frag != frag_carry.end()){ // the fragment belongs to this point is already in frag_return
-            (*crspd_frag).second->ext_pts.insert(ext_pt);
-        }
-        else{
-            frag_t *new_frag = alloc_fragment(); // LEAK
-            new_frag->point_belongs = target_point;
-            new_frag->ext_pts.insert(ext_pt);
-            frag_carry.insert(make_pair(target_point, new_frag));
-        }
-    }
-
-
-    /** @brief      Erase the extreme points in Region r that is not supported by hs_ptr
-     *              Record the erased points in frag_carry to insert them to other Region later
-     */
-    void erase_fragments(Region &r, halfspace_t *hs_ptr, std::map<point_t *, frag_t *> &frag_carry){
-        std::vector<point_t *> frag_remove;
-        for(auto frag_ptr = r.frag_set.begin(); frag_ptr != r.frag_set.end(); ++frag_ptr){
-            frag_t *frag = (*frag_ptr).second;
-            std::vector<point_t*> ext_pt_remove;
-            for(auto p_ptr = (*frag).ext_pts.cbegin(); p_ptr != (*frag).ext_pts.cend(); ++p_ptr){
-                // if this ext point is not supported, first record it in frag_return, then erase it
-                // The normals are outward-pointing, thus remove those dot product > 0
-                if(dot_prod(*p_ptr, hs_ptr->normal) > Precision/2000){ // no need to add offset because the offset of hyperplane is typically 0
-                    record_ext_pt(frag, *p_ptr, frag_carry);
-                    ext_pt_remove.push_back(*p_ptr);
-                }
-            }
-            for(auto p : ext_pt_remove){
-                (*frag).ext_pts.erase(p);
-            }
-            if((*frag).ext_pts.size() == 0){ // frag is completely outside Rk, record and remove it from Rk later
-                frag_remove.push_back((*frag_ptr).first);
-            }
-        }
-        for(auto f: frag_remove){
-            auto to_be_rmv = r.frag_set.find(f);
-            if(to_be_rmv != r.frag_set.end()){
-                delete (*to_be_rmv).second;
-                r.frag_set.erase(to_be_rmv);
-            }
-        }
-        return;
-    }
-
-
-    /** @brief      Add fragments in frag_carry into Region r
-     */
-    void add_fragments(Region &r, std::map<point_t *, frag_t *> &frag_carry){
-        for(auto frag_pair : frag_carry){
-            point_t *pt = frag_pair.first;
-            frag_t *frag = frag_pair.second;
-            auto result = r.frag_set.find(pt);
-            if(result != r.frag_set.end()){ // the fragment is already inside region r
-                for(auto ext_pt : frag->ext_pts){
-                    (*result).second->ext_pts.insert(ext_pt);
-                }
-            }
-            else{   // the fragement is previously not in r
-                frag_t *new_frag = alloc_fragment(); // LEAK
-                new_frag->point_belongs = pt;
-                for(auto ext_pt : frag->ext_pts){
-                    new_frag->ext_pts.insert(ext_pt);
-                }
-                r.frag_set.insert(make_pair(pt,new_frag));
-            }
-        }
-    }
-
-
-    /** @brief        Clear the fragments in frag_carry since they are dynamically created
-     */
-    void clear_frag_map(std::map<point_t *, frag_t *> &frag_carry){
-        for(auto frag_pair : frag_carry) delete frag_pair.second;
-        frag_carry.clear();
-    }
-
-
     void sampling_recurrence(std::vector<sample_set> &s_sets, halfspace_t* hs, const std::map<point_t *, point_t *> &lookup){
         int k = s_sets.size() - 1;
         for(int i = k; i >= 0; i--){
@@ -435,28 +300,6 @@ namespace sampling{
         }
         for(int i = 0; i <= k; i++){
             update_points_in_region(s_sets[i], lookup);
-        }
-    }
-
-
-    /** @brief          The recurrence relation of the exact algorithm
-     */
-    void rt_recurrence(std::vector<Region> &regions, halfspace_t* hs_ptr){
-        int k = regions.size()-1;
-        std::map<point_t *, frag_t *> frag_carry;
-
-        // base case: remove those inside Rk and not supported by hs_ptr
-        Region &cur_region = regions[k];
-        erase_fragments(cur_region, hs_ptr, frag_carry);
-        clear_frag_map(frag_carry);
-
-        // non-base case: first remove frags from cur_region, then add these frags to prev_region
-        // e.g., first remove fragments in R0, then add them to R1
-        for(int i=k-1; i>=0; --i){
-            Region &cur_region = regions[i], &prev_region=regions[i+1];
-            erase_fragments(cur_region, hs_ptr, frag_carry);
-            add_fragments(prev_region, frag_carry);
-            clear_frag_map(frag_carry);
         }
     }
 
@@ -642,7 +485,15 @@ namespace sampling{
             release_item(item_ptr);
             choose_item_set.pop_back();
         }
-        // TODO: clear lookup table and s_sets
+        // clear sample points
+        std::vector<point_t *> sample_free;
+        for(int i = 0; i <= k; i++){
+            for(auto it = s_sets[i].sample.begin(); it != s_sets[i].sample.end(); it++){
+                sample_free.push_back(*it);
+            }
+        }
+        for(auto p : sample_free) release_point(p);
+
         bool success = check_correctness(points_return, u, best_score);
         if(success) ++correct_count;
         question_num += round;
