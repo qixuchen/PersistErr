@@ -78,6 +78,8 @@ else ()
                 approx/approx.cpp
                 sampling/sampling.h
                 sampling/sampling.cpp
+                optimal/optimal.h
+                optimal/optimal.cpp
                 Others/data_struct.h
                 Others/data_utility.cpp
                 Others/data_utility.h
