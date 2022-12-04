@@ -30,7 +30,7 @@ namespace sampling{
         std::set<point_t *> sample;
     };
 
-    int sampling(std::vector<point_t *> p_set, point_t *u, int k);
+    int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta);
 }
 
 #endif

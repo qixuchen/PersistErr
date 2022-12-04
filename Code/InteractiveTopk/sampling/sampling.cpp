@@ -416,8 +416,7 @@ namespace sampling{
     }
 
 
-    int sampling(std::vector<point_t *> p_set, point_t *u, int k){
-        int w = 2;
+    int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta){
         int num_sample = 250;
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
@@ -451,27 +450,31 @@ namespace sampling{
         //double score = max_score(points_return, u);
         int round = 0;
         while(points_return.size() > w){
+            start_timer();
             int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, s_sets);
             if(best_idx < 0) break;
             point_t* p1 = choose_item_set[best_idx]->hyper->point1;
             point_t* p2 = choose_item_set[best_idx]->hyper->point2;
             halfspace_t *hs = 0;
             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-                if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p2, p1, 0, true);
+                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
                 else hs = alloc_halfspace(p1, p2, 0, true);
             }
             else{
-                if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p1, p2, 0, true);
+                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p1, p2, 0, true);
                 else hs = alloc_halfspace(p2, p1, 0, true);
             }
             sampling_recurrence(s_sets, hs, lookup);
             release_halfspace(hs);
 
             std::vector<point_t *> considered_points = compute_considered_set(s_sets);
-            if(considered_points.size() == 0) break;
+            if(considered_points.size() == 0) {
+                break;
+            }
             points_return = considered_points;
-            //double score = max_score(points_return, u);
             round++;
+            stop_timer();
+            incre_total_time_microsec();
         }
 
         // free the related data structures

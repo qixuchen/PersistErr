@@ -30,7 +30,7 @@ namespace optimal{
         std::set<point_t *> sample;
     };
 
-    int optimal(std::vector<point_t *> p_set, point_t *u, int k, double theta);
+    int optimal(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta);
 }
 
 #endif

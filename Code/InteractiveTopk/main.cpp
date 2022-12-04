@@ -20,11 +20,15 @@
 
 int main(int argc, char *argv[])
 {
+    // parameters
+    int k = 1;
+    int num_repeat = 10;
+    int w = 2;
+    double theta = 0.05;
+
     srand(time(NULL));
     point_set_t *P0 = read_points((char*)"4d1k.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
-    int k = 1, num_repeat = 50;
-    double theta = 0.05;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
     point_set_t *P = point_reload(p_set);
@@ -52,15 +56,16 @@ int main(int argc, char *argv[])
         // Approx(p_set, u, k);
         // Exact(p_set, u, k);
         // Optimal(p_set, u, k);
-        // exact_rev::Exact_revised(p_set, u, k);
-        // sampling::sampling(p_set, u, k);
-        optimal::optimal(p_set, u, k, theta);
+        exact_rev::Exact_revised(p_set, u, k, w, theta);
+        // sampling::sampling(p_set, u, k, w, theta);
+        // optimal::optimal(p_set, u, k, theta);
     }
     
 
     std::cout << "correct count: " << correct_count << std::endl;
     std::cout << "avg question num: "<< question_num/num_repeat << std::endl;
     std::cout << "avg return size: "<< return_size/num_repeat << std::endl;
+    std::cout << "avg time: "<< avg_time() << std::endl;
     release_point_set(P, true);
     return 0;
 }

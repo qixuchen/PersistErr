@@ -284,8 +284,7 @@ namespace exact_rev{
     }
 
 
-    int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k){
-        int w = 4;
+    int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta){
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
         find_convh_vertices(p_set, convh);
@@ -314,25 +313,30 @@ namespace exact_rev{
         std::set<point_t *> points_return = compute_considered_set(conf_regions);
         int round = 0;
         while(points_return.size() > w){
+            start_timer();
             int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, conf_regions);
             if(best_idx < 0) break;
             point_t* p1 = choose_item_set[best_idx]->hyper->point1;
             point_t* p2 = choose_item_set[best_idx]->hyper->point2;
             halfspace_t *hs = 0;
             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-                if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p2, p1, 0, true);
+                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
                 else hs = alloc_halfspace(p1, p2, 0, true);
             }
             else{
-                if((double) rand()/RAND_MAX > 0.05) hs = alloc_halfspace(p1, p2, 0, true);
+                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p1, p2, 0, true);
                 else hs = alloc_halfspace(p2, p1, 0, true);
             }
             exact_recur(conf_regions, hs);
             release_halfspace(hs);
             std::set<point_t *> considered_points = compute_considered_set(conf_regions);
-            if(considered_points.size() == 0) break;
+            if(considered_points.size() == 0){ 
+                break;
+            }
             points_return = considered_points;
             round++;
+            stop_timer();
+            incre_total_time_microsec();
         }
 
         // free the related data structures
