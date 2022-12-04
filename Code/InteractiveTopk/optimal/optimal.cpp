@@ -403,8 +403,7 @@ namespace optimal{
     }
 
 
-    int optimal(std::vector<point_t *> p_set, point_t *u, int k, double theta){
-        int w = 2;
+    int optimal(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta){
         int num_sample = 350;
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
@@ -444,6 +443,7 @@ namespace optimal{
         //double score = max_score(points_return, u);
         int round = 0;
         while(points_return.size() > w){
+            start_timer();
             point_t *p1 = 0, *p2 = 0;
             halfspace_t *hs = 0;
             if(round < stage1_target){ // run stage 1
@@ -470,8 +470,9 @@ namespace optimal{
             std::vector<point_t *> considered_points = compute_considered_set(s_sets);
             if(considered_points.size() == 0) break;
             points_return = considered_points;
-            //double score = max_score(points_return, u);
             round++;
+            stop_timer();
+            incre_total_time_microsec();
         }
 
         // free the related data structures

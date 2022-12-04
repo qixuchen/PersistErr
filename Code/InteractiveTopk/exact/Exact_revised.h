@@ -14,7 +14,7 @@ struct conf_region
 
 
 namespace exact_rev{
-    int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k);
+    int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta);
 }
 
 
