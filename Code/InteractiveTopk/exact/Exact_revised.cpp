@@ -336,7 +336,6 @@ namespace exact_rev{
             points_return = considered_points;
             round++;
             stop_timer();
-            incre_total_time_microsec();
         }
 
         // free the related data structures

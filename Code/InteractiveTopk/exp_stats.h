@@ -8,7 +8,7 @@ extern int correct_count;
 extern double question_num;
 extern double return_size;
 
-
+void reset_timer();
 void start_timer();
 void stop_timer();
 void incre_total_time_microsec();
