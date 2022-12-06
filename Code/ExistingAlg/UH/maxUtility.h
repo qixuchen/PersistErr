@@ -6,6 +6,7 @@
 #include "../Others/read_write.h"
 #include "../Qhull/qhull_a.h"
 #include "../Others/used_function.h"
+#include "../exp_stats.h"
 #include <vector>
 #include <algorithm> 
 
@@ -24,7 +25,7 @@ using namespace std;
 int get_current_best_pt(point_set_t* P, vector<int>& C_idx, vector<point_t*>& ext_vec);
 
 // generate s cars for selection in a round
-void update_ext_vec(point_set_t* P, vector<int>& C_idx, point_t* u, int s, vector<point_t*>& ext_vec, int& current_best_idx, int& last_best, vector<int>& frame, int cmp_option);
+void update_ext_vec(point_set_t* P, vector<int>& C_idx, point_t* u, int s, vector<point_t*>& ext_vec, int& current_best_idx, int& last_best, vector<int>& frame, int cmp_option, double theta);
 
 // generate the options for user selection and update the extreme vecotrs based on the user feedback
 vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_best_idx, int& last_best, vector<int>& frame, int cmp_option);
@@ -51,7 +52,7 @@ vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_be
  *                       -CONICAL_HULL
  */
 int max_utility(point_set_t *original_P, point_t *u, int s, double epsilon, int maxRound,
-                 int cmp_option, int stop_option, int prune_option, int dom_option);
+                 int cmp_option, int stop_option, int prune_option, int dom_option, int w, double theta);
 /*
  * @brief The interactive algorithm UH-Random-Adapt.
  *        Find a points/return a point which satisfy the regret ratio

@@ -20,6 +20,8 @@ add_executable(ExistingAlg
         Others/data_utility.h
         UtilityApprox/UtilityApprox.cpp
         UtilityApprox/UtilityApprox.h
+        rev_HDPI/rev_HDPI.cpp
+        rev_HDPI/rev_HDPI.h
         Qhull/frame.cpp
         Qhull/frame.h
         Qhull/geom.cpp
@@ -32,6 +34,8 @@ add_executable(ExistingAlg
         Qhull/libqhull.h
         Others/lp.cpp
         Others/lp.h
+        exp_stats.cpp
+        exp_stats.h
         main.cpp
         UH/maxUtility.cpp
         UH/maxUtility.h

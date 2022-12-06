@@ -590,6 +590,49 @@ void set_in_center(halfspace_set_t *half_set)
     }
 }
 
+
+//@brief Find all the points which are skyline points
+//param p_set 			The original dataset(in the form of vector)
+//param return_point 	The returned points which are skyline points
+void skyline_c(std::vector<point_t *> p_set, std::vector<point_t *> &return_point)
+{
+    int num = p_set.size();
+    point_t *pt;
+    bool dominated;
+    for (int i = 0; i < num; i++)
+    {
+        pt = p_set[i];
+        dominated = false;
+        //check if pt is dominated k times by the return_point so far
+        for (int j = 0; j < return_point.size() && !dominated; j++)
+        {
+            if (dominates_same(return_point[j], pt))
+            {
+                dominated = true;
+            }
+        }
+        if (!dominated)
+        {
+            //eliminate any points in return_point dominated
+            int m = return_point.size();
+            int index = 0;
+            for (int j = 0; j < m; j++)
+            {
+                if (dominates_same(pt, return_point[index]))
+                {
+                    return_point.erase(return_point.begin() + index);
+                }
+                else
+                {
+                    index++;
+                }
+            }
+            return_point.push_back(pt);
+        }
+    }
+}
+
+
 halfspace_set_t *R_initial(int dim)
 {
     halfspace_set_t *R_half_set = alloc_halfspace_set(dim);
@@ -1658,6 +1701,170 @@ void find_possible_top_k(vector<int> &C_idx, point_set_t *p_set, vector<point_t 
             index++;
         }
     }
+}
+
+
+/*
+ * @brief Find points which could be the top-k points for any utility vector in half_set
+ *        Not accurate. It needs to be used with function check_possible_top_k()
+ * @param p_set			The dataset
+ * @param half_set		The half_set/intersection of the halfspace
+ * @param top_current 	THe possible top-k points
+ * @return              If there are possible top-k points, return true.
+ *                      Otherwise return false
+ */
+bool find_possible_topk(std::vector<point_t *> p_set, halfspace_set_t *half_set, int k,
+                             std::vector<point_t *> &top_current)
+{
+    if (p_set.size() <= k)
+    {
+        printf("%s\n", "Number of points is smaller than k.");
+        for (int i = 0; i < p_set.size(); i++)
+        {
+            top_current.push_back(p_set[i]);
+        }
+        return true;
+    }
+    for (int i = 0; i < half_set->ext_pts.size()&&i <= 2; i++)
+    {
+        //top       used to store the top-k point for a single ext_pts
+        //value     used to store the utility of the top-k point for a single ext_pts
+        std::vector<point_t *> top;
+        std::vector<double> value;
+        //set the initial k points
+        top.push_back(p_set[0]);
+        value.push_back(dot_prod(half_set->ext_pts[i], p_set[0]));
+        for (int j = 1; j < k; j++)
+        {
+            int z;
+            double sum0 = dot_prod(half_set->ext_pts[i], p_set[j]);
+            for (z = 0; z < value.size(); z++)
+            {
+                if (sum0 > value[z])
+                {
+                    break;
+                }
+            }
+            top.insert(top.begin() + z, p_set[j]);
+            value.insert(value.begin() + z, sum0);
+        }
+
+        //insert the other points
+        for (int j = k; j < p_set.size(); j++)
+        {
+            int z;
+            double sum0 = dot_prod(half_set->ext_pts[i], p_set[j]);
+            for (z = top.size(); z > 0; z--)
+            {
+                if (value[z - 1] > sum0)
+                {
+                    break;
+                }
+            }
+            if (z < top.size() || (value[top.size() - 1] - sum0) < 0.000001)
+            {
+                top.insert(top.begin() + z, p_set[j]);
+                value.insert(value.begin() + z, sum0);
+                while ((top.size() > k) && value[k - 1] > value[top.size() - 1] + 0.000001)
+                {
+                    top.pop_back();
+                    value.pop_back();
+                }
+            }
+        }
+
+        if (i == 0)
+        {
+            for (int j = 0; j < top.size(); j++)
+            {
+                top_current.push_back(top[j]);
+            }
+        }
+        else
+        {
+            int scan_index = 0;
+            double top_current_size = top_current.size();
+            for (int j = 0; j < top_current_size; j++)
+            {
+                bool is_in = false;
+                for (int a = 0; a < top.size(); a++)
+                {
+                    if (top_current[scan_index]->id == top[a]->id)
+                    {
+                        is_in = true;
+                        break;
+                    }
+                }
+                if (is_in)
+                {
+                    scan_index++;
+                }
+                else
+                {
+                    top_current.erase(top_current.begin() + scan_index);
+                }
+            }
+        }
+        if (top_current.size() < 1)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+/*
+ * @brief Used to check whether there is a top-k points w.r.t any utility vector in half_set
+ * @param p_set			The dataset containing all the points
+ * @param half_set 		The half_set/intersection of the halfspace
+ * @param k 			top-k
+ * @param top_current 	The dataset containing all the possible top-k point found by function find_top_k_point_by_ext()
+ * @return              If there is a top-k point w.r.t any utility vector in half_set, return it
+ *                      Otherwise, return false
+ */
+point_t* check_possible_topk(std::vector<point_t *> p_set, halfspace_set_t *half_set, int k,
+                          std::vector<point_t *> &top_current)
+{
+    point_t* point_topk = NULL;
+    int size = top_current.size();
+    for (int i = 0; i < size; i++)
+    {
+        bool is_top = true;
+        int large_num = 0;
+        for (int j = 0; j < p_set.size(); j++)
+        {
+            //if the points have the same coordinates, we do not need to use function check_situation
+            bool is_same = true;
+            for (int w = 0; w < top_current[i]->dim; w++)
+            {
+                if (top_current[i]->coord[w] != p_set[j]->coord[w])
+                {
+                    is_same = false;
+                    break;
+                }
+            }
+
+            if (!is_same)
+            {
+                hyperplane_t *h = alloc_hyperplane(top_current[i], p_set[j], 0);
+                int relation = check_situation_positive(h, half_set);
+                if (relation != 1)
+                {
+                    large_num++;
+                    if (large_num >= k)
+                    {
+                        is_top = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (is_top)
+        {
+            return top_current[i];
+        }
+    }
+    return point_topk;
 }
 
 
