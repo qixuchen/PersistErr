@@ -10,6 +10,9 @@ double tot_time = 0;
 using namespace std::chrono;
 steady_clock::time_point begin, end;
 
+void reset_timer(){
+    tot_time = 0;
+}
 
 void start_timer(){
     begin = steady_clock::now();
@@ -17,6 +20,7 @@ void start_timer(){
 
 void stop_timer(){
     end = steady_clock::now();
+    incre_total_time_microsec();
 }
 
 void incre_total_time_microsec(){
