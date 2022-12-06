@@ -7,14 +7,13 @@
  * @param u 				The linear function
  * @param k 				The threshold top-k
  */
-int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k)
+int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k, double theta)
 {
-    timeval t1, t2;
-    gettimeofday(&t1, 0);
     int dim = p_set[0]->dim;
-    int numOfQuestion = 0;
+    int round = 0;
     point_random(p_set);
 
+    start_timer();
     //initial
     //add the basic halfspace into R_hyperplane
     halfspace_set_t *R_half_set = R_initial(dim);
@@ -46,18 +45,22 @@ int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k)
                 //if intersect, calculate the distance
                 if (relation == 0)
                 {
-                    numOfQuestion++;
+                    round++;
                     double v1 = dot_prod(u, p_set[i]);
                     double v2 = dot_prod(u, current_use[j]);
                     if (v1 > v2)
                     {
-                        halfspace_t *half = alloc_halfspace(current_use[j], p_set[i], 0, true);
+                        halfspace_t *half = 0;
+                        if((double) rand()/RAND_MAX > theta) half = alloc_halfspace(current_use[j], p_set[i], 0, true);
+                        else half = alloc_halfspace(p_set[i], current_use[j], 0, true);
                         R_half_set->halfspaces.push_back(half);
                         get_extreme_pts_refine_halfspaces_alg1(R_half_set);
                     }
                     else
                     {
-                        halfspace_t *half = alloc_halfspace(p_set[i], current_use[j], 0, true);
+                        halfspace_t *half = 0;
+                        if((double) rand()/RAND_MAX > theta) half = alloc_halfspace(p_set[i], current_use[j], 0, true);
+                        else half = alloc_halfspace(current_use[j], p_set[i], 0, true);
                         R_half_set->halfspaces.push_back(half);
                         get_extreme_pts_refine_halfspaces_alg1(R_half_set);
                         place = j + 1;
@@ -71,12 +74,10 @@ int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k)
             current_use.insert(current_use.begin() + place, p_set[i]);
         }
     }
+    stop_timer();
     p_set.clear();
-    //p_set.shrink_to_fit();
     release_halfspace_set(R_half_set);
-    printf("|%30s |%10d |%10s |\n", "Active-Ranking", numOfQuestion, "--");
-    int i = rand()%k;
-    printf("|%30s |%10s |%10d |\n", "Point", "--", current_use[i]->id);
-    printf("---------------------------------------------------------\n");
-    return numOfQuestion;
+    correct_count += (dot_prod(u, current_use[0]) >= best_score);
+    question_num += round;
+    return 0;
 }

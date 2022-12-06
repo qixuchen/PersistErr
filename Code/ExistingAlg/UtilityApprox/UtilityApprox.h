@@ -4,7 +4,7 @@
 #include "../Others/data_struct.h"
 #include "../Others/data_utility.h"
 #include "../Others/used_function.h"
-
+#include "../exp_stats.h"
 #include "../Others/operation.h"
 
 /**
@@ -15,7 +15,7 @@
  * @param epsilon the threshold of regret ratio
  * @param maxRound the upper bound of number of questions
  */
-int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRound);
+int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRound, double theta);
 
 
 #endif

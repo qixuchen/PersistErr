@@ -237,7 +237,7 @@ vector<int> generate_S(point_set_t *P, vector<int> &C_idx, int s, int current_be
  */
 void
 update_ext_vec(point_set_t *P, vector<int> &C_idx, point_t *u, int s, vector<point_t *> &ext_vec, int &current_best_idx,
-               int &last_best, vector<int> &frame, int cmp_option)
+               int &last_best, vector<int> &frame, int cmp_option, double theta)
 {
     // generate s cars for selection in a round
     vector<int> S = generate_S(P, C_idx, s, current_best_idx, last_best, frame, cmp_option);
@@ -254,7 +254,10 @@ update_ext_vec(point_set_t *P, vector<int> &C_idx, point_t *u, int s, vector<poi
             max_i = i;
         }
     }
-    //printf("\n");
+    
+    // change max_i to the other point with prob. theta
+    // Note: only correct when s = 2
+    if((double) rand()/RAND_MAX < theta) max_i = 1 - max_i;
 
     // get the better car among those from the user
     last_best = current_best_idx;
@@ -308,14 +311,16 @@ update_ext_vec(point_set_t *P, vector<int> &C_idx, point_t *u, int s, vector<poi
  *                       -CONICAL_HULL
  */
 int max_utility(point_set_t *P, point_t *u, int s, double epsilon, int maxRound,
-                int cmp_option, int stop_option, int prune_option, int dom_option)
+                int cmp_option, int stop_option, int prune_option, int dom_option,
+                int w, double theta)
 {
+    start_timer();
     //point_set_t *P = skyline_point(P0);
     int dim = P->points[0]->dim;
 
     // Qcount - the number of questions asked
     // Csize - the size of the current candidate set
-    int Qcount = 0;
+    int round = 0;
     double rr = 1;
 
     // the indexes of the candidate set
@@ -353,14 +358,14 @@ int max_utility(point_set_t *P, point_t *u, int s, double epsilon, int maxRound,
     // if not skyline
     //sql_pruning(P, C_idx, ext_vec);
     // interactively reduce the candidate set and shrink the candidate utility range
-    while (C_idx.size() > 1 && (rr > epsilon && !isZero(rr - epsilon)) && Qcount < maxRound)
+    while (C_idx.size() > w && (rr > epsilon && !isZero(rr - epsilon)) && round < maxRound)
         // while none of the stopping condition is true
     {
-        Qcount++;
+        round++;
         //printf("Number of Question %d\n", Qcount);
         sort(C_idx.begin(), C_idx.end()); // prevent select two different points after different skyline algorithms
         // generate the options for user selection and update the extreme vectors based on the user feedback
-        update_ext_vec(P, C_idx, u, s, ext_vec, current_best_idx, last_best, frame, cmp_option);
+        update_ext_vec(P, C_idx, u, s, ext_vec, current_best_idx, last_best, frame, cmp_option, theta);
         if (C_idx.size() == 1)
         { // || global_best_idx == current_best_idx
             break;
@@ -375,24 +380,27 @@ int max_utility(point_set_t *P, point_t *u, int s, double epsilon, int maxRound,
             rtree_pruning(P, C_idx, ext_vec, rr, stop_option, dom_option);
         }
     }
-
+    stop_timer();
     // get the final result
-    point_t *result = P->points[get_current_best_pt(P, C_idx, ext_vec)];
+    // point_t *result = P->points[get_current_best_pt(P, C_idx, ext_vec)];
+
+    //get the returned points
+    vector<point_t *> points_return;
+    for(auto idx : C_idx) points_return.push_back(P->points[idx]);
+    bool best_point_included = false;
+    for(auto p : points_return){
+        if(dot_prod(u, p) >= best_score){
+            best_point_included = true;
+            break;
+        }
+    }
 
     for (int i = 0; i < ext_vec.size(); i++)
         release_point(ext_vec[i]);
 
-   if (cmp_option == RANDOM)
-    {
-        printf("|%30s |%10d |%10s |\n", "UH-RANDOM", Qcount, "--");
-    }
-    else
-    {
-        printf("|%30s |%10d |%10s |\n", "UH-SIMPLEX", Qcount, "--");
-    }
-    printf("|%30s |%10s |%10d |\n", "Point", "--", result->id);
-    printf("---------------------------------------------------------\n");
-    return Qcount;
+    correct_count += best_point_included;
+    question_num += round;
+    return 0;
 }
 
 /**

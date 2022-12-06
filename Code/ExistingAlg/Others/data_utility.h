@@ -36,10 +36,12 @@ struct valueCmp
 // allocate/release memory for points/hyperplanes 
 point_t* alloc_point(int dim);
 point_t* alloc_point(int dim, int id);
+point_t *alloc_point(const point_t *p);
 void release_point( point_t* &point_v);
 point_t* rand_point(int dim);
 point_set_t* alloc_point_set(int numberOfPoints);
 void release_point_set(point_set_t* &point_set_v, bool clear);
+void print_pointset(point_set_t* p_set);
 
 utility_t* alloc_utility();
 
@@ -52,14 +54,27 @@ void release_cluster(cluster_t* cluster_v);
 s_node_t* alloc_s_node(int dim);
 point_count_t* alloc_point_count();
 
+halfspace_t *alloc_halfspace(int dim);
+halfspace_t *alloc_halfspace(point_t *normal, double offset);
 halfspace_t* alloc_halfspace(point_t* p_1, point_t* p_2, double offset, bool direction);
 void release_halfspace(halfspace_t* &halfspace_v);
 halfspace_set_t* alloc_halfspace_set(int dim);
+halfspace_set_t* alloc_halfspace_set(halfspace_set_t *hset);
+halfspace_set_t* alloc_halfspace_set_normal_only(halfspace_set_t *hset);
 void release_halfspace_set(halfspace_set_t* &halfspace_set_v);
 
+choose_item *alloc_choose_item();
+void release_choose_item(choose_item *item_ptr);
+
+item *alloc_item();
+void release_item(item *iten_ptr); 
+
+frag_t *alloc_fragment();
+void release_fragment(frag_t *frag_ptr);
 
 // print informaiton
 void print_point(point_t* point_v);
 void print_point_set(point_set_t* point_set_v);
+void print_point_set(std::vector<point_t*> p_set);
 
 #endif

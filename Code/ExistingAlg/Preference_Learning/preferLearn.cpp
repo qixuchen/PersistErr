@@ -581,10 +581,10 @@ hyperplane_t *orthogonal_search(s_node_t *node, point_t *q, hyperplane_t *best)
 //@param original_set       The original dataset
 //@param u                  The real utility vector
 //@param k                  The threshold tok-k
-int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u, int k)
+int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u, int k, double theta)
 {
-    timeval t1, t2;
-    gettimeofday(&t1, 0);
+    start_timer();
+    int round = 0;
     int M;
     //p_set: randomly choose 1000 points
     std::vector<point_t *> p_set;
@@ -634,12 +634,10 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
                 }
             }
         }
-        //point_random(p_set);
     }
     int dim = p_set[0]->dim;
     M = p_set.size();
     double accuracy = 0, de_accuracy = 100;
-    int numOfQuestion = 0;
 
     //the normal vectors
     std::vector<point_t *> V;
@@ -687,7 +685,7 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
 
     while (accuracy < 0.99999 && de_accuracy > 0)
     {
-        numOfQuestion++;
+        round++;
         hyperplane_t *best = NULL;
         best = orthogonal_search(stree_root, estimate_u, best);
         point_t *p = best->point1;
@@ -697,16 +695,32 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
         point_t *pt = alloc_point(dim);
         if (v1 >= v2)
         {
-            for (int i = 0; i < dim; i++)
-            {
-                pt->coord[i] = best->normal->coord[i];
+            if((double) rand()/RAND_MAX > theta){
+                for (int i = 0; i < dim; i++)
+                {
+                    pt->coord[i] = best->normal->coord[i];
+                }
+            }
+            else{
+                for (int i = 0; i < dim; i++)
+                {
+                    pt->coord[i] = -best->normal->coord[i];
+                }
             }
         }
         else
         {
-            for (int i = 0; i < dim; i++)
-            {
-                pt->coord[i] = -best->normal->coord[i];
+            if((double) rand()/RAND_MAX > theta){
+                for (int i = 0; i < dim; i++)
+                {
+                    pt->coord[i] = -best->normal->coord[i];
+                }
+            }
+            else{
+                for (int i = 0; i < dim; i++)
+                {
+                    pt->coord[i] = best->normal->coord[i];
+                }
             }
         }
         V.push_back(pt);
@@ -731,9 +745,8 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
         h_set.pop_back();
     }
 
-    printf("|%30s |%10d |%10s |\n", "Preference_Learning", numOfQuestion, "--");
-    int i = rand()%k;
-    printf("|%30s |%10s |%10d |\n", "Point", "--", top_current[i]->id);
-    printf("---------------------------------------------------------\n");
-    return numOfQuestion;
+    stop_timer();
+    correct_count += (dot_prod(u, top_current[0]) >= best_score);
+    question_num += round;
+    return 0;
 }

@@ -1,6 +1,7 @@
 //#include "stdafx.h"
 
 #include "data_utility.h"
+#include "pruning.h"
 
 
 /*
@@ -34,6 +35,22 @@ point_t *alloc_point(int dim, int id)
 
     return point_v;
 }
+
+
+/*
+ *	Allocate memory for a point in dim-dimensional space with id
+ */
+point_t *alloc_point(const point_t * p)
+{
+    if(p == NULL) return NULL;
+    point_t *point_v = alloc_point(p->dim);
+    point_v->id = p->id;
+    for(int i = 0; i < p->dim; i++){
+        point_v->coord[i] = p->coord[i];
+    }
+    return point_v;
+}
+
 
 
 utility_t *alloc_utility()
@@ -81,6 +98,21 @@ void release_point(point_t *&point_v)
     free(point_v);
     point_v = NULL;
 }
+
+void print_point_set(std::vector<point_t*> p_set)
+{
+    int size = p_set.size(), dim = p_set[0]->dim;
+    for(int i=0; i < size; ++i)
+    {
+        printf("%d  %d  ", p_set[i]->id, p_set[i]->dim);
+        for(int j=0; j < dim; ++j)
+        {
+            printf("%lf  ", p_set[i]->coord[j]);
+        }
+        printf("%lf  \n", p_set[i]->value);
+    }
+}
+
 
 /*
  *	Allocate memory for a hyperplane in dim-dimensional space
@@ -149,6 +181,39 @@ point_count_t *alloc_point_count()
     memset(point_count_v, 0, sizeof(point_count_t));
 
     return point_count_v;
+}
+
+
+/*
+ *	Allocate memory for a halfspace in dim-dimensional space
+ */
+halfspace_t *alloc_halfspace(int dim)
+{
+    halfspace_t *halfspace_v;
+    halfspace_v = (halfspace_t *) malloc(sizeof(halfspace_t));
+    memset(halfspace_v, 0, sizeof(halfspace_t));
+
+    halfspace_v->normal = alloc_point(dim);
+    for (int i = 0; i < dim; i++) halfspace_v->normal->coord[i] = 0;
+    halfspace_v->direction = true;
+    halfspace_v->offset = 0;
+    return halfspace_v;
+}
+
+
+/*
+ *	Allocate memory for a halfspace in dim-dimensional space
+ */
+halfspace_t *alloc_halfspace(point_t *normal, double offset)
+{
+    halfspace_t *halfspace_v;
+    halfspace_v = (halfspace_t *) malloc(sizeof(halfspace_t));
+    memset(halfspace_v, 0, sizeof(halfspace_t));
+
+    halfspace_v->normal = alloc_point(normal->dim);
+    for (int i = 0; i < normal->dim; i++) halfspace_v->normal->coord[i] = normal->coord[i];
+    halfspace_v->offset = offset;
+    return halfspace_v;
 }
 
 /*
@@ -228,6 +293,7 @@ void release_cluster(cluster_t *cluster_v)
     }
     cluster_v->h_set.clear();
     free(cluster_v);
+    cluster_v = NULL;
 }
 
 /*
@@ -293,6 +359,61 @@ halfspace_set_t *alloc_halfspace_set(int dim)
 }
 
 
+/**
+ * @brief Initial utility range
+ * @param hset  The halfspace
+ * @return      The new copied halfspace
+ */
+halfspace_set_t* alloc_halfspace_set(halfspace_set_t *hset)
+{
+    int dim = hset->halfspaces[0]->normal->dim;
+    halfspace_set_t *halfspace_set_v;
+    halfspace_set_v = new halfspace_set_t;
+
+    for(int i=0; i < hset->halfspaces.size();++i)
+    {
+        halfspace_t *h = alloc_halfspace(hset->halfspaces[i]->point1, hset->halfspaces[i]->point2, 0, true);
+        halfspace_set_v->halfspaces.push_back(h);
+    }
+    halfspace_set_v->in_center = alloc_point(dim);
+    halfspace_set_v->out_center = alloc_point(dim);
+    halfspace_set_v->check_point = alloc_point(dim);
+
+    //set extreme points
+    get_extreme_pts_refine_halfspaces_alg1(halfspace_set_v);
+
+
+
+    return halfspace_set_v;
+}
+
+
+halfspace_set_t* alloc_halfspace_set_normal_only(halfspace_set_t *hset)
+{
+    int dim = hset->halfspaces[0]->normal->dim;
+    halfspace_set_t *halfspace_set_v;
+    halfspace_set_v = new halfspace_set_t;
+
+    for(int i=0; i < hset->halfspaces.size();++i)
+    {
+        halfspace_t *h = alloc_halfspace(hset->halfspaces[i]->normal, hset->halfspaces[i]->offset);
+        halfspace_set_v->halfspaces.push_back(h);
+    }
+    halfspace_set_v->in_center = alloc_point(dim);
+    halfspace_set_v->out_center = alloc_point(dim);
+    halfspace_set_v->check_point = alloc_point(dim);
+
+    //set extreme points
+    get_extreme_pts_refine_halfspaces_alg1(halfspace_set_v);
+
+
+
+    return halfspace_set_v;
+}
+
+
+
+
 /*
  *	Release memory for halfspace_set
  */
@@ -327,9 +448,69 @@ void release_halfspace_set(halfspace_set_t *&halfspace_set_v)
     }
     halfspace_set_v->halfspaces.clear();
     //halfspace_set_v->halfspaces.shrink_to_fit();
-    free(halfspace_set_v);
     halfspace_set_v = NULL;
 }
+
+
+/**  @brief dynamically allocate space for choose_item 
+ * 
+ * 
+ */
+choose_item *alloc_choose_item(){
+    choose_item *item_ptr = (choose_item *) malloc(sizeof(choose_item));;
+    memset(item_ptr, 0, sizeof(choose_item));
+    return item_ptr;
+}
+
+/**  @brief destory the dynamically allocated choose_item 
+ * 
+ * 
+ */
+void release_choose_item(choose_item *item_ptr){
+    if (item_ptr == 0) return;
+
+    if(item_ptr->hyper != 0){
+        release_hyperplane(item_ptr->hyper);
+    }
+    free(item_ptr);
+    item_ptr = NULL;
+}
+
+
+/**  @brief dynamically allocate space for item 
+ */
+item *alloc_item(){
+    return new item;
+}
+
+
+/**  @brief destory the dynamically allocated choose_item 
+ */
+void release_item(item *item_ptr){
+    if (item_ptr == 0) return;
+
+    if(item_ptr->hyper != 0){
+        release_hyperplane(item_ptr->hyper);
+    }
+    delete item_ptr;
+    item_ptr = NULL;
+}
+
+
+/**  @brief dynamically allocate space for partition_fragement 
+ */
+frag_t *alloc_fragment(){
+    return new frag_t;
+}
+
+/**  @brief destory the dynamically allocated partition_fragement
+ */
+void release_fragment(frag_t *frag_ptr){
+    if (frag_ptr == 0) return;
+    free(frag_ptr);
+    frag_ptr = NULL;
+}
+
 
 
 /*
