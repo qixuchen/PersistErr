@@ -77,4 +77,11 @@ void print_point(point_t* point_v);
 void print_point_set(point_set_t* point_set_v);
 void print_point_set(std::vector<point_t*> p_set);
 
+point_t *deepcopy_point(const point_t *p);
+hyperplane_t *deepcopy_hyperplane(const hyperplane_t *h);
+halfspace_t *deepcopy_halfspace(const halfspace_t *h);
+halfspace_set_t *deepcopy_halfspace_set(const halfspace_set_t * hss);
+choose_item *deepcopy_choose_item(const choose_item *it);
+
+
 #endif

@@ -21,6 +21,53 @@ bool is_same_point(point_t *p1, point_t *p2)
     return true;
 }
 
+
+/**
+ * @brief check if h1 and h2 are the same hyperplane
+ * 
+ * @param h1 
+ * @param h2 
+ * @return true if they are the same
+ * @return false 
+ */
+bool is_same_hyperplane(hyperplane_t* h1, hyperplane_t* h2){
+
+    int dim = h1->normal->dim;
+
+    if(h1->offset!=h2->offset){
+        return false;
+    }
+    
+    bool same_normal=true;
+
+    for (int i = 0; i < dim; i++)
+    {
+        if (h1->normal->coord[i] != h2->normal->coord[i])
+        {
+            same_normal=false;
+            break;
+        }
+    }
+    if(same_normal){
+        return true;
+    }
+
+    same_normal=true;
+    for (int i = 0; i < dim; i++)
+    {
+        if (h1->normal->coord[i] != -1 * h2->normal->coord[i])
+        {
+            same_normal=false;
+            break;
+        }
+    }
+    if(same_normal){
+        return true;
+    }
+    return false;
+}
+
+
 /**
  * @brief Reload the points to the data structure vector
  *        Does not change the original dataset

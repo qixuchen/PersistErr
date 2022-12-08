@@ -52,6 +52,29 @@ point_t *alloc_point(const point_t * p)
 }
 
 
+/**
+ * @brief       Deep copy a point.
+ * 
+ * @param p     The point to be copied from.
+ * @return point_t* 
+ */
+point_t *deepcopy_point(const point_t *p){
+    point_t *point_v=NULL;
+    if(p==NULL){
+        return point_v;
+    }
+    point_v = alloc_point(p->dim);
+    point_v->id = p->id;
+    point_v->pid = p->pid;
+    point_v->value = p->value;
+    if(p->coord != NULL){
+        for(int i=0; i< p->dim; i++){
+            point_v->coord[i]=p->coord[i];
+        }
+    }
+    return point_v;
+}
+
 
 utility_t *alloc_utility()
 {
@@ -124,7 +147,12 @@ hyperplane_t *alloc_hyperplane(point_t *normal, double offset)
     hyperplane_v = (hyperplane_t *) malloc(sizeof(hyperplane_t));
     memset(hyperplane_v, 0, sizeof(hyperplane_t));
 
-    hyperplane_v->normal = normal;
+    hyperplane_v->normal = alloc_point(normal->dim);
+
+    for (int i = 0; i < normal->dim; i++)
+    {
+        hyperplane_v->normal->coord[i] = normal->coord[i];
+    }
     hyperplane_v->offset = offset;
 
     return hyperplane_v;
@@ -155,6 +183,29 @@ hyperplane_t *alloc_hyperplane(point_t *p_1, point_t *p_2, double offset)
     return hyperplane_v;
 }
 
+
+/**
+ * @brief       deep copy the hyperplane (until point level (exclude point))
+ * 
+ * @param h     the hyperplane to copy from
+ * @return      hyperplane_t* 
+ */
+hyperplane_t *deepcopy_hyperplane(const hyperplane_t *h){
+    hyperplane_t *h_v =NULL;
+    if(h==NULL){
+        return h_v;
+    }
+    h_v = alloc_hyperplane(h->normal, h->offset);
+    if(h->point1 != NULL){
+        h_v->point1 = h->point1;
+    }
+    if(h->point2 != NULL){
+        h_v->point2 = h->point2;
+    }
+    return h_v;
+};
+
+
 /*
  *	Release memory for a point in dim-dimensional space
  */
@@ -168,7 +219,6 @@ void release_hyperplane(hyperplane_t *&hyperplane_v)
     {
         release_point(hyperplane_v->normal);
     }
-    free(hyperplane_v);
     hyperplane_v = NULL;
 }
 
@@ -242,6 +292,23 @@ halfspace_t *alloc_halfspace(point_t *p_1, point_t *p_2, double offset, bool dir
     return halfspace_v;
 }
 
+
+/**
+ * @brief       deep copy the halfspace (until point level (exclude point))
+ * 
+ * @param h     the halfspace to copy from
+ * @return      halfspace_t* 
+ */
+halfspace_t *deepcopy_halfspace(const halfspace_t *h){
+    halfspace_t *h_v=NULL;
+    if(h==NULL){
+        return h_v;
+    }
+    h_v = alloc_halfspace(h->point1, h->point2, h->offset, h->direction);
+    return h_v;
+}
+
+
 /*
  *	Release memory for a halfspace in dim-dimensional space
  */
@@ -255,7 +322,6 @@ void release_halfspace(halfspace_t *&halfspace_v)
     {
         release_point(halfspace_v->normal);
     }
-    free(halfspace_v);
     halfspace_v = NULL;
 }
 
@@ -412,6 +478,52 @@ halfspace_set_t* alloc_halfspace_set_normal_only(halfspace_set_t *hset)
 }
 
 
+/**
+ * @brief       Deep copy the hyperplane set (until point level (exclude point))
+ * 
+ * @param hss   the hyperplane set to copy from
+ * @return      hyperplane_set_t* 
+ */
+halfspace_set_t *deepcopy_halfspace_set(const halfspace_set_t * hss){ //LEAK
+    halfspace_set_t * hss_v;
+    if(hss==NULL){
+        return hss_v;
+    }
+    hss_v = (halfspace_set_t *) malloc(sizeof(halfspace_set_t));
+    memset(hss_v, 0, sizeof(halfspace_set_t));
+
+    hss_v->in_center = deepcopy_point(hss->in_center);
+    hss_v->out_center = deepcopy_point(hss->out_center);
+    hss_v->check_point = deepcopy_point(hss->check_point);
+
+    int size = hss->ext_pts.size();
+    for (int i = 0; i < size; i++)
+    {
+        point * p = deepcopy_point(hss->ext_pts[i]);
+        hss_v->ext_pts.push_back(p);
+    }
+
+    size = hss->halfspaces.size();
+    for (int i = 0; i < size; i++)
+    {
+        halfspace_t * halfspace = deepcopy_halfspace(hss->halfspaces[i]);
+        hss_v->halfspaces.push_back(halfspace);
+    }
+
+    size = hss->rec.size();
+    for (int i = 0; i < size; i++)
+    {
+        hss_v->rec.push_back(hss->rec[i]);
+    }
+
+    size = hss->represent_point.size();
+    for (int i = 0; i < size; i++)
+    {
+        hss_v->represent_point.push_back(hss->represent_point[i]);
+    }
+
+    return hss_v;
+}
 
 
 /*
@@ -462,18 +574,65 @@ choose_item *alloc_choose_item(){
     return item_ptr;
 }
 
-/**  @brief destory the dynamically allocated choose_item 
- * 
- * 
- */
-void release_choose_item(choose_item *item_ptr){
-    if (item_ptr == 0) return;
 
-    if(item_ptr->hyper != 0){
-        release_hyperplane(item_ptr->hyper);
+/**
+ * @brief                Deep copy a choose_item object
+ * 
+ * @param it            The choose_item object to copy from
+ * @return choose_item* 
+ */
+choose_item *deepcopy_choose_item(const choose_item *it){
+    choose_item *it_v=NULL;
+    if(it == NULL){
+        return it_v;
     }
-    free(item_ptr);
-    item_ptr = NULL;
+    it_v=(choose_item *) malloc(sizeof(choose_item));
+    memset(it_v, 0, sizeof(choose_item));
+    if(it->hyper != NULL){
+        it_v->hyper=deepcopy_hyperplane(it->hyper);
+    }
+
+    int size = it->positive_side.size();
+    for(int i=0; i<size; i++){
+        it_v->positive_side.push_back(it->positive_side[i]);
+    }
+
+    size = it->negative_side.size();
+    for(int i=0; i<size; i++){
+        it_v->negative_side.push_back(it->negative_side[i]);
+    }
+
+    size = it->intersect_case.size();
+    for(int i=0; i<size; i++){
+        it_v->intersect_case.push_back(it->intersect_case[i]);
+    }
+
+    return it_v;
+
+}
+
+
+/*
+ *	Release memory for choose_item
+ */
+void release_choose_item(choose_item *c_i)
+{
+
+
+    if (c_i == NULL)
+    {
+        return;
+    }
+
+    if(c_i->hyper != NULL){
+        release_hyperplane(c_i->hyper);
+    }
+    c_i->positive_side.clear();
+    c_i->negative_side.clear();
+    c_i->intersect_case.clear();
+
+    free(c_i);
+    c_i = NULL;
 }
 
 

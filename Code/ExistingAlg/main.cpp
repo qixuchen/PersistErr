@@ -7,6 +7,7 @@
 #include "Preference_Learning/preferLearn.h"
 #include "UtilityApprox/UtilityApprox.h"
 #include "Active_Ranking/active_ranking.h"
+#include "PointPrune/PointPrune.h"
 #include "Qhull/qhull_build.h"
 #include "rev_HDPI/rev_HDPI.h"
 #include <vector>
@@ -71,9 +72,13 @@ int main(int argc, char *argv[])
         // the HDPI Algorithm
         // rev_HDPI(p_set, u, 1, w, theta);
 
+        // PointPrune Algorithm
+        PointPrune_v2(p_set, u, 3, w, theta);
+
     }
     std::cout << "correct count: " << correct_count << std::endl;
     std::cout << "avg question num: "<< question_num/num_repeat << std::endl;
+    std::cout << "avg return size: "<< return_size/num_repeat << std::endl;
     std::cout << "avg time: "<< avg_time() << std::endl;
     release_point_set(P, true);
     return 0;

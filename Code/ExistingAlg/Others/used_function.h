@@ -14,6 +14,8 @@
 
 bool is_same_point(point_t* p1, point_t* p2);
 
+bool is_same_hyperplane(hyperplane_t* h1, hyperplane_t* h2);
+
 //@brief Reload the points to the data structure vector
 // 		 Does not change the original dataset
 //@param original_set	The original dataset
