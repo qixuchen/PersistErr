@@ -277,6 +277,39 @@ namespace sampling{
     }
 
 
+    /** @brief    Randomly determine the next question
+     */
+    std::pair<point_t *, point_t *> rand_select_hyperplane(const std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &selected_questions){
+        point_t *p1 = 0, *p2 = 0; 
+        int k = s_sets.size() - 1;
+        std::vector<point_t *> candidate_points;
+        for(int i=0; i <= k; i++){
+            for(int j = 0; j <= i; j++){
+                for(auto p: s_sets[j].data){
+                    candidate_points.push_back(p);
+                }
+            }
+            if(candidate_points.size() < 2) continue;
+            auto rng = std::default_random_engine {};
+            std::shuffle(candidate_points.begin(), candidate_points.end(), rng);
+            
+            for(int j = 0; j < candidate_points.size() - 1; j++){
+                for(int k = 1; k < candidate_points.size(); k++){
+                    point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
+                    if(selected_questions.size() != 0){
+                        if(selected_questions.find(make_pair(cand1, cand2)) != selected_questions.end() ||
+                            selected_questions.find(make_pair(cand2, cand1)) != selected_questions.end()) break; // make sure this pair was not used before
+                    }
+                    p1 = cand1, p2 = cand2;
+                    selected_questions.insert(make_pair(p1, p2));
+                    return make_pair(p1, p2);
+                }
+            }
+        }
+        return make_pair(p1, p2);
+    }
+
+
     void sampling_recurrence(std::vector<sample_set> &s_sets, halfspace_t* hs, const std::map<point_t *, point_t *> &lookup){
         int k = s_sets.size() - 1;
         for(int i = k; i >= 0; i--){
@@ -416,7 +449,7 @@ namespace sampling{
     }
 
 
-    int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta){
+    int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
         int num_sample = 250;
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
@@ -447,14 +480,22 @@ namespace sampling{
         std::map<int, hyperplane_t *> hyperplane_candidates;
         construct_hy_candidates(hyperplane_candidates, choose_item_set);
         std::vector<point_t *> points_return = compute_considered_set(s_sets);
-        //double score = max_score(points_return, u);
         int round = 0;
+        std::set<std::pair<point_t *, point_t *>> selected_questions;
         start_timer();
         while(points_return.size() > w){
-            int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, s_sets);
-            if(best_idx < 0) break;
-            point_t* p1 = choose_item_set[best_idx]->hyper->point1;
-            point_t* p2 = choose_item_set[best_idx]->hyper->point2;
+            point *p1 =0, *p2 =0;
+            if(select_opt == SCORE_SELECT){
+                int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, s_sets);
+                if(best_idx < 0) break;
+                p1 = choose_item_set[best_idx]->hyper->point1;
+                p2 = choose_item_set[best_idx]->hyper->point2;
+            }
+            else{ // using random select
+                std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(s_sets, selected_questions);
+                p1 = point_pair.first, p2 = point_pair.second;
+                if(p1 == 0 || p2 == 0) break;
+            }
             halfspace_t *hs = 0;
             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
                 if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
