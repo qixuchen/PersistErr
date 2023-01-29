@@ -218,6 +218,100 @@ namespace optimal{
     }
 
 
+    /** @brief      Compute the priority of an item's related hyperplane
+     */
+    double compute_hy_priority(const item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
+        int k = points_in_region.size()-1;
+        double score = 0;
+        for(int i=0; i<=k; ++i){
+            double weight = pow(Alpha, i);
+            int pos_count = 0, neg_count = 0;
+            for(auto f: points_in_region[i]){
+                if(item_ptr->pos_points.find(f) != item_ptr->pos_points.end()) pos_count++;
+                else if(item_ptr->neg_points.find(f) != item_ptr->neg_points.end()) neg_count++;
+            }
+            score += weight * min(pos_count, neg_count);
+        }
+        return score;
+    }
+
+
+    /** @brief       Find the best hyperplane to ask
+     */
+    int find_best_hyperplane(const std::vector<item *> &choose_item_set, 
+                                std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<sample_set> &s_sets){
+        int k = s_sets.size()-1;
+        std::vector<std::vector<point_t*>> points_in_region;
+        std::vector<int> cand_to_be_removed;
+        for(int i=0; i<=k; ++i){
+            std::vector<point_t*> points(s_sets[i].data.begin(), s_sets[i].data.end());
+            points_in_region.push_back(points);
+        }
+        double highest_priority = 0;
+        int highest_index = -1;
+        hyperplane_t *hy_res = 0;
+        for(auto c : hyperplane_candidates){
+            item_t *item_ptr = choose_item_set[c.first];
+            double priority = compute_hy_priority(item_ptr, points_in_region);
+            if(priority > highest_priority){
+                highest_priority = priority;
+                highest_index = c.first;
+                hy_res = c.second;
+            }
+            if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
+                cand_to_be_removed.push_back(c.first);
+            }
+        }
+        // MUST: remove the selected candidate
+        if(highest_index >= 0) hyperplane_candidates.erase(highest_index);
+        for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
+        return highest_index;
+    }
+
+
+
+    /** @brief      Initialize the hyperplane candidates 
+     */
+    void construct_hy_candidates(std::map<int, hyperplane_t *> &hyperplane_candidates, const std::vector<item *> &choose_item_set){
+        for(int i = 0; i<choose_item_set.size(); ++i){
+            hyperplane_candidates.insert(make_pair(i, choose_item_set[i]->hyper));
+        }
+    }
+
+
+    /** @brief    Randomly determine the next question
+     */
+    std::pair<point_t *, point_t *> rand_select_hyperplane(const std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &selected_questions){
+        point_t *p1 = 0, *p2 = 0; 
+        int k = s_sets.size() - 1;
+        std::vector<point_t *> candidate_points;
+        for(int i=0; i <= k; i++){
+            for(int j = 0; j <= i; j++){
+                for(auto p: s_sets[j].data){
+                    candidate_points.push_back(p);
+                }
+            }
+            if(candidate_points.size() < 2) continue;
+            auto rng = std::default_random_engine {};
+            std::shuffle(candidate_points.begin(), candidate_points.end(), rng);
+            
+            for(int j = 0; j < candidate_points.size() - 1; j++){
+                for(int k = 1; k < candidate_points.size(); k++){
+                    point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
+                    if(selected_questions.size() != 0){
+                        if(selected_questions.find(make_pair(cand1, cand2)) != selected_questions.end() ||
+                            selected_questions.find(make_pair(cand2, cand1)) != selected_questions.end()) break; // make sure this pair was not used before
+                    }
+                    p1 = cand1, p2 = cand2;
+                    selected_questions.insert(make_pair(p1, p2));
+                    return make_pair(p1, p2);
+                }
+            }
+        }
+        return make_pair(p1, p2);
+    }
+
+
     void sampling_recurrence(std::vector<sample_set> &s_sets, halfspace_t* hs, const std::map<point_t *, point_t *> &lookup){
         int k = s_sets.size() - 1;
         for(int i = k; i >= 0; i--){
@@ -403,7 +497,7 @@ namespace optimal{
     }
 
 
-    int optimal(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta){
+    int optimal(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
         int num_sample = 350;
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
@@ -437,10 +531,11 @@ namespace optimal{
         int stage1_target=0; // stage1_target is the # of questions expected for stage 1
         stage1_target = compute_stage1_num_question(k, theta);
 
-
-
+        std::map<int, hyperplane_t *> hyperplane_candidates;
+        construct_hy_candidates(hyperplane_candidates, choose_item_set);
         std::vector<point_t *> points_return = compute_considered_set(s_sets);
-        //double score = max_score(points_return, u);
+        std::set<std::pair<point_t *, point_t *>> selected_questions;
+        
         int round = 0;
         start_timer();
         while(points_return.size() > w){
@@ -452,9 +547,22 @@ namespace optimal{
                 p2 = point_pair.second;
             }
             else{
-                auto point_pair = rand_select_stage2(points_return);
-                p1 = point_pair.first;
-                p2 = point_pair.second;
+                if(select_opt == PURE_RANDOM){
+                    auto point_pair = rand_select_stage2(points_return);
+                    p1 = point_pair.first;
+                    p2 = point_pair.second;
+                }    
+                else if(select_opt == RAND_SELECT){
+                    auto point_pair = rand_select_hyperplane(s_sets, selected_questions);
+                    p1 = point_pair.first, p2 = point_pair.second;
+                    if(p1 == 0 || p2 == 0) break;
+                }
+                else{
+                int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, s_sets);
+                if(best_idx < 0) break;
+                p1 = choose_item_set[best_idx]->hyper->point1;
+                p2 = choose_item_set[best_idx]->hyper->point2;
+                }
             }
             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
                 if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);

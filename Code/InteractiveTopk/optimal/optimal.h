@@ -17,9 +17,16 @@
 #include "../exp_stats.h"
 #include <map>
 #include <math.h>
+#include <algorithm>
+#include <random>
+
 
 #ifndef OPT_SAMPLE
 #define OPT_SAMPLE
+
+#define SCORE_SELECT 1
+#define RAND_SELECT 2
+#define PURE_RANDOM 3
 
 namespace optimal{
 
@@ -30,7 +37,7 @@ namespace optimal{
         std::set<point_t *> sample;
     };
 
-    int optimal(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta);
+    int optimal(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta);
 }
 
 #endif
