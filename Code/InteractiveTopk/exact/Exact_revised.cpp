@@ -53,7 +53,7 @@ namespace exact_rev{
     /** @brief       Find the best hyperplane to ask
      */
     int find_best_hyperplane(const std::vector<item *> &choose_item_set, 
-                                std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<conf_region> &conf_regions){
+                                std::map<int, hyperplane_t *> &hyperplane_candidates, const std::vector<conf_region> &conf_regions){
         int k = conf_regions.size() - 1;
         std::vector<std::vector<point_t*>> points_in_region;
         std::vector<int> cand_to_be_removed;
@@ -91,6 +91,38 @@ namespace exact_rev{
         for(auto it = cr.partitions.cbegin(); it != cr.partitions.cend(); it++){
             cr.points.insert((*it)->represent_point[0]);
         }
+    }
+
+    /** @brief    Randomly determine the next question
+     */
+    std::pair<point_t *, point_t *> rand_select_hyperplane(const vector<conf_region> &conf_regions, std::set<std::pair<point_t *, point_t *>> &selected_questions){
+        point_t *p1 = 0, *p2 = 0; 
+        int k = conf_regions.size() - 1;
+        std::vector<point_t *> candidate_points;
+        for(int i=0; i <= k; i++){
+            for(int j = 0; j <= i; j++){
+                for(auto p: conf_regions[j].points){
+                    candidate_points.push_back(p);
+                }
+            }
+            if(candidate_points.size() < 2) continue;
+            auto rng = std::default_random_engine {};
+            std::shuffle(candidate_points.begin(), candidate_points.end(), rng);
+            
+            for(int j = 0; j < candidate_points.size() - 1; j++){
+                for(int k = 1; k < candidate_points.size(); k++){
+                    point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
+                    if(selected_questions.size() != 0){
+                        if(selected_questions.find(make_pair(cand1, cand2)) != selected_questions.end() ||
+                            selected_questions.find(make_pair(cand2, cand1)) != selected_questions.end()) break; // make sure this pair was not used before
+                    }
+                    p1 = cand1, p2 = cand2;
+                    selected_questions.insert(make_pair(p1, p2));
+                    return make_pair(p1, p2);
+                }
+            }
+        }
+        return make_pair(p1, p2);
     }
 
 
@@ -235,7 +267,10 @@ namespace exact_rev{
             while(it != conf_regions[i].partitions.end()){
                 int pos = check_situation(hs, (*it));
                 if(pos == -2){
-                    cout << "ERROR: checking position failed" << endl;
+                    if((*it)->ext_pts.size() == 0){ // avoid errors caused by precision issue
+                        release_halfspace_set(*it);
+                        it = conf_regions[i].partitions.erase(it);
+                    }
                 }
                 else if(pos == 1){ // the partition lie completely in hs
                     ++it;
@@ -256,7 +291,6 @@ namespace exact_rev{
                     halfspace_set_t * other_half = alloc_halfspace_set(*it);
                     halfspace_t * hs_minus = reverse_halfspace(hs);
                     
-
                     // first update the partition in this conf region
                     (*it)->halfspaces.push_back(alloc_halfspace(hs->point1, hs->point2, hs->offset, hs->direction));
                     get_extreme_pts_refine_halfspaces_alg1(*it);
@@ -265,14 +299,18 @@ namespace exact_rev{
                     if(i < k){
                         other_half->halfspaces.push_back(hs_minus);
                         get_extreme_pts_refine_halfspaces_alg1(other_half);
-                        other_half->represent_point.push_back((*it)->represent_point[0]);
-                        conf_regions[i+1].partitions.push_back(other_half);
+                        if(other_half->ext_pts.size() == 0){ // avoid errors caused by precision issue
+                            release_halfspace_set(other_half);
+                        }
+                        else{
+                            other_half->represent_point.push_back((*it)->represent_point[0]);
+                            conf_regions[i+1].partitions.push_back(other_half);
+                        }
                     }
                     else{
                         release_halfspace_set(other_half);
                         release_halfspace(hs_minus);
                     }
-                    
                     ++it;
                 }
             }
@@ -284,7 +322,7 @@ namespace exact_rev{
     }
 
 
-    int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta){
+    int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
         start_timer();
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
@@ -312,12 +350,21 @@ namespace exact_rev{
         std::map<int, hyperplane_t *> hyperplane_candidates;
         construct_hy_candidates(hyperplane_candidates, choose_item_set);
         std::set<point_t *> points_return = compute_considered_set(conf_regions);
+        std::set<std::pair<point_t *, point_t *>> selected_questions;
         int round = 0;
         while(points_return.size() > w){
-            int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, conf_regions);
-            if(best_idx < 0) break;
-            point_t* p1 = choose_item_set[best_idx]->hyper->point1;
-            point_t* p2 = choose_item_set[best_idx]->hyper->point2;
+            point *p1 =0, *p2 =0;
+            if(select_opt == SCORE_SELECT){
+                int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, conf_regions);
+                if(best_idx < 0) break;
+                p1 = choose_item_set[best_idx]->hyper->point1;
+                p2 = choose_item_set[best_idx]->hyper->point2;
+            }
+            else{ // using random select
+                std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(conf_regions, selected_questions);
+                p1 = point_pair.first, p2 = point_pair.second;
+                if(p1 == 0 || p2 == 0) break;
+            }
             halfspace_t *hs = 0;
             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
                 if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);

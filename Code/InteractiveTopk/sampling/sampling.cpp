@@ -480,8 +480,8 @@ namespace sampling{
         std::map<int, hyperplane_t *> hyperplane_candidates;
         construct_hy_candidates(hyperplane_candidates, choose_item_set);
         std::vector<point_t *> points_return = compute_considered_set(s_sets);
-        int round = 0;
         std::set<std::pair<point_t *, point_t *>> selected_questions;
+        int round = 0;
         start_timer();
         while(points_return.size() > w){
             point *p1 =0, *p2 =0;

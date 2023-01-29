@@ -945,7 +945,7 @@ int check_situation(halfspace_t *hs, halfspace_set_t *half_set){
     int M = half_set->ext_pts.size();
     if (M < 1)
     {
-        printf("%s\n", "None of the ext_pts in the set.");
+        // printf("%s\n", "None of the ext_pts in the set.");
         return -2;
     }
     int D = half_set->ext_pts[0]->dim;

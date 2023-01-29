@@ -22,12 +22,12 @@ int main(int argc, char *argv[])
 {
     // parameters
     int k = 2;
-    int num_repeat = 1;
+    int num_repeat = 50;
     int w = 4;
     double theta = 0.05;
 
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"5d100k.txt");
+    point_set_t *P0 = read_points((char*)"4d10m.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
         // Approx(p_set, u, k);
         // Exact(p_set, u, k);
         // Optimal(p_set, u, k);
-        // exact_rev::Exact_revised(p_set, u, k, w, theta);
-        sampling::sampling(p_set, u, k, w, theta);
+        // exact_rev::Exact_revised(p_set, u, k, w, RAND_SELECT, theta);
+        // sampling::sampling(p_set, u, k, w, RAND_SELECT, theta);
         // optimal::optimal(p_set, u, k, w, theta);
     }
     
