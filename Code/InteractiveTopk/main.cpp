@@ -22,15 +22,16 @@ int main(int argc, char *argv[])
 {
     // parameters
     int k = 2;
-    int num_repeat = 100;
+    int num_repeat = 1;
     int w = 4;
     double theta = 0.05;
 
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"2d.txt");
+    point_set_t *P0 = read_points((char*)"5d100k.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
+    cout << "skyline size: " << p_set.size() << endl;
     point_set_t *P = point_reload(p_set);
 
     for(int i = 0; i < num_repeat; i++){

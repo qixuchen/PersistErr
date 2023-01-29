@@ -449,8 +449,8 @@ namespace sampling{
         std::vector<point_t *> points_return = compute_considered_set(s_sets);
         //double score = max_score(points_return, u);
         int round = 0;
+        start_timer();
         while(points_return.size() > w){
-            start_timer();
             int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, s_sets);
             if(best_idx < 0) break;
             point_t* p1 = choose_item_set[best_idx]->hyper->point1;
@@ -473,7 +473,6 @@ namespace sampling{
             }
             points_return = considered_points;
             round++;
-            stop_timer();
         }
 
         // free the related data structures
@@ -496,6 +495,7 @@ namespace sampling{
         }
         for(auto p : sample_free) release_point(p);
 
+        stop_timer();
         bool success = check_correctness(points_return, u, best_score);
         if(success) ++correct_count;
         question_num += round;

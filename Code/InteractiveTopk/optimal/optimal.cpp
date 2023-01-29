@@ -442,8 +442,8 @@ namespace optimal{
         std::vector<point_t *> points_return = compute_considered_set(s_sets);
         //double score = max_score(points_return, u);
         int round = 0;
+        start_timer();
         while(points_return.size() > w){
-            start_timer();
             point_t *p1 = 0, *p2 = 0;
             halfspace_t *hs = 0;
             if(round < stage1_target){ // run stage 1
@@ -471,8 +471,8 @@ namespace optimal{
             if(considered_points.size() == 0) break;
             points_return = considered_points;
             round++;
-            stop_timer();
         }
+        stop_timer();
 
         // free the related data structures
         while(half_set_set.size() > 0){

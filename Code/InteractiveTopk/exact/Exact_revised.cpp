@@ -285,6 +285,7 @@ namespace exact_rev{
 
 
     int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta){
+        start_timer();
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
         find_convh_vertices(p_set, convh);
@@ -313,7 +314,6 @@ namespace exact_rev{
         std::set<point_t *> points_return = compute_considered_set(conf_regions);
         int round = 0;
         while(points_return.size() > w){
-            start_timer();
             int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, conf_regions);
             if(best_idx < 0) break;
             point_t* p1 = choose_item_set[best_idx]->hyper->point1;
@@ -335,9 +335,9 @@ namespace exact_rev{
             }
             points_return = considered_points;
             round++;
-            stop_timer();
         }
-
+        
+        stop_timer();
         // free the related data structures
         while(half_set_set.size() > 0){
             halfspace_set_t * hs_s_ptr = half_set_set[half_set_set.size() - 1];

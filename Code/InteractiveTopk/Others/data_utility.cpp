@@ -124,7 +124,12 @@ hyperplane_t *alloc_hyperplane(point_t *normal, double offset)
     hyperplane_v = (hyperplane_t *) malloc(sizeof(hyperplane_t));
     memset(hyperplane_v, 0, sizeof(hyperplane_t));
 
-    hyperplane_v->normal = normal;
+    hyperplane_v->normal = alloc_point(normal->dim);
+
+    for (int i = 0; i < normal->dim; i++)
+    {
+        hyperplane_v->normal->coord[i] = normal->coord[i];
+    }
     hyperplane_v->offset = offset;
 
     return hyperplane_v;
