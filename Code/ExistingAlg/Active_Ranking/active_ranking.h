@@ -7,4 +7,4 @@
  * @param u 				The linear function
  * @param k 				The threshold top-k
  */
-int Active_Ranking(std::vector<point_t*> p_set, point_t* u, int k, double theta);
+int Active_Ranking(std::vector<point_t*> p_set, point_t* u, int k, int w, double theta);

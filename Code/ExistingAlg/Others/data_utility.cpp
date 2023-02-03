@@ -219,6 +219,7 @@ void release_hyperplane(hyperplane_t *&hyperplane_v)
     {
         release_point(hyperplane_v->normal);
     }
+    free(hyperplane_v);
     hyperplane_v = NULL;
 }
 
@@ -322,6 +323,7 @@ void release_halfspace(halfspace_t *&halfspace_v)
     {
         release_point(halfspace_v->normal);
     }
+    free(halfspace_v);
     halfspace_v = NULL;
 }
 
@@ -559,7 +561,7 @@ void release_halfspace_set(halfspace_set_t *&halfspace_set_v)
         release_halfspace(halfspace_set_v->halfspaces[i]);
     }
     halfspace_set_v->halfspaces.clear();
-    //halfspace_set_v->halfspaces.shrink_to_fit();
+    free(halfspace_set_v);
     halfspace_set_v = NULL;
 }
 

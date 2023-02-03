@@ -367,6 +367,7 @@ int rev_HDPI(std::vector<point_t *> p_set, point_t *u, int k, int w, double thet
     }
     correct_count += best_point_included;
     question_num += round;
+    return_size += points_return.size();
 
     // free the related data structures
     release_halfspace_set(R_half_set);

@@ -120,7 +120,11 @@ point_t* checking_varyk(point_t* u, point_t* p1, point_t* p2, double err_rate, i
     int p1_count=1, p2_count=0; //p1_count set to 1 since it is preferred in the first round
     point_t *result_this_round;
     int num_asked=1;
+    double skip_rate = 0.2;
 
+    if((double) rand()/RAND_MAX < skip_rate){
+        return p1;
+    }
     while (p1_count<=k/2 && p2_count<=k/2 && num_asked<k){
         result_this_round = user_rand_err(u, p1, p2, err_rate, round); 
         if(result_this_round==p1){

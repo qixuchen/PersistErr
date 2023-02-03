@@ -121,7 +121,7 @@ void set_ext_on_R(bool *place, double *high, double *low, std::vector<point_t *>
  * @param epsilon the threshold of regret ratio
  * @param maxRound the upper bound of number of questions
  */
-int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRound, double theta)
+int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRound, int w, double theta)
 {
     start_timer();
     int D = P->points[0]->dim;
@@ -272,11 +272,26 @@ int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRoun
     delete[] L;
     delete[] chi;
 
-    point_t *result = P->points[findbestpoint(P, v)];
+    std::vector<point_t*> p_set, top_current;
+    for(int i = 0; i < P->numberOfPoints; i++){
+        p_set.push_back(P->points[i]);
+    }
+    find_top_k(v, p_set, top_current, w);
+    // point_t *result = P->points[findbestpoint(P, v)];
     release_point(v);
     release_point_set(q_set, true);
 
-    correct_count += (dot_prod(u, result) >= best_score);
+    //get the returned points
+    int output_size = min(w, int(top_current.size()));
+    bool best_point_included = false;
+    for(int i=0; i < output_size; i++){
+        if(dot_prod(u, top_current[i]) >= best_score){
+            best_point_included = true;
+            break;
+        }
+    }
+    correct_count += best_point_included;
     question_num += round;
+    return_size += output_size;
     return 0;
 }

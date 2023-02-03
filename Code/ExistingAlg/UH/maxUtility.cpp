@@ -400,6 +400,7 @@ int max_utility(point_set_t *P, point_t *u, int s, double epsilon, int maxRound,
 
     correct_count += best_point_included;
     question_num += round;
+    return_size += points_return.size();
     return 0;
 }
 

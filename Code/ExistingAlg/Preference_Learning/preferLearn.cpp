@@ -581,7 +581,7 @@ hyperplane_t *orthogonal_search(s_node_t *node, point_t *q, hyperplane_t *best)
 //@param original_set       The original dataset
 //@param u                  The real utility vector
 //@param k                  The threshold tok-k
-int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u, int k, double theta)
+int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u, int k, int w, double theta)
 {
     start_timer();
     int round = 0;
@@ -736,7 +736,7 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
     }
     //Find the top-k point based on estimated utility vector
     std::vector<point_t *> top_current;
-    find_top_k(estimate_u, original_set, top_current, k);
+    find_top_k(estimate_u, original_set, top_current, w);
     release_point(estimate_u);
     while(h_set.size()>0)
     {
@@ -746,7 +746,18 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
     }
 
     stop_timer();
-    correct_count += (dot_prod(u, top_current[0]) >= best_score);
+
+    //get the returned points
+    int output_size = min(w, int(top_current.size()));
+    bool best_point_included = false;
+    for(int i=0; i < output_size; i++){
+        if(dot_prod(u, top_current[i]) >= best_score){
+            best_point_included = true;
+            break;
+        }
+    }
+    correct_count += best_point_included;
     question_num += round;
+    return_size += output_size;
     return 0;
 }

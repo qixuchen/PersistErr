@@ -18,17 +18,18 @@
 
 int main(int argc, char *argv[])
 {
-    int num_repeat = 20;
+    int num_repeat = 50;
     int w = 4;
     double theta = 0.05;
 
     //reload point
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"4d1k.txt");
+    point_set_t *P0 = read_points((char*)"5d100k.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
     int k = 1;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, k);
+    cout << "Skyline size: " << p_set.size() << endl;
     point_set_t *P = point_reload(p_set);
 
 
@@ -57,23 +58,23 @@ int main(int argc, char *argv[])
         double epsilon = (v1 - v2) / v1;
         int prune_option = RTREE, dom_option = HYPER_PLANE, stop_option = EXACT_BOUND, cmp_option = SIMPLEX;
 
+        // the HDPI Algorithm
+        rev_HDPI(p_set, u, 1, w, theta);
+
+        // PointPrune Algorithm
+        // PointPrune_v2(p_set, u, 3, w, theta);
+
+        // the UtilityApprox Algorithm
+        // utilityapprox(P, u, 2, epsilon, maxRound, w, theta);
+
         // Algorithm: Active Ranking
-        // Active_Ranking(p_set, u, k, theta);
+        // Active_Ranking(p_set, u, k, w, theta);
         
         // Algorithm: Preference Learning
-        // Preference_Learning_accuracy(p_set, u, k, theta);
+        // Preference_Learning_accuracy(p_set, u, k, w, theta);
 
         // the UH-Simplex algorithm
         // max_utility(P, u, 2, epsilon, maxRound, cmp_option, stop_option, prune_option, dom_option, w, theta);
-
-        // the UtilityApprox Algorithm
-        // utilityapprox(P, u, 2, epsilon, maxRound, theta);
-
-        // the HDPI Algorithm
-        // rev_HDPI(p_set, u, 1, w, theta);
-
-        // PointPrune Algorithm
-        PointPrune_v2(p_set, u, 3, w, theta);
 
     }
     std::cout << "correct count: " << correct_count << std::endl;

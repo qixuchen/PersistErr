@@ -7,7 +7,7 @@
  * @param u 				The linear function
  * @param k 				The threshold top-k
  */
-int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k, double theta)
+int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta)
 {
     int dim = p_set[0]->dim;
     int round = 0;
@@ -77,7 +77,18 @@ int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k, double theta
     stop_timer();
     p_set.clear();
     release_halfspace_set(R_half_set);
-    correct_count += (dot_prod(u, current_use[0]) >= best_score);
+    
+    //get the returned points
+    int output_size = min(w, int(current_use.size()));
+    bool best_point_included = false;
+    for(int i=0; i < output_size; i++){
+        if(dot_prod(u, current_use[i]) >= best_score){
+            best_point_included = true;
+            break;
+        }
+    }
+    correct_count += best_point_included;
     question_num += round;
+    return_size += output_size;
     return 0;
 }

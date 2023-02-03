@@ -25,7 +25,7 @@ point_t* find_estimate(std::vector<point_t*> V);
 //@param original_set       The original dataset
 //@param u                  The real utility vector
 //@param k                  The threshold tok-k
-int Preference_Learning_accuracy(std::vector<point_t*> original_set, point_t* u, int k, double theta);
+int Preference_Learning_accuracy(std::vector<point_t*> original_set, point_t* u, int k, int w, double theta);
 
 
 #endif

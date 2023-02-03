@@ -15,7 +15,7 @@
  * @param epsilon the threshold of regret ratio
  * @param maxRound the upper bound of number of questions
  */
-int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRound, double theta);
+int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRound, int w, double theta);
 
 
 #endif
