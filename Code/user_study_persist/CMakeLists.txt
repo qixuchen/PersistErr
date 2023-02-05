@@ -90,8 +90,6 @@ else ()
                 optimal/optimal.cpp
                 Others/Array.cc
                 Others/Array.hh
-                # Others/lp.cpp
-                # Others/lp.h
                 Others/data_struct.h
                 Others/data_utility.cpp
                 Others/data_utility.h
@@ -113,6 +111,10 @@ else ()
                 lp.h
                 exp_stats.cpp
                 exp_stats.h
+                user_study.cpp
+                user_study.h
+                user_study_func.cpp
+                user_study_func.h
                 main.cpp
                 Qhull/mem.cpp
                 Qhull/mem.h

@@ -30,3 +30,11 @@ void incre_total_time_microsec(){
 double avg_time(){
     return tot_time / question_num;
 }
+
+void reset_stats(){
+    best_score = 0;
+    question_num = 0;
+    return_size = 0;
+    correct_count = 0;
+    tot_time = 0;
+}

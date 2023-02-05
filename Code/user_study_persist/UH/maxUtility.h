@@ -11,7 +11,7 @@
 #include <algorithm> 
 
 #include "../Others/rtree.h"
-#include "../Others/lp.h"
+#include "../lp.h"
 #include "../Others/pruning.h"
 #include <queue>
 

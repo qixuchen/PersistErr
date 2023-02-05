@@ -814,16 +814,62 @@ void skyband(std::vector<point_t *> p_set, std::vector<point_t *> &return_point,
             return_point.push_back(pt);
         }
     }
+    delete[] dominated;
+}
+
+
+
+/**
+ * @brief Find all the points which are not dominated by >=k points
+ * @param p_set 		The original dataset
+ * @param return_point 	The returned points which are not dominated by >=k points
+ * @param k 			The threshold
+ * @param id_num        The maximum id of points
+ */
+void skyband(std::vector<point_t *> p_set, std::vector<point_t *> &return_point, int k, int id_num)
+{
+    int num = p_set.size();
+    point_t *pt;
+    int *dominated = new int[id_num + 1];
+    for (int i = 0; i < num; i++)
+    {
+        pt = p_set[i];
+        dominated[pt->id] = 0;
+        //check if pt is dominated k times by the return_point so far 
+        for (int j = 0; j < return_point.size() && dominated[pt->id] < k; j++)
+        {
+            if (dominates_same(return_point[j], pt))
+            {
+                dominated[pt->id]++;
+            }
+        }
+        if (dominated[pt->id] < k)
+        {
+            //eliminate any points in return_point dominated k times
+            int m = return_point.size();
+            int index = 0;
+            for (int j = 0; j < m; j++)
+            {
+                if (dominates_same(pt, return_point[index]))
+                {
+                    dominated[return_point[index]->id]++;
+                }
+                if (dominated[return_point[index]->id] >= k)
+                {
+                    return_point.erase(return_point.begin() + index);
+                }
+                else
+                {
+                    index++;
+                }
+            }
+            return_point.push_back(pt);
+        }
+    }
 
     delete[] dominated;
-    //printf("size%d\n", return_point.size());
-    /*
-    for(int i=0; i<return_point.size();i++)
-    {
-        printf("point %d %lf %lf\n", return_point[i]->id, return_point[i]->coord[0], return_point[i]->coord[1]);
-    }
-    */
 }
+
 
 //@brief Find all the points which are skyline points
 //param p_set 			The original dataset(in the form of vector)

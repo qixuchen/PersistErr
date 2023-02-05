@@ -15,6 +15,7 @@
 
 #include "../Others/used_function.h"
 #include "../exp_stats.h"
+#include "../user_study_func.h"
 #include <map>
 #include <math.h>
 #include <algorithm>
@@ -35,7 +36,7 @@ namespace sampling{
         std::set<point_t *> sample;
     };
 
-    int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta);
+    int sampling(std::vector<point_t *> p_set, point_set_t *P0, int k, int w, int select_opt);
 }
 
 #endif

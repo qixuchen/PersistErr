@@ -528,8 +528,8 @@ namespace sampling{
     }
 
 
-    int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
-        int num_sample = 50;
+    int sampling(std::vector<point_t *> p_set, point_set_t *P0, int k, int w, int select_opt){
+        int num_sample = 250;
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
         find_convh_vertices(p_set, convh);
@@ -577,13 +577,12 @@ namespace sampling{
                 if(p1 == 0 || p2 == 0) break;
             }
             halfspace_t *hs = 0;
-            if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
-                else hs = alloc_halfspace(p1, p2, 0, true);
+            int opt = show_to_user(P0, p1->id, p2->id);
+            if(opt == 1){ //p1 > p2
+                hs = alloc_halfspace(p2, p1, 0, true);
             }
             else{
-                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p1, p2, 0, true);
-                else hs = alloc_halfspace(p2, p1, 0, true);
+                hs = alloc_halfspace(p1, p2, 0, true);
             }
             sampling_recurrence(s_sets, hs, lookup);
             release_halfspace(hs);
@@ -617,8 +616,7 @@ namespace sampling{
         for(auto p : sample_free) release_point(p);
 
         stop_timer();
-        bool success = check_correctness(points_return, u, best_score);
-        if(success) ++correct_count;
+        print_result_list(P0, points_return);
         question_num += round;
         return_size += points_return.size();
         return 0;

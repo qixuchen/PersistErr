@@ -1,5 +1,6 @@
 #include "../Others/used_function.h"
 #include "../exp_stats.h"
+#include "../user_study_func.h"
 
 #ifndef REV_HDPI
 #define REV_HDPI
@@ -11,6 +12,6 @@
  * @param u 			 The linear function
  * @param k 			 The parameter
  */
-int rev_HDPI(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta);
+int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w);
 
 #endif

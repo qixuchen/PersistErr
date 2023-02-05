@@ -274,7 +274,7 @@ int rev_modify_choose_item_table(std::vector<item *> &choose_item_set,
  * @param u 			 The linear function
  * @param k 			 The parameter
  */
-int rev_HDPI(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta)
+int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w)
 {
     start_timer();
     int round = 0;
@@ -302,8 +302,7 @@ int rev_HDPI(std::vector<point_t *> p_set, point_t *u, int k, int w, double thet
     //v2    the utility of point 2
     rev_build_choose_item_table(half_set_set, choose_item_points, choose_item_set);
     int index = get_best_hyperplane(choose_item_set);
-    double v1 = dot_prod(u, choose_item_set[index]->hyper->point1);
-    double v2 = dot_prod(u, choose_item_set[index]->hyper->point2);
+    int opt = show_to_user(P0, choose_item_set[index]->hyper->point1->id, choose_item_set[index]->hyper->point2->id);
 
     //initial
     halfspace_set_t *R_half_set = R_initial(dim);
@@ -313,59 +312,41 @@ int rev_HDPI(std::vector<point_t *> p_set, point_t *u, int k, int w, double thet
     while (considered_half_set.size() > w)
     {
         round++;
-        if (v1 >= v2)
+        if (opt == 1)
         {
-            if((double) rand()/RAND_MAX > theta) {
-                hy = alloc_halfspace(choose_item_set[index]->hyper->point2, choose_item_set[index]->hyper->point1, 0, true);
-                rev_modify_choose_item_table(choose_item_set, half_set_set, considered_half_set, index, true);
-            }
-            else {
-                hy = alloc_halfspace(choose_item_set[index]->hyper->point1, choose_item_set[index]->hyper->point2, 0, true);
-                rev_modify_choose_item_table(choose_item_set, half_set_set, considered_half_set, index, false);
-            }        
+            hy = alloc_halfspace(choose_item_set[index]->hyper->point2, choose_item_set[index]->hyper->point1, 0, true);
+            rev_modify_choose_item_table(choose_item_set, half_set_set, considered_half_set, index, true);
         }
         else
         {
-            if((double) rand()/RAND_MAX > theta) {
-                hy = alloc_halfspace(choose_item_set[index]->hyper->point1, choose_item_set[index]->hyper->point2, 0, true);
-                rev_modify_choose_item_table(choose_item_set, half_set_set, considered_half_set, index, false);
-            }
-            else {
-                hy = alloc_halfspace(choose_item_set[index]->hyper->point2, choose_item_set[index]->hyper->point1, 0, true);
-                rev_modify_choose_item_table(choose_item_set, half_set_set, considered_half_set, index, true);
-            }
+            hy = alloc_halfspace(choose_item_set[index]->hyper->point1, choose_item_set[index]->hyper->point2, 0, true);
+            rev_modify_choose_item_table(choose_item_set, half_set_set, considered_half_set, index, false);
         }
         index = get_best_hyperplane(choose_item_set);
-        v1 = dot_prod(u, choose_item_set[index]->hyper->point1);
-        v2 = dot_prod(u, choose_item_set[index]->hyper->point2);
 
         //Find whether there exist point which is the topk point w.r.t any u in R
         R_half_set->halfspaces.push_back(hy);
         get_extreme_pts_refine_halfspaces_alg1(R_half_set);
         std::vector<point_t *> top_current;
         point_result = NULL;
-        bool check_result = find_possible_topk(p_set, R_half_set, k, top_current);
+        bool check_result = find_possible_topk(p_set, R_half_set, 1, top_current);
         if (check_result)
         {
-            point_result = check_possible_topk(p_set, R_half_set, k, top_current);
+            point_result = check_possible_topk(p_set, R_half_set, 1, top_current);
         }
         if (point_result!= NULL)
         {
             break;
+        }
+        if(considered_half_set.size() > w){
+            opt = show_to_user(P0, choose_item_set[index]->hyper->point1->id, choose_item_set[index]->hyper->point2->id);
         }
     }
     stop_timer();
     //get the returned points
     vector<point_t *> points_return;
     for(auto idx : considered_half_set) points_return.push_back(half_set_set[idx]->represent_point[0]);
-    bool best_point_included = false;
-    for(auto p : points_return){
-        if(dot_prod(u, p) >= best_score){
-            best_point_included = true;
-            break;
-        }
-    }
-    correct_count += best_point_included;
+    print_result_list(P0, points_return);
     question_num += round;
     return_size += points_return.size();
 
@@ -376,6 +357,5 @@ int rev_HDPI(std::vector<point_t *> p_set, point_t *u, int k, int w, double thet
         release_item(item_ptr);
         choose_item_set.pop_back();
     }
-
     return 0;
 }

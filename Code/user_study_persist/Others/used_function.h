@@ -115,6 +115,8 @@ void skyband(point_set_t* p_set, std::vector<point_t*> &return_point, int k);
 //param k 				The threhold
 void skyband(std::vector<point_t*> p_set, std::vector<point_t*> &return_point, int k);
 
+void skyband(std::vector<point_t *> p_set, std::vector<point_t *> &return_point, int k, int id_num);
+
 void skyline_c(std::vector<point_t *> p_set, std::vector<point_t *> &return_point);
 
 /*
