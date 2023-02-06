@@ -122,31 +122,25 @@ int user_study_main_body(){
     for(int i = 0; i < num_repeat; i++){
 
         // the exact Algorithm
-        // exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
+        // exact_rev::Exact_revised(p_set, P0, k, w, SCORE_SELECT);
 
         // the sampling Algorithm
-        sampling::sampling(p_set, P0, k, w, SCORE_SELECT);
+        // sampling::sampling(p_set, P0, k, w, SCORE_SELECT);
 
         // the optimal Algorithm
-        // optimal::optimal(p_set, u, k, w, SCORE_SELECT, theta);
+        optimal::optimal(p_set, P0, k, w, PURE_RANDOM);
 
         // the HDPI Algorithm
         // rev_HDPI(p_set, P0, w);
 
         // PointPrune Algorithm
-        // PointPrune_v2(p_set, u, 3, w, theta);
-
-        // the UtilityApprox Algorithm
-        // utilityapprox(P, u, 2, epsilon, maxRound, w, theta);
+        // PointPrune_v2(p_set, P0, 3, w, max, min);
 
         // Algorithm: Active Ranking
-        // Active_Ranking(p_set, u, 1, w, theta);
+        // Active_Ranking(p_set, P0, w);
         
         // Algorithm: Preference Learning
-        // Preference_Learning_accuracy(p_set, u, 1, w, theta);
-
-        // the UH-Simplex algorithm
-        // max_utility(P, u, 2, epsilon, maxRound, cmp_option, stop_option, prune_option, dom_option, w, theta);
+        // Preference_Learning(p_set, P0, w);
     }
     release_point_set(P, true);
     release_point_set(P0, true);

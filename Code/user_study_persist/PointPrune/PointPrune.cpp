@@ -69,7 +69,7 @@ int find_best_hyperplane(std::vector<choose_item*> choose_item_set, std::vector<
 
 
 
-int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w, double theta)
+int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, int w, double *max, double *min)
 {
     start_timer();
     int k = 1;
@@ -122,8 +122,8 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w,
         // double v2 = dot_prod(u, choose_item_set[index]->hyper->point2);
         point_t* p1 = choose_item_set[index]->hyper->point1;
         point_t* p2 = choose_item_set[index]->hyper->point2;
-        point_t* user_choice = user_rand_err(u, p1, p2, theta, round);
-
+        point_t* user_choice = (show_to_user(P0->points[p1->id],P0->points[p2->id])==1) ? p1 : p2;
+        round++;
         //start of phase 1
         //==========================================================================================================================================
         // while (point_result==NULL)
@@ -141,7 +141,8 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w,
             }
             p1 = choose_item_set[index]->hyper->point1;
             p2 = choose_item_set[index]->hyper->point2;
-            user_choice = user_rand_err(u, p1, p2, theta, round);
+            user_choice = (show_to_user(P0->points[p1->id],P0->points[p2->id])==1) ? p1 : p2;
+            round++;
 
             //Find whether there exist point which is the topk point w.r.t any u in R
             R_half_set->halfspaces.push_back(hy);
@@ -178,14 +179,16 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w,
             int best_index = find_best_hyperplane(choose_item_set_cp,selected_halfspaces, best_p1, best_p2, ratio);
             p1 = choose_item_set_cp[best_index]->hyper->point1;
             p2 = choose_item_set_cp[best_index]->hyper->point2;
-            
+    
             if(best_p1==p1){
                 //user_choice = checking(u,p2,p1,theta,checknum);
-                user_choice = checking_varyk(u, p2, p1, theta, checknum, round);
+                user_choice = checking_varyk(p2, p1, checknum, max, min)==1 ? p2 : p1;
+                round += checknum;
             }
             else{
                 //user_choice = checking(u,p1,p2,theta,checknum);
-                user_choice = checking_varyk(u, p1, p2, theta, checknum, round);
+                user_choice = checking_varyk(p1, p2, checknum, max, min)==1 ? p1 : p2;
+                round += checknum;
             }
             //printf("ratio %10f\n",ratio);
             if(user_choice!=best_p2){
@@ -240,13 +243,6 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w,
         }
 
         //  re-initialize all data structures used in the inner loop with the record of the outer loop
-        //  std::vector<halfspace_set_t *> half_set_set
-        //  std::vector<int> considered_half_set
-        //  std::vector<point_t *> choose_item_points
-        //  std::vector<choose_item *> choose_item_set
-        //  std::vector<halfspace_t*> selected_halfspaces
-        //  halfspace_set_t *R_half_set
-
         selected_halfspaces.clear();
 
         release_halfspace_set(R_half_set);
@@ -283,16 +279,13 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w,
     stop_timer();
 
     //get the returned points
-    bool best_point_included = false;
+    vector<point_t *> points_return; 
     for(auto p : considered_half_set_cp){
-        if(dot_prod(u, half_set_set_cp[p]->represent_point[0]) >= best_score){
-            best_point_included = true;
-            break;
-        }
+        points_return.push_back(half_set_set_cp[p]->represent_point[0]);
     }
-    correct_count += best_point_included;
+    print_result_list(P0, points_return);
     question_num += round;
-    return_size += considered_half_set_cp.size();
+    return_size += points_return.size();
     return 0;
 }
 

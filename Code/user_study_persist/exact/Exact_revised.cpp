@@ -399,7 +399,7 @@ namespace exact_rev{
     }
 
 
-    int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
+    int Exact_revised(std::vector<point_t *> p_set, point_set_t *P, int k, int w, int select_opt){
         start_timer();
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
@@ -444,13 +444,12 @@ namespace exact_rev{
                 if(p1 == 0 || p2 == 0) break;
             }
             halfspace_t *hs = 0;
-            if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
-                else hs = alloc_halfspace(p1, p2, 0, true);
+            int opt = show_to_user(P, p1->id, p2->id);
+            if(opt == 1){ //p1 > p2
+                hs = alloc_halfspace(p2, p1, 0, true);
             }
             else{
-                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p1, p2, 0, true);
-                else hs = alloc_halfspace(p2, p1, 0, true);
+                hs = alloc_halfspace(p1, p2, 0, true);
             }
             exact_recur(conf_regions, hs);
             release_halfspace(hs);
@@ -483,8 +482,11 @@ namespace exact_rev{
                 ++it;
             }
         } 
-        bool success = check_correctness(points_return, u, best_score);
-        if(success) ++correct_count;
+        vector<point_t *> result_list;
+        for(auto p: points_return){
+            result_list.push_back(p);
+        }
+        print_result_list(P, result_list);
         question_num += round;
         return_size += points_return.size();
         return 0;

@@ -7,7 +7,7 @@
  * @param u 				The linear function
  * @param k 				The threshold top-k
  */
-int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k, int w, double theta)
+int Active_Ranking(std::vector<point_t *> p_set, point_set_t *P, int w)
 {
     int dim = p_set[0]->dim;
     int round = 0;
@@ -46,21 +46,16 @@ int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k, int w, doubl
                 if (relation == 0)
                 {
                     round++;
-                    double v1 = dot_prod(u, p_set[i]);
-                    double v2 = dot_prod(u, current_use[j]);
-                    if (v1 > v2)
+                    int option = show_to_user(P, p_set[i]->id, current_use[j]->id);
+                    if (option == 1)
                     {
-                        halfspace_t *half = 0;
-                        if((double) rand()/RAND_MAX > theta) half = alloc_halfspace(current_use[j], p_set[i], 0, true);
-                        else half = alloc_halfspace(p_set[i], current_use[j], 0, true);
+                        halfspace_t *half = alloc_halfspace(current_use[j], p_set[i], 0, true);
                         R_half_set->halfspaces.push_back(half);
                         get_extreme_pts_refine_halfspaces_alg1(R_half_set);
                     }
                     else
                     {
-                        halfspace_t *half = 0;
-                        if((double) rand()/RAND_MAX > theta) half = alloc_halfspace(p_set[i], current_use[j], 0, true);
-                        else half = alloc_halfspace(current_use[j], p_set[i], 0, true);
+                        halfspace_t *half = alloc_halfspace(p_set[i], current_use[j], 0, true);
                         R_half_set->halfspaces.push_back(half);
                         get_extreme_pts_refine_halfspaces_alg1(R_half_set);
                         place = j + 1;
@@ -80,14 +75,11 @@ int Active_Ranking(std::vector<point_t *> p_set, point_t *u, int k, int w, doubl
     
     //get the returned points
     int output_size = min(w, int(current_use.size()));
-    bool best_point_included = false;
+    vector<point_t *> points_return;
     for(int i=0; i < output_size; i++){
-        if(dot_prod(u, current_use[i]) >= best_score){
-            best_point_included = true;
-            break;
-        }
+        points_return.push_back(current_use[i]);
     }
-    correct_count += best_point_included;
+    print_result_list(P, points_return);
     question_num += round;
     return_size += output_size;
     return 0;

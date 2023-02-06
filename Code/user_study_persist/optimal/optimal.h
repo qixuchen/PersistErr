@@ -12,7 +12,7 @@
 #include "exact_vols.h"
 #include "generators/known_polytope_generators.h"
 #include "sampling/sampling.hpp"
-
+#include "../user_study_func.h"
 #include "../Others/used_function.h"
 #include "../exp_stats.h"
 #include <map>
@@ -37,7 +37,7 @@ namespace optimal{
         std::set<point_t *> sample;
     };
 
-    int optimal(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta);
+    int optimal(std::vector<point_t *> p_set, point_set_t *P, int k, int w, int select_opt);
 }
 
 #endif

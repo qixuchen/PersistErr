@@ -497,7 +497,8 @@ namespace optimal{
     }
 
 
-    int optimal(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
+    int optimal(std::vector<point_t *> p_set, point_set_t *P, int k, int w, int select_opt){
+        double theta = 0.05;
         int num_sample = 350;
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
@@ -564,13 +565,12 @@ namespace optimal{
                 p2 = choose_item_set[best_idx]->hyper->point2;
                 }
             }
-            if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
-                else hs = alloc_halfspace(p1, p2, 0, true);
+            int opt = show_to_user(P, p1->id, p2->id);
+            if(opt == 1){ //p1 > p2
+                hs = alloc_halfspace(p2, p1, 0, true);
             }
             else{
-                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p1, p2, 0, true);
-                else hs = alloc_halfspace(p2, p1, 0, true);
+                hs = alloc_halfspace(p1, p2, 0, true);
             }
             sampling_recurrence(s_sets, hs, lookup);
             release_halfspace(hs);
@@ -602,8 +602,7 @@ namespace optimal{
         }
         for(auto p : sample_free) release_point(p);
 
-        bool success = check_correctness(points_return, u, best_score);
-        if(success) ++correct_count;
+        print_result_list(P, points_return);
         question_num += round;
         return_size += points_return.size();
         return 0;

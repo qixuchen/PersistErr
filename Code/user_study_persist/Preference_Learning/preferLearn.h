@@ -13,6 +13,7 @@
 #include <string>
 #include "../Others/QuadProg++.hh"
 #include "../exp_stats.h"
+#include "../user_study_func.h"
 using namespace quadprogpp;
 
 //@brief Used to find the estimated utility vector by max-min
@@ -25,7 +26,7 @@ point_t* find_estimate(std::vector<point_t*> V);
 //@param original_set       The original dataset
 //@param u                  The real utility vector
 //@param k                  The threshold tok-k
-int Preference_Learning_accuracy(std::vector<point_t*> original_set, point_t* u, int k, int w, double theta);
+int Preference_Learning(std::vector<point_t*> original_set, point_set_t *P, int w);
 
 
 #endif

@@ -581,11 +581,10 @@ hyperplane_t *orthogonal_search(s_node_t *node, point_t *q, hyperplane_t *best)
 //@param original_set       The original dataset
 //@param u                  The real utility vector
 //@param k                  The threshold tok-k
-int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u, int k, int w, double theta)
+int Preference_Learning(std::vector<point_t *> original_set, point_set_t *P, int w)
 {
     start_timer();
-    int round = 0;
-    int M;
+    int M, round = 0, maxQcount = 50, testCount = 0, correctCount = 0;;
     //p_set: randomly choose 1000 points
     std::vector<point_t *> p_set;
     if (original_set.size() < 1000)
@@ -634,10 +633,10 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
                 }
             }
         }
+        point_random(p_set);
     }
     int dim = p_set[0]->dim;
     M = p_set.size();
-    double accuracy = 0, de_accuracy = 100;
 
     //the normal vectors
     std::vector<point_t *> V;
@@ -679,85 +678,105 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
     s_node_t *stree_root = alloc_s_node(dim);
     build_spherical_tree(h_set, stree_root);
 
-    //initial
-    point_t *estimate_u = find_estimate(V);
-    point_nomarlize(estimate_u);
-
-    while (accuracy < 0.99999 && de_accuracy > 0)
+    point_t *estimate_u;
+    for (int i = 0; i < maxQcount; i++)
     {
-        round++;
+        point_t *p;
+        point_t *q;
+        int p_idx, q_idx;
+        estimate_u = find_estimate(V);
+        point_nomarlize(estimate_u);
+        //printf("|%lf|%lf|%lf|%lf|\n", estimate_u->coord[0], estimate_u->coord[1], estimate_u->coord[2], estimate_u->coord[3]);
         hyperplane_t *best = NULL;
-        best = orthogonal_search(stree_root, estimate_u, best);
-        point_t *p = best->point1;
-        point_t *q = best->point2;
-        double v1 = dot_prod(u, p);
-        double v2 = dot_prod(u, q);
-        point_t *pt = alloc_point(dim);
-        if (v1 >= v2)
+
+        if (i % 2 == 1)
         {
-            if((double) rand()/RAND_MAX > theta){
-                for (int i = 0; i < dim; i++)
+            bool done = false;
+            while (!done)
+            {
+                p_idx = rand() % M;
+                q_idx = p_idx;
+                while (p_idx == q_idx)
                 {
-                    pt->coord[i] = best->normal->coord[i];
+                    q_idx = rand() % M;
+                }
+                if (!dominates(p_set[p_idx], p_set[q_idx]) && !dominates(p_set[q_idx], p_set[p_idx]))
+                {
+                    done = true;
                 }
             }
-            else{
-                for (int i = 0; i < dim; i++)
-                {
-                    pt->coord[i] = -best->normal->coord[i];
-                }
-            }
+            p = p_set[p_idx];
+            q = p_set[q_idx];
         }
         else
         {
-            if((double) rand()/RAND_MAX > theta){
-                for (int i = 0; i < dim; i++)
-                {
-                    pt->coord[i] = -best->normal->coord[i];
-                }
-            }
-            else{
-                for (int i = 0; i < dim; i++)
-                {
-                    pt->coord[i] = best->normal->coord[i];
-                }
-            }
+            best = orthogonal_search(stree_root, estimate_u, best);
+            p = best->point1;
+            q = best->point2;
         }
-        V.push_back(pt);
-        estimate_u = find_estimate(V);
-        for (int i = 0; i < dim; i++)
+
+
+        int option = show_to_user(P, p->id, q->id);
+        round++;
+        if (i % 2 == 0) //training
         {
-            estimate_u->coord[i] = estimate_u->coord[i] < 0 ? 0 : estimate_u->coord[i];
+            point_t *pt = alloc_point(dim);
+            if (option == 1)
+            {
+                for (int ia = 0; ia < dim; ia++)
+                {
+                    pt->coord[ia] = best->normal->coord[ia];
+                }
+            }
+            else
+            {
+                for (int ia = 0; ia < dim; ia++)
+                {
+                    pt->coord[ia] = -best->normal->coord[ia];
+                }
+            }
+            V.push_back(pt);
         }
-        point_nomarlize(estimate_u);
-        double ac = cosine0(u, estimate_u);
-        de_accuracy = fabs(ac - accuracy);
-        accuracy = ac;
+        else // testing
+        {
+            testCount++;
+            if ((option == 1 && dot_prod(estimate_u, p) >= dot_prod(estimate_u, q)) ||
+                    (option == 2 && dot_prod(estimate_u, p) <= dot_prod(estimate_u, q)))
+            {
+                correctCount++;
+            }
+            double accuracy = ((double) correctCount) / testCount;
+            //printf("TotalQ:%d, TestQ: %d, Accuracy: %lf\n", i + 1, testCount, accuracy);
+            if (testCount >= 5 && accuracy > 0.75)
+            {
+                break;
+            }
+        }
+        release_point(estimate_u);
     }
+
+    estimate_u = find_estimate(V);
+    point_nomarlize(estimate_u);
     //Find the top-k point based on estimated utility vector
     std::vector<point_t *> top_current;
     find_top_k(estimate_u, original_set, top_current, w);
     release_point(estimate_u);
-    while(h_set.size()>0)
+    while (h_set.size() > 0)
     {
         hyperplane_t *hh = h_set[h_set.size()-1];
         release_hyperplane(hh);
         h_set.pop_back();
     }
-
     stop_timer();
 
-    //get the returned points
     int output_size = min(w, int(top_current.size()));
-    bool best_point_included = false;
+    vector<point_t *> points_return;
     for(int i=0; i < output_size; i++){
-        if(dot_prod(u, top_current[i]) >= best_score){
-            best_point_included = true;
-            break;
-        }
+        points_return.push_back(top_current[i]);
     }
-    correct_count += best_point_included;
+    print_result_list(P, points_return);
     question_num += round;
     return_size += output_size;
+    
     return 0;
 }

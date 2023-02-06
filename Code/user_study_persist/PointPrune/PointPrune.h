@@ -5,6 +5,7 @@
 #include <cmath>
 #include <chrono>
 #include <sys/time.h>
+#include "../user_study_func.h"
 
 
 #ifndef POINTPRUNE
@@ -13,6 +14,6 @@
 /**
  * @brief           PointPrune, with some modifications (e.g., end prematurely) 
  */
-int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w, double theta);
+int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, int w, double *max, double *min);
 
 #endif
