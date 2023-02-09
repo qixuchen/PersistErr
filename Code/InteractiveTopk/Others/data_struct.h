@@ -147,6 +147,7 @@ typedef struct choose_item
 typedef struct item
 {
 	hyperplane* hyper;
+	double upper_bound = 0;
 	std::set<int> positive_side;
 	std::set<int> negative_side;
 	std::set<int> intersect_case;

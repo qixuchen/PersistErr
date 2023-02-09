@@ -36,18 +36,20 @@ namespace exact_rev{
     double compute_hy_priority(const item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
         int k = points_in_region.size()-1;
         double score = 0;
+        std::unordered_set<point_t*> processed;
         for(int i=0; i<=k; ++i){
             double weight = pow(Alpha, i);
             int pos_count = 0, neg_count = 0;
             for(auto f: points_in_region[i]){
+                if(processed.find(f) != processed.end()) continue;
                 if(item_ptr->pos_points.find(f) != item_ptr->pos_points.end()) pos_count++;
                 else if(item_ptr->neg_points.find(f) != item_ptr->neg_points.end()) neg_count++;
+                processed.insert(f);
             }
             score += weight * min(pos_count, neg_count);
         }
         return score;
     }
-
 
 
     /** @brief       Find the best hyperplane to ask
@@ -74,6 +76,86 @@ namespace exact_rev{
             }
             if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
                 cand_to_be_removed.push_back(c.first);
+            }
+        }
+        // MUST: remove the selected candidate
+        if(highest_index >= 0) hyperplane_candidates.erase(highest_index);
+        for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
+        return highest_index;
+    }
+
+
+    /** @brief      Compute the priority of an item's related hyperplane
+     */
+    double compute_hy_priority_update_upper_bound(item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
+        int k = points_in_region.size()-1;
+        int pos[k + 1] = {}, neg[k + 1] = {};
+        double score = 0;
+        std::unordered_set<point_t*> processed;
+        for(int i=0; i <= k; ++i){
+           for(auto f: points_in_region[i]){
+                if(processed.find(f) != processed.end()) continue;
+                if(item_ptr->pos_points.find(f) != item_ptr->pos_points.end()) ++pos[i];
+                else if(item_ptr->neg_points.find(f) != item_ptr->neg_points.end()) ++neg[i];
+                processed.insert(f);
+            }
+        }
+        for(int i=0; i <= k; ++i){
+            score += pow(Alpha, i) * min(pos[i], neg[i]);
+        }
+        // update the upper bound of this item
+        double ub = 0;
+        const int POS = 0, NEG = 1; 
+        int carry_side = POS, carry = 0;
+        for(int i = 0; i <= k; i++){
+            if(carry_side == POS){
+                pos[i] += carry;
+            }
+            else{
+                neg[i] += carry;
+            }
+            ub += pow(Alpha, i) * min(pos[i], neg[i]);
+            if(i < k){
+                if(pos[i] >= neg[i]){
+                    carry_side = POS, carry = pos[i] - neg[i];
+                }
+                else{
+                    carry_side = NEG, carry = neg[i] - pos[i];
+                }
+            }
+        }
+        item_ptr->upper_bound = ub;
+        return score;
+    }
+
+
+    /** @brief       Find the best hyperplane to ask
+     *               Using lazy updating trick
+     */
+    int find_best_hyperplane_lazy_update(std::vector<item *> &choose_item_set, 
+                                std::map<int, hyperplane_t *> &hyperplane_candidates, const std::vector<conf_region> &conf_regions){
+        int k = conf_regions.size() - 1;
+        std::vector<std::vector<point_t*>> points_in_region;
+        std::vector<int> cand_to_be_removed;
+        for(int i=0; i<=k; ++i){
+            std::vector<point_t*> frags(conf_regions[i].points.begin(), conf_regions[i].points.end());
+            points_in_region.push_back(frags);
+        }
+        double highest_priority = 0;
+        int highest_index = -1;
+        hyperplane_t *hy_res = 0;
+        for(auto c : hyperplane_candidates){
+            item_t *item_ptr = choose_item_set[c.first];
+            if(item_ptr->upper_bound > highest_priority || item_ptr->upper_bound == 0){
+                double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
+                if(priority > highest_priority){
+                    highest_priority = priority;
+                    highest_index = c.first;
+                    hy_res = c.second;
+                }
+                if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
+                    cand_to_be_removed.push_back(c.first);
+                }
             }
         }
         // MUST: remove the selected candidate
@@ -311,7 +393,13 @@ namespace exact_rev{
                         release_halfspace_set(other_half);
                         release_halfspace(hs_minus);
                     }
-                    ++it;
+                    if((*it)->ext_pts.size() == 0){ // avoid errors caused by precision issue
+                        release_halfspace_set(*it);
+                        it = conf_regions[i].partitions.erase(it);
+                    }
+                    else{
+                        ++it;
+                    }
                 }
             }
         }
@@ -355,7 +443,8 @@ namespace exact_rev{
         while(points_return.size() > w){
             point *p1 =0, *p2 =0;
             if(select_opt == SCORE_SELECT){
-                int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, conf_regions);
+                // int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, conf_regions);
+                int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, conf_regions);
                 if(best_idx < 0) break;
                 p1 = choose_item_set[best_idx]->hyper->point1;
                 p2 = choose_item_set[best_idx]->hyper->point2;

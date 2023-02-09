@@ -22,12 +22,12 @@ int main(int argc, char *argv[])
 {
     // parameters
     int k = 2;
-    int num_repeat = 200;
+    int num_repeat = 10;
     int w = 4;
     double theta = 0.05;
 
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"4d100k.txt");
+    point_set_t *P0 = read_points((char*)"HTRU.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
@@ -51,15 +51,9 @@ int main(int argc, char *argv[])
         find_top_k(u, P, top_current, 1);
         best_score = dot_prod(u, top_current[0]);
 
-        // rev_HDPI(p_set, u, k);
-        // Exact(p_set, u, 2);
-        // compute_convh_hyperplanes(p_set);
-        // Approx(p_set, u, k);
-        // Exact(p_set, u, k);
-        // Optimal(p_set, u, k);
-        // exact_rev::Exact_revised(p_set, u, k, w, RAND_SELECT, theta);
-        // sampling::sampling(p_set, u, k, w, RAND_SELECT, theta);
-        optimal::optimal(p_set, u, k, w, SCORE_SELECT, theta);
+        exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
+        // sampling::sampling(p_set, u, k, w, SCORE_SELECT, theta);
+        // optimal::optimal(p_set, u, k, w, PURE_RANDOM, theta);
     }
     
 

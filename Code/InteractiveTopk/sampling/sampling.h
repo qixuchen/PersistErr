@@ -19,6 +19,7 @@
 #include <math.h>
 #include <algorithm>
 #include <random>
+#include <unordered_set>
 
 #ifndef SAMPLING
 #define SAMPLING

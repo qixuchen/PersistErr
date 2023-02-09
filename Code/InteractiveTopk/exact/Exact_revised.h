@@ -4,6 +4,7 @@
 #include <math.h>
 #include <algorithm>
 #include <random>
+#include <unordered_set>
 
 #ifndef EXACT_REVISED
 #define EXACT_REVISED
