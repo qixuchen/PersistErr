@@ -69,8 +69,9 @@ int find_best_hyperplane(std::vector<choose_item*> choose_item_set, std::vector<
 
 
 
-int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, int w, double *max, double *min)
+int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, int w, double *max, double *min, int alg_id)
 {
+    reset_stats();
     start_timer();
     int k = 1;
     int round = 0;
@@ -122,7 +123,11 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
         // double v2 = dot_prod(u, choose_item_set[index]->hyper->point2);
         point_t* p1 = choose_item_set[index]->hyper->point1;
         point_t* p2 = choose_item_set[index]->hyper->point2;
+
+        stop_timer();
         point_t* user_choice = (show_to_user(P0->points[p1->id],P0->points[p2->id])==1) ? p1 : p2;
+        start_timer();
+
         round++;
         //start of phase 1
         //==========================================================================================================================================
@@ -141,7 +146,11 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
             }
             p1 = choose_item_set[index]->hyper->point1;
             p2 = choose_item_set[index]->hyper->point2;
+
+            stop_timer();
             user_choice = (show_to_user(P0->points[p1->id],P0->points[p2->id])==1) ? p1 : p2;
+            start_timer();
+
             round++;
 
             //Find whether there exist point which is the topk point w.r.t any u in R
@@ -179,23 +188,22 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
             int best_index = find_best_hyperplane(choose_item_set_cp,selected_halfspaces, best_p1, best_p2, ratio);
             p1 = choose_item_set_cp[best_index]->hyper->point1;
             p2 = choose_item_set_cp[best_index]->hyper->point2;
-    
+
+            stop_timer();
             if(best_p1==p1){
-                //user_choice = checking(u,p2,p1,theta,checknum);
                 user_choice = checking_varyk(p2, p1, checknum, max, min)==1 ? p2 : p1;
                 round += checknum;
             }
             else{
-                //user_choice = checking(u,p1,p2,theta,checknum);
                 user_choice = checking_varyk(p1, p2, checknum, max, min)==1 ? p1 : p2;
                 round += checknum;
             }
-            //printf("ratio %10f\n",ratio);
+            start_timer();
+
             if(user_choice!=best_p2){
                 encounter_err = true;
             }
             if(encounter_err==true && ratio<0.15){
-                //printf("enc err\n");
                 end_premature=true;
             }
 
@@ -284,8 +292,14 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
         points_return.push_back(half_set_set_cp[p]->represent_point[0]);
     }
     print_result_list(P0, points_return);
-    question_num += round;
-    return_size += points_return.size();
+    int alg_best = alg_top1_select(points_return);
+    question_asked_list[alg_id] = round;
+    best_pid_list[alg_id] = points_return[alg_best]->id; 
+    proc_time_list[alg_id] = avg_time(round);
+    cout << "avg time: " << avg_time(round)<< endl; 
+    return_size_list[alg_id] = points_return.size();
+    write_results_to_file(alg_id, points_return, alg_best);
+    for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
     return 0;
 }
 

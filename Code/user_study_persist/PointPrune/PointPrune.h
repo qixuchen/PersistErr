@@ -14,6 +14,6 @@
 /**
  * @brief           PointPrune, with some modifications (e.g., end prematurely) 
  */
-int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, int w, double *max, double *min);
+int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, int w, double *max, double *min, int alg_id);
 
 #endif

@@ -18,6 +18,7 @@
 #include "optimal/optimal.h"
 #include "approx/approx.h"
 #include "Others/qhull_build.h"
+#include "user_study_func.h"
 #include <vector>
 #include <ctime>
 #include <iostream>

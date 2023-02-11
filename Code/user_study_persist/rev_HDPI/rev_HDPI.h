@@ -12,6 +12,6 @@
  * @param u 			 The linear function
  * @param k 			 The parameter
  */
-int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w);
+int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w, int alg_id);
 
 #endif

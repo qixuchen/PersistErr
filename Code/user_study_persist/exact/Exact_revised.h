@@ -20,7 +20,7 @@ struct conf_region
 
 
 namespace exact_rev{
-    int Exact_revised(std::vector<point_t *> p_set, point_set_t *P, int k, int w, int select_opt);
+    int Exact_revised(std::vector<point_t *> p_set, point_set_t *P, int k, int w, int select_opt, int alg_id);
 }
 
 

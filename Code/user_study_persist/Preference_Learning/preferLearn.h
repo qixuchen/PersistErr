@@ -26,7 +26,7 @@ point_t* find_estimate(std::vector<point_t*> V);
 //@param original_set       The original dataset
 //@param u                  The real utility vector
 //@param k                  The threshold tok-k
-int Preference_Learning(std::vector<point_t*> original_set, point_set_t *P, int w);
+int Preference_Learning(std::vector<point_t*> original_set, point_set_t *P0, int w, int alg_id);
 
 
 #endif

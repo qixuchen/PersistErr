@@ -581,10 +581,11 @@ hyperplane_t *orthogonal_search(s_node_t *node, point_t *q, hyperplane_t *best)
 //@param original_set       The original dataset
 //@param u                  The real utility vector
 //@param k                  The threshold tok-k
-int Preference_Learning(std::vector<point_t *> original_set, point_set_t *P, int w)
+int Preference_Learning(std::vector<point_t *> original_set, point_set_t *P0, int w, int alg_id)
 {
+    reset_stats();
     start_timer();
-    int M, round = 0, maxQcount = 50, testCount = 0, correctCount = 0;;
+    int M, round = 0, maxQcount = 30, testCount = 0, correctCount = 0;;
     //p_set: randomly choose 1000 points
     std::vector<point_t *> p_set;
     if (original_set.size() < 1000)
@@ -715,8 +716,10 @@ int Preference_Learning(std::vector<point_t *> original_set, point_set_t *P, int
             q = best->point2;
         }
 
+        stop_timer();
+        int option = show_to_user(P0, p->id, q->id);
+        start_timer();
 
-        int option = show_to_user(P, p->id, q->id);
         round++;
         if (i % 2 == 0) //training
         {
@@ -774,9 +777,14 @@ int Preference_Learning(std::vector<point_t *> original_set, point_set_t *P, int
     for(int i=0; i < output_size; i++){
         points_return.push_back(top_current[i]);
     }
-    print_result_list(P, points_return);
-    question_num += round;
-    return_size += output_size;
-    
+    print_result_list(P0, points_return);
+    int alg_best = alg_top1_select(points_return);
+    question_asked_list[alg_id] = round;
+    best_pid_list[alg_id] = points_return[alg_best]->id; 
+    proc_time_list[alg_id] = avg_time(round);
+    cout << "avg time: " << avg_time(round)<< endl; 
+    return_size_list[alg_id] = points_return.size();
+    write_results_to_file(alg_id, points_return, alg_best);
+    for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
     return 0;
 }

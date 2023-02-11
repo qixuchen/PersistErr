@@ -7,8 +7,9 @@
  * @param u 				The linear function
  * @param k 				The threshold top-k
  */
-int Active_Ranking(std::vector<point_t *> p_set, point_set_t *P, int w)
+int Active_Ranking(std::vector<point_t *> p_set, point_set_t *P0, int w, int alg_id)
 {
+    reset_stats();
     int dim = p_set[0]->dim;
     int round = 0;
     point_random(p_set);
@@ -46,7 +47,11 @@ int Active_Ranking(std::vector<point_t *> p_set, point_set_t *P, int w)
                 if (relation == 0)
                 {
                     round++;
-                    int option = show_to_user(P, p_set[i]->id, current_use[j]->id);
+
+                    stop_timer();
+                    int option = show_to_user(P0, p_set[i]->id, current_use[j]->id);
+                    start_timer();
+
                     if (option == 1)
                     {
                         halfspace_t *half = alloc_halfspace(current_use[j], p_set[i], 0, true);
@@ -79,8 +84,14 @@ int Active_Ranking(std::vector<point_t *> p_set, point_set_t *P, int w)
     for(int i=0; i < output_size; i++){
         points_return.push_back(current_use[i]);
     }
-    print_result_list(P, points_return);
-    question_num += round;
-    return_size += output_size;
+    print_result_list(P0, points_return);
+    int alg_best = alg_top1_select(points_return);
+    question_asked_list[alg_id] = round;
+    best_pid_list[alg_id] = points_return[alg_best]->id; 
+    proc_time_list[alg_id] = avg_time(round);
+    cout << "avg time: " << avg_time(round)<< endl; 
+    return_size_list[alg_id] = points_return.size();
+    write_results_to_file(alg_id, points_return, alg_best);
+    for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
     return 0;
 }

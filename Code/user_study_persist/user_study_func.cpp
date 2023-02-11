@@ -92,15 +92,66 @@ int show_to_user(const point_t* p1, const point_t* p2)
 }
 
 
-
 void print_result_list(point_set_t* P, const vector<point_t *> &point_return){
     cout << endl;
-    cout << "These are the cars recommended by this algorithm:" << endl;
+    cout << "These are the cars recommended by this algorithm:" << endl << endl;
     print_table_title(cout);
     for(int i=0; i < point_return.size(); i++){
         print_opt(cout, P, point_return[i]->id, i+1);
     }
     cout<< vline <<endl;
+}
+
+
+void print_result_list(point_set_t* P, const vector<int> &ids){
+    cout << endl;
+    cout << "These are the cars recommended by this algorithm:" << endl << endl;
+    print_table_title(cout);
+    for(int i=0; i < ids.size(); i++){
+        print_opt(cout, P, ids[i], i+1);
+    }
+    cout<< vline <<endl;
+}
+
+
+int alg_top1_select(const vector<point_t *> &point_return){
+    cout << endl << "Please select your favorite one among the recommended cars." << endl;
+    int option = 0, opt_range = point_return.size();
+    while (option <= 0 || option > opt_range){
+        char buf[BUF_SIZE];
+        cout << endl << "Your choice (1 to " << opt_range << "): ";
+        cin >> buf;
+        option = atoi(buf);
+    }
+    return option-1;
+
+}
+
+
+/**    @brief write the result of an algorithm to a file in directory logs
+ * 
+ *             format:
+ *                      # of used questions
+ *                      id of the best point
+ *                      average processing time
+ *                      # of points recommended by algorithm (return size)
+ *                      id of recommended point 1
+ *                      id of recommended point 2
+ *                      id of recommended point 3
+ *                      ......
+ * 
+*/
+void write_results_to_file(const int alg_id, const vector<point_t *> &point_return, const int best_idx){
+    ofstream ofs;
+    ofs.open("../logs/" + file_names[alg_id], ofstream::out);
+    ofs << question_asked_list[alg_id] << endl;
+    ofs << proc_time_list[alg_id] << endl;
+    ofs << point_return[best_idx]->id << endl;
+    ofs << point_return.size()<<endl;
+    for(auto p: point_return){
+        ofs << p->id << endl;
+    }
+    ofs.close();
 }
 
 
@@ -143,6 +194,20 @@ int show_to_user_scale(const point_t* p1, const point_t* p2)
 }
 
 
+void print_alg_start(const int alg_num){
+    cout << vline << endl;
+    cout << "                  Algorithm " << alg_num+1 << " begins" << endl;
+    cout << vline << endl;
+}
+
+
+void print_alg_end(const int alg_num){
+    cout << vline << endl;
+    cout << "                  Algorithm " << alg_num+1 << " ends" << endl;
+    cout << vline << endl << endl << endl << endl;
+}
+
+
 void print_result(FILE* wPtr, const char *alg_name, const int num_of_question, const point* p, int alg_num){
     // print result to user
     printf("\n=========== Recommendation of algorithm %d =================\n", alg_num);
@@ -172,21 +237,19 @@ void print_result(FILE* wPtr, const char *alg_name, const int num_of_question, c
 
 };
 
+
+
 /**
  * @brief Display cars in the final list
  * 
  * @param final_list 
  */
-void display_final_list(const point_set_t* P, const std::vector<int> final_list){
-    for(int i=0; i<final_list.size(); i++){
-        printf("\n\n");
-        printf("Recommended car No. %d:\n", i+1);
-        printf("--------------------------------------------------------\n");
-        printf("|%10s|%10s|%10s|%10s|%10s|\n", " ", "Price(USD)", "Year", "Power(PS)", "Used KM");
-        printf("---------------------------------------------------------\n");
-        printf("|%10s|%10.0f|%10.0f|%10.0f|%10.0f|\n", "Car", P->points[final_list[i]]->coord[0], P->points[final_list[i]]->coord[1],
-                    P->points[final_list[i]]->coord[2], P->points[final_list[i]]->coord[3]);
-        printf("---------------------------------------------------------\n");
+void display_final_list(point_set_t* P, std::vector<int> final_list){
+    for(int i = 0; i <final_list.size(); i++){
+        cout << "Recommended car No. " << i+1 << ":" << endl;
+        print_table_title(cout);
+        print_opt(cout, P, final_list[i], i+1);
+        cout << vline << endl;
     }
 }
 
@@ -204,11 +267,58 @@ int ask_favorite_item(int l_size){
             "(e.g., 2 means car No. 2 is your favorite car)", l_size);
     while(favorite <1 || favorite > l_size){
         char buf[BUF_SIZE];
-        printf("\nYou answer: ");
-        fgets(buf, BUF_SIZE, stdin);
+        cout << endl << "Your choice (1 - " << l_size << "): ";
+        cin >> buf;
         favorite = atoi(buf);
     }
     return favorite-1;
+}
+
+
+int confirm_favorite_item(point_set_t* P, std::vector<int> final_list, int possible_best_idx){
+    std::vector<int> compete_points;
+    for(int i = 0; i < final_list.size(); i++){
+        if(i == possible_best_idx) continue;
+        int ans = show_to_user(P, final_list[possible_best_idx], final_list[i]);
+        if(ans != 1){
+            compete_points.push_back(i);
+        }
+    }
+    compete_points.push_back(possible_best_idx);
+    if(compete_points.size() <= 1) return possible_best_idx;
+    else{
+        int cur_best_idx = 0;
+        for(int i = 1; i < compete_points.size(); i++){
+            int ans = show_to_user(P, final_list[compete_points[cur_best_idx]], final_list[compete_points[i]]);
+            if(ans != 1) cur_best_idx = i;
+        }
+        return compete_points[cur_best_idx];
+    }
+}
+
+std::set<int> find_dissatisfactory_lists(point_set_t *P, int best_pid){
+    std::set<int> dissat_lists;
+    for(int i = 0; i < TOT_ALG_COUNT; i++){
+        std::vector<int> &vec = recommendation_list[i];
+        if(std::find(vec.begin(), vec.end(), best_pid) == vec.end()){
+            dissat_lists.insert(i);
+        }
+    }
+    return dissat_lists;
+}
+
+
+int ask_dissat_score(point_set_t *P,  vector<int> &ids){
+    print_result_list(P, ids);
+    int ans = 0;
+    cout << "Please give a dissatisfaction score (1 - 10) on this result list." << endl;
+    while (ans < 1 || ans > 10){
+        char buf[BUF_SIZE];
+        cout << endl << "Your answer (1 - 10): ";
+        cin >> buf;
+        ans = atoi(buf);
+    }
+    return ans;
 }
 
 

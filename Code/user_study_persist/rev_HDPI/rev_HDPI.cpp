@@ -274,8 +274,8 @@ int rev_modify_choose_item_table(std::vector<item *> &choose_item_set,
  * @param u 			 The linear function
  * @param k 			 The parameter
  */
-int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w)
-{
+int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w, int alg_id){
+    reset_stats();
     start_timer();
     int round = 0;
     //p_set_1 contains the points which are not dominated by >=1 points
@@ -339,16 +339,15 @@ int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w)
             break;
         }
         if(considered_half_set.size() > w){
+            stop_timer();
             opt = show_to_user(P0, choose_item_set[index]->hyper->point1->id, choose_item_set[index]->hyper->point2->id);
+            start_timer();
         }
     }
     stop_timer();
     //get the returned points
     vector<point_t *> points_return;
     for(auto idx : considered_half_set) points_return.push_back(half_set_set[idx]->represent_point[0]);
-    print_result_list(P0, points_return);
-    question_num += round;
-    return_size += points_return.size();
 
     // free the related data structures
     release_halfspace_set(R_half_set);
@@ -357,5 +356,14 @@ int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w)
         release_item(item_ptr);
         choose_item_set.pop_back();
     }
+    print_result_list(P0, points_return);
+    int alg_best = alg_top1_select(points_return);
+    question_asked_list[alg_id] = round;
+    best_pid_list[alg_id] = points_return[alg_best]->id; 
+    proc_time_list[alg_id] = avg_time(round);
+    cout << "avg time: " << avg_time(round)<< endl; 
+    return_size_list[alg_id] = points_return.size();
+    write_results_to_file(alg_id, points_return, alg_best);
+    for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
     return 0;
 }

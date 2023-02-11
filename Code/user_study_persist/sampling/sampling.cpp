@@ -528,7 +528,8 @@ namespace sampling{
     }
 
 
-    int sampling(std::vector<point_t *> p_set, point_set_t *P0, int k, int w, int select_opt){
+    int sampling(std::vector<point_t *> p_set, point_set_t *P0, int k, int w, int select_opt, int alg_id){
+        reset_stats();
         int num_sample = 250;
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
@@ -577,7 +578,11 @@ namespace sampling{
                 if(p1 == 0 || p2 == 0) break;
             }
             halfspace_t *hs = 0;
+
+            stop_timer();
             int opt = show_to_user(P0, p1->id, p2->id);
+            start_timer();
+            
             if(opt == 1){ //p1 > p2
                 hs = alloc_halfspace(p2, p1, 0, true);
             }
@@ -617,8 +622,14 @@ namespace sampling{
 
         stop_timer();
         print_result_list(P0, points_return);
-        question_num += round;
-        return_size += points_return.size();
+        int alg_best = alg_top1_select(points_return);
+        question_asked_list[alg_id] = round;
+        best_pid_list[alg_id] = points_return[alg_best]->id; 
+        proc_time_list[alg_id] = avg_time(round);
+        cout << "avg time: " << avg_time(round)<< endl; 
+        return_size_list[alg_id] = points_return.size();
+        write_results_to_file(alg_id, points_return, alg_best);
+        for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
         return 0;
     }
 }
