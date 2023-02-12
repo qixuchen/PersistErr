@@ -30,6 +30,8 @@ int alg_top1_select(const vector<point_t *> &point_return);
 
 void write_results_to_file(const int alg_id, const vector<point_t *> &point_return, const int best_idx);
 
+void write_cf_info(const int alg_id, const vector<int> &cr_belong);
+
 int show_to_user_scale(point_set_t* P, int p_idx, int q_idx);
 
 int show_to_user_scale(const point_t* p1, const point_t* p2);
@@ -56,6 +58,7 @@ int ask_satisfactory_level(const point_set_t* P, const int num_questions_asked, 
 
 void record_to_file(FILE *wPtr, int *records, int r_size);
 
+void write_summary();
 
 
 

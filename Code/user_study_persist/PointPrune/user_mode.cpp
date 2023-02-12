@@ -18,7 +18,7 @@ int checking_varyk(point_t* p1, point_t* p2, int k, double * max, double * min){
     int num_asked=1;
     int dim = p1->dim;
     point_t *scaled_p1 = alloc_point(dim), *scaled_p2 = alloc_point(dim);
-
+    scaled_p1->id = p1->id, scaled_p2->id = p2->id;
     while (p1_count<=k/2 && p2_count<=k/2 && num_asked<k){
         // printf("checking \n");
         double scale = (double)(90 + (rand()%10)) / 100; //generate a random number from 0.91-0.99

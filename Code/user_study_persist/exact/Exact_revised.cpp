@@ -13,13 +13,29 @@ namespace exact_rev{
 
     /** @brief compute the set of points whose partition intersects with R^0 ... R^k
     */
-    std::set<point_t *> compute_considered_set(const std::vector<conf_region> &conf_regions){
-        std::set<point_t *> point_return;
+    std::vector<point_t *> compute_considered_set(const std::vector<conf_region> &conf_regions){
+        std::set<point_t *> considered_points;
         int k = conf_regions.size() - 1;
         for(int i = 0; i <= k; i++){
-            point_return.insert(conf_regions[i].points.begin(), conf_regions[i].points.end());
+            considered_points.insert(conf_regions[i].points.begin(), conf_regions[i].points.end());
         }
-        return point_return;
+        return std::vector<point_t *> (considered_points.begin(), considered_points.end());;
+    }
+
+    /** @brief decide the confidence region each returned points belongs to
+    */
+    std::vector<int> decide_belonging_cr(const std::vector<point_t *> &points_return, const std::vector<conf_region> &conf_regions){
+        std::vector<int> cr_belong;  
+        int k = conf_regions.size() - 1;  
+        for(auto p : points_return){
+            for(int i = 0; i <= k; i++){
+                if(conf_regions[i].points.find(p) != conf_regions[i].points.end()){
+                    cr_belong.push_back(i);
+                    break;
+                }
+            }
+        }
+        return cr_belong;
     }
 
     /** @brief      Initialize the hyperplane candidates 
@@ -424,10 +440,10 @@ namespace exact_rev{
         }
         initialize_conf_region(conf_regions[0], half_set_set); // conf_region[0] now contains all partitions
 
-        // key: index of the item in choose_item_set; value: pointer to the hyperplane
-        std::map<int, hyperplane_t *> hyperplane_candidates;
+        vector<int> cr_belong;
+        std::map<int, hyperplane_t *> hyperplane_candidates; // key: index of the item in choose_item_set; value: pointer to the hyperplane
         construct_hy_candidates(hyperplane_candidates, choose_item_set);
-        std::set<point_t *> points_return = compute_considered_set(conf_regions);
+        std::vector<point_t *> points_return = compute_considered_set(conf_regions);
         std::set<std::pair<point_t *, point_t *>> selected_questions;
         int round = 0;
         while(points_return.size() > w){
@@ -458,11 +474,12 @@ namespace exact_rev{
             }
             exact_recur(conf_regions, hs);
             release_halfspace(hs);
-            std::set<point_t *> considered_points = compute_considered_set(conf_regions);
+            std::vector<point_t *> considered_points = compute_considered_set(conf_regions);
             if(considered_points.size() == 0){ 
                 break;
             }
             points_return = considered_points;
+            cr_belong = decide_belonging_cr(points_return, conf_regions);
             round++;
         }
         
@@ -487,19 +504,16 @@ namespace exact_rev{
                 ++it;
             }
         } 
-        vector<point_t *> result_list;
-        for(auto p: points_return){
-            result_list.push_back(p);
-        }
 
-        print_result_list(P, result_list);
-        int alg_best = alg_top1_select(result_list);
+        print_result_list(P, points_return);
+        int alg_best = alg_top1_select(points_return);
         question_asked_list[alg_id] = round;
-        best_pid_list[alg_id] = result_list[alg_best]->id; 
+        best_pid_list[alg_id] = points_return[alg_best]->id; 
         proc_time_list[alg_id] = avg_time(round);
-        return_size_list[alg_id] = result_list.size();
-        write_results_to_file(alg_id, result_list, alg_best);
-        for(auto p : result_list) recommendation_list[alg_id].push_back(p->id);
+        return_size_list[alg_id] = points_return.size();
+        write_results_to_file(alg_id, points_return, alg_best);
+        write_cf_info(alg_id, cr_belong);
+        for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
         return 0;
     }
 }

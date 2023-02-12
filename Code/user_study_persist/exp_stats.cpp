@@ -12,6 +12,7 @@ double proc_time_list[TOT_ALG_COUNT] = {0};
 int dissat_score_list[TOT_ALG_COUNT] = {0};
 std::vector<std::string> file_names = {"1.txt", "2.txt", "3.txt", "4.txt", "5.txt", "6.txt"};
 std::vector<std::vector<int>> recommendation_list(TOT_ALG_COUNT, std::vector<int>());
+std::vector<std::pair<int,int>> inconsistency;
 
 using namespace std::chrono;
 steady_clock::time_point begin, end;
@@ -47,4 +48,5 @@ void reset_stats(){
     return_size = 0;
     correct_count = 0;
     tot_time = 0;
+    inconsistency.clear();
 }

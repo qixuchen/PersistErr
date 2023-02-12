@@ -189,16 +189,16 @@ int user_study_main_body(){
     // print_alg_end(2);
 
     // // PointPrune Algorithm
-    // print_alg_start(3);
-    // PointPrune_v2(p_set, P0, 3, w, max, min, 3);
-    // print_alg_end(3);
+    // print_alg_start(0);
+    // PointPrune_v2(p_set, P0, 3, w, max, min, 0);
+    // print_alg_end(0);
 
-    // // Algorithm: Active Ranking
-    // print_alg_start(4);
-    // Active_Ranking(p_set, P0, w, 4);
-    // print_alg_end(4);
+    // // Active Ranking Algorithm
+    // print_alg_start(1);
+    // Active_Ranking(p_set, P0, w, 1);
+    // print_alg_end(1);
 
-    // // Algorithm: Preference Learning
+    // // Preference Learning Algorithm
     // print_alg_start(5);
     // Preference_Learning(p_set, P0, w, 5);
     // print_alg_end(5);
@@ -220,8 +220,7 @@ int user_study_main_body(){
             dissat_score_list[i] = ask_dissat_score(P0, recommendation_list[i]);
         }
     }
-
-
+    write_summary();
 
 
 

@@ -217,6 +217,24 @@ namespace sampling{
     }
 
 
+    
+    /** @brief decide the confidence region each returned points belongs to
+    */
+    std::vector<int> decide_belonging_cr(const std::vector<point_t *> &points_return, const std::vector<sample_set> &s_sets){
+        std::vector<int> cr_belong;  
+        int k = s_sets.size() - 1;  
+        for(auto p : points_return){
+            for(int i = 0; i <= k; i++){
+                if(s_sets[i].data.find(p) != s_sets[i].data.end()){
+                    cr_belong.push_back(i);
+                    break;
+                }
+            }
+        }
+        return cr_belong;
+    }
+
+
     /** @brief      Compute the priority of an item's related hyperplane
      */
     double compute_hy_priority(const item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
@@ -557,6 +575,7 @@ namespace sampling{
         }
         initialize_sample_sets(s_sets, lookup);
 
+        vector<int> cr_belong;
         std::map<int, hyperplane_t *> hyperplane_candidates;
         construct_hy_candidates(hyperplane_candidates, choose_item_set);
         std::vector<point_t *> points_return = compute_considered_set(s_sets);
@@ -597,6 +616,7 @@ namespace sampling{
                 break;
             }
             points_return = considered_points;
+            cr_belong = decide_belonging_cr(points_return, s_sets);
             round++;
         }
 
@@ -629,6 +649,7 @@ namespace sampling{
         cout << "avg time: " << avg_time(round)<< endl; 
         return_size_list[alg_id] = points_return.size();
         write_results_to_file(alg_id, points_return, alg_best);
+        write_cf_info(alg_id, cr_belong);
         for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
         return 0;
     }

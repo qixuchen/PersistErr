@@ -18,6 +18,7 @@ extern double proc_time_list[TOT_ALG_COUNT];
 extern int dissat_score_list[TOT_ALG_COUNT];
 extern std::vector<std::string> file_names;
 extern std::vector<std::vector<int>> recommendation_list;
+extern std::vector<std::pair<int,int>> inconsistency;
 
 // #define EXACT_ALG 0
 // #define SAMPLING_ALG 1

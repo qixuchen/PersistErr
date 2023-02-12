@@ -54,18 +54,75 @@ void print_opt_scale(ostream &os, const point_t *p, const int opt, double scale)
 }
 
 
-int show_to_user(point_set_t* P, int p_idx, int q_idx)
-{
+int inconsistency_asking(point_set_t* P, int p_idx, int q_idx){
     int option = 0;
     cout << endl;
-    cout << "Please choose the car you favor more:" << endl;
+    cout << "This is the special round:" << endl;
+    cout << "Please choose the car that you *dislike*:" << endl;
     print_table_title(cout);
     print_opt(cout, P, p_idx, 1);
     print_opt(cout, P, q_idx, 2);
     cout << vline << endl;
     while (option != 1 && option != 2){
         char buf[BUF_SIZE];
-        cout << endl << "Your choice (1 or 2): ";
+        cout << endl << "Your choice (choose the one that you *dislike*) (1 or 2): ";
+        cin >> buf;
+        option = atoi(buf);
+    }
+    return option;
+}
+
+
+int show_to_user(point_set_t* P, int p_idx, int q_idx)
+{
+    int option = 0;
+    cout << endl;
+    if(inconsistency.size()==0){
+        int opt = inconsistency_asking(P, p_idx, q_idx);
+        inconsistency.push_back( (opt == 1) ? make_pair(p_idx, q_idx) : make_pair(q_idx, p_idx));
+        // cout << "Inconsistency added; " << p_idx << "\t" << q_idx << endl;
+        return opt;
+    }
+    else{
+        int ic1 = inconsistency[0].first, ic2 = inconsistency[0].second;
+        if(ic1 == p_idx && ic2 == q_idx){ 
+            // cout << "Auto answer;" << p_idx << "\t" << q_idx << endl;
+            return 1;
+        }
+        else if(ic1 == q_idx && ic2 == p_idx){
+            // cout << "Auto answer;" << q_idx << "\t" << p_idx << endl;
+            return 2;
+        }
+        else{
+            cout << "Please choose the car you favor more:" << endl;
+            print_table_title(cout);
+            print_opt(cout, P, p_idx, 1);
+            print_opt(cout, P, q_idx, 2);
+            cout << vline << endl;
+            while (option != 1 && option != 2){
+                char buf[BUF_SIZE];
+                cout << endl << "Your choice (1 or 2): ";
+                cin >> buf;
+                option = atoi(buf);
+            }
+            return option;
+        }
+    }
+}
+
+
+int inconsistency_asking(const point_t* p1, const point_t* p2){
+    int option = 0;
+    cout << endl;
+    cout << "This is the special round:" << endl;
+    cout << "Please choose the car that you *dislike*:" << endl;
+    print_table_title(cout);
+    print_opt(cout, p1, 1);
+    print_opt(cout, p2, 2);
+    cout << vline << endl;
+    while (option != 1 && option != 2){
+        char buf[BUF_SIZE];
+        cout << endl << "Your choice (choose the one that you *dislike*) (1 or 2): ";
         cin >> buf;
         option = atoi(buf);
     }
@@ -77,18 +134,37 @@ int show_to_user(const point_t* p1, const point_t* p2)
 {
     int option = 0;
     cout << endl;
-    cout << "Please choose the car you favor more:" << endl;
-    print_table_title(cout);
-    print_opt(cout, p1, 1);
-    print_opt(cout, p2, 2);
-    cout << vline << endl;
-    while (option != 1 && option != 2){
-        char buf[BUF_SIZE];
-        cout << endl << "Your choice (1 or 2): ";
-        cin >> buf;
-        option = atoi(buf);
+    if(inconsistency.size()==0){
+        int opt = inconsistency_asking(p1, p2);
+        inconsistency.push_back( (opt == 1) ? make_pair(p1->id, p2->id) : make_pair(p2->id, p1->id) );
+        // cout << "Inconsistency added; " << p1->id << "\t" << p2->id << endl;
+        return opt;
     }
-    return option;
+    else{
+        int ic1 = inconsistency[0].first, ic2 = inconsistency[0].second;
+        if(ic1 == p1->id && ic2 == p2->id){
+            // cout << "Auto answer;" << p1->id << "\t" << p2->id << endl;
+            return 1;
+        }
+        else if(ic1 == p2->id && ic2 == p1->id){
+            // cout << "Auto answer;" << p2->id << "\t" << p1->id << endl;
+            return 2;
+        }
+        else{
+            cout << "Please choose the car you favor more:" << endl;
+            print_table_title(cout);
+            print_opt(cout, p1, 1);
+            print_opt(cout, p2, 2);
+            cout << vline << endl;
+            while (option != 1 && option != 2){
+                char buf[BUF_SIZE];
+                cout << endl << "Your choice (1 or 2): ";
+                cin >> buf;
+                option = atoi(buf);
+            }
+            return option;
+        }
+    }
 }
 
 
@@ -150,6 +226,18 @@ void write_results_to_file(const int alg_id, const vector<point_t *> &point_retu
     ofs << point_return.size()<<endl;
     for(auto p: point_return){
         ofs << p->id << endl;
+    }
+    ofs.close();
+}
+
+
+/**    @brief write the confidence region each returned point belongs to
+ */
+void write_cf_info(const int alg_id, const vector<int> &cr_belong){
+    ofstream ofs;
+    ofs.open(string("../logs/") + "conf_reg" + file_names[alg_id], ofstream::out);
+    for(auto cr: cr_belong){
+        ofs << cr << endl;
     }
     ofs.close();
 }
@@ -319,6 +407,17 @@ int ask_dissat_score(point_set_t *P,  vector<int> &ids){
         ans = atoi(buf);
     }
     return ans;
+}
+
+void write_summary(){
+    ofstream ofs;
+    ofs.open("../logs/summary", ofstream::out);
+    for(int i = 0; i < TOT_ALG_COUNT; i++){
+        ofs << question_asked_list[i] << "\t";
+        ofs << proc_time_list[i] << "\t";
+        ofs << dissat_score_list[i] << "\t" << endl;
+    }
+    ofs.close();
 }
 
 
