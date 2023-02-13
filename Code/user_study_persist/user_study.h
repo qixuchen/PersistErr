@@ -22,10 +22,10 @@
 #include <vector>
 #include <ctime>
 #include <iostream>
+#include <string>
 #include "exp_stats.h"
 #include <sys/time.h>
 
 int user_study_main_body();
-
 
 #endif

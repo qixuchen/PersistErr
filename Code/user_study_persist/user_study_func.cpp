@@ -4,6 +4,110 @@ using namespace std;
 
 string vline = "--------------------------------------------------------";
 
+void enter_to_continue(){
+    cout << "Press Enter to Continue.";
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cout << endl;
+}
+
+bool is_number(const string& s)
+{
+    if(s.size() == 0) return false;
+    for (char const &ch : s) {
+        if (std::isdigit(ch) == 0)
+            return false;
+    }
+    return true;
+}
+
+void intro(){
+    cout << "-------------------------Welcome to the recommending car system--------------------------------" << endl;
+    cout << "Imagine that you have been saving for years to buy a car in the second-hand market. There are " << endl
+           << "thousands of cars in the market." << endl << endl;
+    cout << "Since this is a big decision in your life, you want to make every penny count and pick your" << endl
+           << "favorite car." << endl << endl;
+    cout << "In our research project, we want to study several recommendation algorithms and see whether they" << endl
+           << "can help you find your favorite car if some **incorrect** input is given by the user." << endl << endl;
+    cout << "This survey consists of 2 parts. Based on your answers in Part 1, there is a small chance that " << endl
+           << "Part 2 is skipped." << endl << endl;
+    enter_to_continue();
+    cout << endl;
+}
+
+void part1_info(){
+    cout << "===============================================================================================" << endl << endl;
+    cout << "                                     Beginning of Part 1" << endl << endl;
+    cout << "===============================================================================================" << endl << endl;
+    cout << "In Part 1, there are 6 algorithms and each will ask you some questions." << endl << endl;
+    cout << "In each question, you will be presented 2 options of cars and you need to pick the one that" << endl
+            << "you favor more. For example, enter 1 if you think car 1 is more preferred to car 2." << endl << endl;
+    cout << "Each car is described with the following 4 atrributes:" << endl
+            << "    Price               Range from USD 1049-95400" << endl
+            << "    Year                Range from 2002-2015" << endl
+            << "    Power               Range from 52-575 PS" << endl
+            << "    Used kilometer      Range from 10000-125000 km" << endl << endl;
+    enter_to_continue();
+    cout << endl;
+
+    cout << "However, in the **first** question of each algorithm, we will ask you to do something special." << endl << endl;
+    cout << "For this question, instead of picking the one you **prefer**, please pick the one that you " << endl
+            << "think is **less preferred**." << endl << endl;
+    cout << "This is because we want to see if the algorithm can find your favorite car even if some *incorrect*" << endl
+            << "input is given by the user." << endl << endl;
+    cout << "We will notify you when you should do this special action." << endl << endl;
+    enter_to_continue();
+    cout << endl;
+
+    cout << "By the end of each algorithm, a list of cars will be recommended by this algorithm." << endl;
+    cout << "For example, a recommendation list may looks like follows:" << endl << endl;
+
+    cout << "These are the cars recommended by this algorithm:" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "|          |Price(USD)|      Year| Power(PS)|   Used KM|" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "|  Option 1|      2100|      2009|       156|     90000|" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "|  Option 2|      8790|      2010|       299|    100000|" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "|  Option 3|      1850|      2002|       150|    125000|" << endl;
+    cout << "--------------------------------------------------------" << endl << endl;
+
+    cout << "You will need to select 1 car from the recommendation list that you think is the best." << endl;
+    cout << "For example, enter 3 if you think option 3 is your favorite among the recommended cars." << endl << endl;
+    enter_to_continue();
+    cout << endl;
+}
+
+
+void part1_end(){
+    cout << "===============================================================================================" << endl << endl;
+    cout << "                                        End of Part 1" << endl << endl;
+    cout << "===============================================================================================" << endl << endl << endl << endl;
+}
+
+
+void part2_info(){
+    cout << "===============================================================================================" << endl << endl;
+    cout << "                                     Beginning of Part 2" << endl << endl;
+    cout << "===============================================================================================" << endl << endl;
+
+    cout << "In Part 2, there are two tasks." << endl << endl;
+
+    cout << "The first task is to decide your favorite car among the cars you selected at the end of each" << endl
+            << "algorithm in Part 1." << endl << endl;
+
+    enter_to_continue();
+    cout << endl;
+}
+
+
+void part2_end(){
+    cout << "===============================================================================================" << endl << endl;
+    cout << "                                        End of Part 2" << endl << endl;
+    cout << "===============================================================================================" << endl << endl << endl << endl;
+}
+
+
 void print_table_title(ostream &os){
     char buffer[1024];
     sprintf(buffer, "|%10s|%10s|%10s|%10s|%10s|", " ", "Price(USD)", "Year", "Power(PS)", "Used KM");
@@ -21,15 +125,6 @@ string format_opt(const point_t *p, const int opt){
 }
 
 
-string format_opt_scale(const point_t *p, const int opt, double scale){
-    char *buffer = new char[1024];
-    string option = "Option " + to_string(opt);
-    sprintf(buffer, "|%10s|%10.0f|%10.0f|%10.0f|%10.0f|", option.c_str(), p->coord[0] * scale, p->coord[1] * scale, 
-                p->coord[2] * scale, p->coord[3] * scale);
-    return string(buffer);
-}
-
-
 void print_opt(ostream &os, point_set_t* P, const int idx, const int opt){
     cout << vline << endl;
     cout << format_opt(P->points[idx], opt) << endl;
@@ -41,33 +136,26 @@ void print_opt(ostream &os, const point_t *p, const int opt){
     cout << format_opt(p, opt) << endl;
 }
 
-
-void print_opt_scale(ostream &os, point_set_t* P, const int idx, const int opt, double scale){
-    cout << vline << endl;
-    cout << format_opt_scale(P->points[idx], opt, scale) << endl;
-}
-
-
-void print_opt_scale(ostream &os, const point_t *p, const int opt, double scale){
-    cout << vline << endl;
-    cout << format_opt_scale(p, opt, scale) << endl;
-}
-
-
 int inconsistency_asking(point_set_t* P, int p_idx, int q_idx){
     int option = 0;
     cout << endl;
-    cout << "This is the special round:" << endl;
-    cout << "Please choose the car that you *dislike*:" << endl;
+    cout << "In this round, you will need to choose the car that you *dislike*." << endl << endl;
+    cout << "Note that you need to do this special action *only* in this round." << endl << endl;
+    cout << "In later rounds, please still choose the car that you like." << endl << endl;
+    enter_to_continue();
+    cout << endl;
+
     print_table_title(cout);
     print_opt(cout, P, p_idx, 1);
     print_opt(cout, P, q_idx, 2);
     cout << vline << endl;
     while (option != 1 && option != 2){
-        char buf[BUF_SIZE];
-        cout << endl << "Your choice (choose the one that you *dislike*) (1 or 2): ";
-        cin >> buf;
-        option = atoi(buf);
+        string buf;
+        cout << endl << "Your choice (choose the one that you *dislike*) (enter 1 or 2): ";
+        getline(cin, buf);
+        if(is_number(buf)){
+            option = stoi(buf);
+        }
     }
     return option;
 }
@@ -100,10 +188,12 @@ int show_to_user(point_set_t* P, int p_idx, int q_idx)
             print_opt(cout, P, q_idx, 2);
             cout << vline << endl;
             while (option != 1 && option != 2){
-                char buf[BUF_SIZE];
-                cout << endl << "Your choice (1 or 2): ";
-                cin >> buf;
-                option = atoi(buf);
+                string buf;
+                cout << endl << "Your choice (enter 1 or 2): ";
+                getline(cin, buf);
+                if(is_number(buf)){
+                    option = stoi(buf);
+                }
             }
             return option;
         }
@@ -114,17 +204,22 @@ int show_to_user(point_set_t* P, int p_idx, int q_idx)
 int inconsistency_asking(const point_t* p1, const point_t* p2){
     int option = 0;
     cout << endl;
-    cout << "This is the special round:" << endl;
-    cout << "Please choose the car that you *dislike*:" << endl;
+    cout << "In this round, you will need to choose the car that you *dislike*." << endl << endl;
+    cout << "Note that you need to do this special action *only* in this round." << endl << endl;
+    cout << "In later rounds, please still choose the car that you like." << endl << endl;
+    enter_to_continue();
+    cout << endl;
     print_table_title(cout);
     print_opt(cout, p1, 1);
     print_opt(cout, p2, 2);
     cout << vline << endl;
     while (option != 1 && option != 2){
-        char buf[BUF_SIZE];
-        cout << endl << "Your choice (choose the one that you *dislike*) (1 or 2): ";
-        cin >> buf;
-        option = atoi(buf);
+        string buf;
+        cout << endl << "Your choice (choose the one that you *dislike*) (enter 1 or 2): ";
+        getline(cin, buf);
+        if(is_number(buf)){
+            option = stoi(buf);
+        }
     }
     return option;
 }
@@ -157,10 +252,12 @@ int show_to_user(const point_t* p1, const point_t* p2)
             print_opt(cout, p2, 2);
             cout << vline << endl;
             while (option != 1 && option != 2){
-                char buf[BUF_SIZE];
-                cout << endl << "Your choice (1 or 2): ";
-                cin >> buf;
-                option = atoi(buf);
+                string buf;
+                cout << endl << "Your choice (enter 1 or 2): ";
+                getline(cin, buf);
+                if(is_number(buf)){
+                    option = stoi(buf);
+                }
             }
             return option;
         }
@@ -170,7 +267,8 @@ int show_to_user(const point_t* p1, const point_t* p2)
 
 void print_result_list(point_set_t* P, const vector<point_t *> &point_return){
     cout << endl;
-    cout << "These are the cars recommended by this algorithm:" << endl << endl;
+    cout << vline << endl << endl;
+    cout << "These are the cars recommended by this algorithm:" << endl;
     print_table_title(cout);
     for(int i=0; i < point_return.size(); i++){
         print_opt(cout, P, point_return[i]->id, i+1);
@@ -181,7 +279,9 @@ void print_result_list(point_set_t* P, const vector<point_t *> &point_return){
 
 void print_result_list(point_set_t* P, const vector<int> &ids){
     cout << endl;
-    cout << "These are the cars recommended by this algorithm:" << endl << endl;
+    cout << vline << endl;
+    cout << "This algorithm has finished."  << endl;
+    cout << "These are the cars recommended by this algorithm:" << endl;
     print_table_title(cout);
     for(int i=0; i < ids.size(); i++){
         print_opt(cout, P, ids[i], i+1);
@@ -194,10 +294,12 @@ int alg_top1_select(const vector<point_t *> &point_return){
     cout << endl << "Please select your favorite one among the recommended cars." << endl;
     int option = 0, opt_range = point_return.size();
     while (option <= 0 || option > opt_range){
-        char buf[BUF_SIZE];
-        cout << endl << "Your choice (1 to " << opt_range << "): ";
-        cin >> buf;
-        option = atoi(buf);
+        string buf;
+        cout << endl << "Your choice (enter 1 to " << opt_range << "): ";
+        getline(cin, buf);
+        if(is_number(buf)){
+            option = stoi(buf);
+        }
     }
     return option-1;
 
@@ -243,45 +345,6 @@ void write_cf_info(const int alg_id, const vector<int> &cr_belong){
 }
 
 
-int show_to_user_scale(point_set_t* P, int p_idx, int q_idx)
-{
-    double scale = (double)(90 + (rand()%10)) / 100; //generate a random number from 0.91-0.99
-    int option = 0;
-    cout << endl;
-    cout << "Please choose the car you favor more:" << endl;
-    print_table_title(cout);
-    print_opt_scale(cout, P, p_idx, 1, scale);
-    print_opt_scale(cout, P, q_idx, 2, scale);
-    cout << vline << endl;
-    while (option != 1 && option != 2){
-        char buf[BUF_SIZE];
-        cout << endl << "Your choice (1 or 2): ";
-        cin >> buf;
-        option = atoi(buf);
-    }
-    return option;
-}
-
-int show_to_user_scale(const point_t* p1, const point_t* p2)
-{
-    double scale = (double)(90 + (rand()%10)) / 100; //generate a random number from 0.91-0.99
-    int option = 0;
-    cout << endl;
-    cout << "Please choose the car you favor more:" << endl;
-    print_table_title(cout);
-    print_opt_scale(cout, p1, 1, scale);
-    print_opt_scale(cout, p2, 2, scale);
-    cout << vline << endl;
-    while (option != 1 && option != 2){
-        char buf[BUF_SIZE];
-        cout << endl << "Your choice (1 or 2): ";
-        cin >> buf;
-        option = atoi(buf);
-    }
-    return option;
-}
-
-
 void print_alg_start(const int alg_num){
     cout << vline << endl;
     cout << "                  Algorithm " << alg_num+1 << " begins" << endl;
@@ -296,43 +359,16 @@ void print_alg_end(const int alg_num){
 }
 
 
-void print_result(FILE* wPtr, const char *alg_name, const int num_of_question, const point* p, int alg_num){
-    // print result to user
-    printf("\n=========== Recommendation of algorithm %d =================\n", alg_num);
-    printf("\n--------------------------------------------------------\n");
-    printf("%s %10d \n", "No. of questions asked:", num_of_question);
-    printf("--------------------------------------------------------\n");
-    printf("Recommended car:\n");
-    printf("--------------------------------------------------------\n");
-    printf("|%10s|%10s|%10s|%10s|%10s|\n", " ", "Price(USD)", "Year", "Power(PS)", "Used KM");
-    printf("---------------------------------------------------------\n");
-    printf("|%10s|%10.0f|%10.0f|%10.0f|%10.0f|\n", "Car", p->coord[0],p->coord[1],
-                p->coord[2], p->coord[3]);
-    printf("---------------------------------------------------------\n");
-
-
-    // print result to file 
-    fprintf(wPtr, "--------------------------------------------------------\n");
-    fprintf(wPtr, "|%30s |%10d |\n", alg_name, num_of_question);
-    fprintf(wPtr, "--------------------------------------------------------\n");
-    fprintf(wPtr, "Recommended car:\n");
-    fprintf(wPtr, "--------------------------------------------------------\n");
-    fprintf(wPtr, "|%10s|%10s|%10s|%10s|%10s|\n", " ", "Price(USD)", "Year", "Power(PS)", "Used KM");
-    fprintf(wPtr,"---------------------------------------------------------\n");
-    fprintf(wPtr,"|%10s|%10.0f|%10.0f|%10.0f|%10.0f|\n", "Car", p->coord[0], p->coord[1],
-               p->coord[2], p->coord[3]);
-    fprintf(wPtr,"---------------------------------------------------------\n");
-
-};
-
-
-
 /**
  * @brief Display cars in the final list
  * 
  * @param final_list 
  */
 void display_final_list(point_set_t* P, std::vector<int> final_list){
+    cout << vline << endl;
+    cout << "Now, we need you to decide your favorite car among the " << endl
+            << "cars you selected in Part 1." << endl << endl;
+    cout << "The list of cars selected by you are as follows." << endl << endl;
     for(int i = 0; i <final_list.size(); i++){
         cout << "Recommended car No. " << i+1 << ":" << endl;
         print_table_title(cout);
@@ -354,10 +390,12 @@ int ask_favorite_item(int l_size){
             "you like the most in the recommended cars listed above \n"
             "(e.g., 2 means car No. 2 is your favorite car)", l_size);
     while(favorite <1 || favorite > l_size){
-        char buf[BUF_SIZE];
-        cout << endl << "Your choice (1 - " << l_size << "): ";
-        cin >> buf;
-        favorite = atoi(buf);
+        string buf;
+        cout << endl << "Your choice (enter 1 to " << l_size << "): ";
+        getline(cin, buf);
+        if(is_number(buf)){
+            favorite = stoi(buf);
+        }
     }
     return favorite-1;
 }
@@ -396,15 +434,34 @@ std::set<int> find_dissatisfactory_lists(point_set_t *P, int best_pid){
 }
 
 
+void dissat_info(){
+    cout << "------------------------------------------------------------------------------------------------" << endl << endl;
+    cout << "The second task is to provide a **dissatisfaction score** to each recommendation list that does" << endl
+            << "not recommend your favorite car." << endl << endl;
+
+    cout << "The **dissatisfaction score** is an integer ranging from 1 to 10. It measures how *dissatisfied*" << endl
+            << "you will feel if you get a car from this list instead of your favorite car." << endl;
+    
+    cout << "1 means the least dissatisfied, and 10 means the most dissatisfied." << endl << endl;
+
+    enter_to_continue();
+    cout << endl;
+
+}
+
+
+
 int ask_dissat_score(point_set_t *P,  vector<int> &ids){
     print_result_list(P, ids);
     int ans = 0;
     cout << "Please give a dissatisfaction score (1 - 10) on this result list." << endl;
     while (ans < 1 || ans > 10){
-        char buf[BUF_SIZE];
-        cout << endl << "Your answer (1 - 10): ";
-        cin >> buf;
-        ans = atoi(buf);
+        string buf;
+        cout << endl << "Your answer (enter 1 - 10): ";
+        getline(cin, buf);
+        if(is_number(buf)){
+            ans = stoi(buf);
+        }
     }
     return ans;
 }

@@ -172,6 +172,8 @@ int user_study_main_body(){
     p_2 = scale_up(p_set);
     point_set_t *P = point_reload(p_set);
 
+    // intro();
+    // part1_info();
 
     // the exact Algorithm
     print_alg_start(0);
@@ -203,23 +205,31 @@ int user_study_main_body(){
     // Preference_Learning(p_set, P0, w, 5);
     // print_alg_end(5);
 
+    part1_end();
+
     int best_idx = -1, possible_best_idx = -1;
     std::vector<int> final_cand = load_final_cand(); 
     int cand_num = final_cand.size();
     if(cand_num > 1){
+        part2_info();
         display_final_list(P0, final_cand);
         possible_best_idx = ask_favorite_item(cand_num);
-    }
-    best_idx = confirm_favorite_item(P0, final_cand, possible_best_idx);
-    std::set<int> dissat_lists = find_dissatisfactory_lists(P0, final_cand[best_idx]);
-    for(int i = 0; i < TOT_ALG_COUNT; i++){
-        if(dissat_lists.find(i) == dissat_lists.end()){
-            dissat_score_list[i] = 0;
+        best_idx = confirm_favorite_item(P0, final_cand, possible_best_idx);
+        std::set<int> dissat_lists = find_dissatisfactory_lists(P0, final_cand[best_idx]);
+        if(dissat_lists.size() > 0){
+            dissat_info();
         }
-        else{
-            dissat_score_list[i] = ask_dissat_score(P0, recommendation_list[i]);
+        for(int i = 0; i < TOT_ALG_COUNT; i++){
+            if(dissat_lists.find(i) == dissat_lists.end()){
+                dissat_score_list[i] = 0;
+            }
+            else{
+                dissat_score_list[i] = ask_dissat_score(P0, recommendation_list[i]);
+            }
         }
+        part2_end();
     }
+   
     write_summary();
 
 
