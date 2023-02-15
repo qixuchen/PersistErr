@@ -4,14 +4,56 @@ using namespace std;
 
 string vline = "--------------------------------------------------------";
 
+
+void enter_recover(){
+    string recover;
+    cout << "Press Enter to Continue.";
+    getline(cin, recover);
+    if(recover.size() == 1 && recover[0] == 'r'){
+        cout << endl << "Entering recover mode " << endl;
+        int jump_id = 0; 
+        while (jump_id < 1 || jump_id > 6){
+            string buf;
+            cout << "Enter the algorithm id you want to jump to:";
+            getline(cin, buf);
+            if(is_number(buf)){
+                jump_id = stoi(buf);
+            }
+            handle_recover(jump_id);
+        }
+        jump = jump_id;
+    }
+    cout << endl;
+}
+
+void handle_recover(int jump_id){
+    for(int i=0; i < jump_id - 1; i++){
+        ifstream ifs;
+        ifs.open("../logs/" + file_names[i], ifstream::in);
+        string ques, proc_time, best_pid, return_size, recom_id; 
+        getline(ifs, ques);
+        question_asked_list[i] = stoi(ques);
+        getline(ifs, proc_time);
+        proc_time_list[i] = stod(proc_time);
+        getline(ifs, best_pid);
+        best_pid_list[i] = stoi(best_pid);
+        getline(ifs, return_size);
+        int size = stoi(return_size);
+        return_size_list[i] = size;
+        for(int j = 0; j < size; j++){
+            getline(ifs, recom_id);
+            recommendation_list[i].push_back(stoi(recom_id));
+        }
+    }
+}
+
 void enter_to_continue(){
     cout << "Press Enter to Continue.";
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     cout << endl;
 }
 
-bool is_number(const string& s)
-{
+bool is_number(const string& s){
     if(s.size() == 0) return false;
     for (char const &ch : s) {
         if (std::isdigit(ch) == 0)
@@ -30,7 +72,8 @@ void intro(){
            << "can help you find your favorite car if some **incorrect** input is given by the user." << endl << endl;
     cout << "This survey consists of 2 parts. Based on your answers in Part 1, there is a small chance that " << endl
            << "Part 2 is skipped." << endl << endl;
-    enter_to_continue();
+    // enter_to_continue();
+    enter_recover();
     cout << endl;
 }
 

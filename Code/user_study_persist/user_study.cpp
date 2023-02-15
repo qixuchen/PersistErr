@@ -173,37 +173,46 @@ int user_study_main_body(){
     point_set_t *P = point_reload(p_set);
 
     intro();
-    part1_info();
 
-    // the exact Algorithm
-    print_alg_start(0);
-    exact_rev::Exact_revised(p_set, P0, k, w, SCORE_SELECT, 0);
-    print_alg_end(0);
-
-    // the sampling Algorithm
-    print_alg_start(1);
-    sampling::sampling(p_set, P0, k, w, SCORE_SELECT, 1);
-    print_alg_end(1);
-
-    // the HDPI Algorithm
-    print_alg_start(2);
-    rev_HDPI(p_set, P0, w, 2);
-    print_alg_end(2);
-
-    // PointPrune Algorithm
-    print_alg_start(3);
-    PointPrune_v2(p_set, P0, 3, w, max, min, 3);
-    print_alg_end(3);
-
-    // Active Ranking Algorithm
-    print_alg_start(4);
-    Active_Ranking(p_set, P0, w, 4);
-    print_alg_end(4);
-
-    // Preference Learning Algorithm
-    print_alg_start(5);
-    Preference_Learning(p_set, P0, w, 5);
-    print_alg_end(5);
+    if(jump <= 1){
+        part1_info();
+    }
+    if(jump <= 1){
+        // the exact Algorithm
+        print_alg_start(0);
+        exact_rev::Exact_revised(p_set, P0, k, w, SCORE_SELECT, 0);
+        print_alg_end(0);
+    }
+    if(jump <= 2){
+        // the sampling Algorithm
+        print_alg_start(1);
+        sampling::sampling(p_set, P0, k, w, SCORE_SELECT, 1);
+        print_alg_end(1);
+    }
+    if(jump <= 3){
+        // the HDPI Algorithm
+        print_alg_start(2);
+        rev_HDPI(p_set, P0, w, 2);
+        print_alg_end(2);
+    }
+    if(jump <= 4){
+        // PointPrune Algorithm
+        print_alg_start(3);
+        PointPrune_v2(p_set, P0, 3, w, max, min, 3);
+        print_alg_end(3);
+    }
+    if(jump <= 5){
+        // Active Ranking Algorithm
+        print_alg_start(4);
+        Active_Ranking(p_set, P0, w, 4);
+        print_alg_end(4);
+    }
+    if(jump <= 6){
+        // Preference Learning Algorithm
+        print_alg_start(5);
+        Preference_Learning(p_set, P0, w, 5);
+        print_alg_end(5);
+    }
 
     part1_end();
 

@@ -18,7 +18,13 @@
 
 #define BUF_SIZE 1024
 
+bool is_number(const string& s);
+
 void enter_to_continue();
+
+void enter_recover();
+
+void handle_recover(int jump_id);
 
 void intro();
 
