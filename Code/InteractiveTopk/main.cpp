@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     double theta = 0.05;
 
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"HTRU.txt");
+    point_set_t *P0 = read_points((char*)"4d100k.txt");
     int dim = P0->points[0]->dim; //obtain the dimension of the point
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
         exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
         // sampling::sampling(p_set, u, k, w, SCORE_SELECT, theta);
-        // optimal::optimal(p_set, u, k, w, PURE_RANDOM, theta);
+        // optimal::optimal(p_set, u, k, w, RAND_SELECT, theta);
     }
     
 

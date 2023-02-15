@@ -223,12 +223,15 @@ namespace optimal{
     double compute_hy_priority(const item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
         int k = points_in_region.size()-1;
         double score = 0;
+        std::unordered_set<point_t*> processed;
         for(int i=0; i<=k; ++i){
             double weight = pow(Alpha, i);
             int pos_count = 0, neg_count = 0;
             for(auto f: points_in_region[i]){
+                if(processed.find(f) != processed.end()) continue;
                 if(item_ptr->pos_points.find(f) != item_ptr->pos_points.end()) pos_count++;
                 else if(item_ptr->neg_points.find(f) != item_ptr->neg_points.end()) neg_count++;
+                processed.insert(f);
             }
             score += weight * min(pos_count, neg_count);
         }

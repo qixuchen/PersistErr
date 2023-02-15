@@ -35,7 +35,7 @@ namespace exact_rev{
      */
     double compute_hy_priority(const item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
         int k = points_in_region.size()-1;
-        double score = 0;
+        double pos_score = 0, neg_score = 0;
         std::unordered_set<point_t*> processed;
         for(int i=0; i<=k; ++i){
             double weight = pow(Alpha, i);
@@ -46,9 +46,10 @@ namespace exact_rev{
                 else if(item_ptr->neg_points.find(f) != item_ptr->neg_points.end()) neg_count++;
                 processed.insert(f);
             }
-            score += weight * min(pos_count, neg_count);
+            pos_score += weight * pos_count;
+            neg_score += weight * neg_count;
         }
-        return score;
+        return min(pos_score, neg_score);
     }
 
 
@@ -89,42 +90,24 @@ namespace exact_rev{
      */
     double compute_hy_priority_update_upper_bound(item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
         int k = points_in_region.size()-1;
-        int pos[k + 1] = {}, neg[k + 1] = {};
-        double score = 0;
+        double pos_score = 0, neg_score = 0;
         std::unordered_set<point_t*> processed;
-        for(int i=0; i <= k; ++i){
-           for(auto f: points_in_region[i]){
+        for(int i=0; i<=k; ++i){
+            double weight = pow(Alpha, i);
+            int pos_count = 0, neg_count = 0;
+            for(auto f: points_in_region[i]){
                 if(processed.find(f) != processed.end()) continue;
-                if(item_ptr->pos_points.find(f) != item_ptr->pos_points.end()) ++pos[i];
-                else if(item_ptr->neg_points.find(f) != item_ptr->neg_points.end()) ++neg[i];
+                if(item_ptr->pos_points.find(f) != item_ptr->pos_points.end()) pos_count++;
+                else if(item_ptr->neg_points.find(f) != item_ptr->neg_points.end()) neg_count++;
                 processed.insert(f);
             }
+            pos_score += weight * pos_count;
+            neg_score += weight * neg_count;
         }
-        for(int i=0; i <= k; ++i){
-            score += pow(Alpha, i) * min(pos[i], neg[i]);
-        }
+
+        double score = min(pos_score, neg_score);
         // update the upper bound of this item
-        double ub = 0;
-        const int POS = 0, NEG = 1; 
-        int carry_side = POS, carry = 0;
-        for(int i = 0; i <= k; i++){
-            if(carry_side == POS){
-                pos[i] += carry;
-            }
-            else{
-                neg[i] += carry;
-            }
-            ub += pow(Alpha, i) * min(pos[i], neg[i]);
-            if(i < k){
-                if(pos[i] >= neg[i]){
-                    carry_side = POS, carry = pos[i] - neg[i];
-                }
-                else{
-                    carry_side = NEG, carry = neg[i] - pos[i];
-                }
-            }
-        }
-        item_ptr->upper_bound = ub;
+        item_ptr->upper_bound = score;
         return score;
     }
 
