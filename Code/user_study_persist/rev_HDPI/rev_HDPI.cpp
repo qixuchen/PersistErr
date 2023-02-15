@@ -302,7 +302,10 @@ int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w, int alg_id){
     //v2    the utility of point 2
     rev_build_choose_item_table(half_set_set, choose_item_points, choose_item_set);
     int index = get_best_hyperplane(choose_item_set);
+
+    stop_timer();
     int opt = show_to_user(P0, choose_item_set[index]->hyper->point1->id, choose_item_set[index]->hyper->point2->id);
+    start_timer();
 
     //initial
     halfspace_set_t *R_half_set = R_initial(dim);
@@ -361,7 +364,6 @@ int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w, int alg_id){
     question_asked_list[alg_id] = round;
     best_pid_list[alg_id] = points_return[alg_best]->id; 
     proc_time_list[alg_id] = avg_time(round);
-    cout << "avg time: " << avg_time(round)<< endl; 
     return_size_list[alg_id] = points_return.size();
     write_results_to_file(alg_id, points_return, alg_best);
     for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);

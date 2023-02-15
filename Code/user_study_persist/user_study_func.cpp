@@ -59,7 +59,7 @@ void part1_info(){
     cout << endl;
 
     cout << "By the end of each algorithm, a list of cars will be recommended by this algorithm." << endl;
-    cout << "For example, a recommendation list may looks like follows:" << endl << endl;
+    cout << "For example, a recommendation list may look like follows:" << endl << endl;
 
     cout << "These are the cars recommended by this algorithm:" << endl;
     cout << "--------------------------------------------------------" << endl;
@@ -93,6 +93,8 @@ void part2_info(){
 
     cout << "In Part 2, there are two tasks." << endl << endl;
 
+    cout << "Based on your answer to the first task, you may not need to do the second task." << endl << endl;
+
     cout << "The first task is to decide your favorite car among the cars you selected at the end of each" << endl
             << "algorithm in Part 1." << endl << endl;
 
@@ -101,10 +103,30 @@ void part2_info(){
 }
 
 
+void part2_skip(){
+    cout << "According to your answer in Part 1, you do not need to take Part 2." << endl << endl;
+    cout << "Part 2 is skipped." << endl << endl;
+}
+
+void part2_second_task_skip(){
+    cout << endl << endl;
+    cout << "According to your answer in task 1, you do not need to take task 2." << endl << endl;
+    cout << "Task 2 is skipped." << endl << endl;
+}
+
+
 void part2_end(){
     cout << "===============================================================================================" << endl << endl;
     cout << "                                        End of Part 2" << endl << endl;
     cout << "===============================================================================================" << endl << endl << endl << endl;
+}
+
+
+void end(){
+    cout << "===============================================================================================" << endl << endl;
+    cout << "                                     End of User Study" << endl << endl;
+    cout << "===============================================================================================" << endl << endl;
+    cout << "Genuinely thank you for taking the user study." << endl << endl;
 }
 
 
@@ -139,9 +161,9 @@ void print_opt(ostream &os, const point_t *p, const int opt){
 int inconsistency_asking(point_set_t* P, int p_idx, int q_idx){
     int option = 0;
     cout << endl;
-    cout << "In this round, you will need to choose the car that you *dislike*." << endl << endl;
-    cout << "Note that you need to do this special action *only* in this round." << endl << endl;
-    cout << "In later rounds, please still choose the car that you like." << endl << endl;
+    cout << "In this question, you will need to choose the car that you *dislike*." << endl << endl;
+    cout << "Note that you need to do this special action *only* in this question." << endl << endl;
+    cout << "In later questions, please still choose the car that you like." << endl << endl;
     enter_to_continue();
     cout << endl;
 
@@ -204,9 +226,9 @@ int show_to_user(point_set_t* P, int p_idx, int q_idx)
 int inconsistency_asking(const point_t* p1, const point_t* p2){
     int option = 0;
     cout << endl;
-    cout << "In this round, you will need to choose the car that you *dislike*." << endl << endl;
-    cout << "Note that you need to do this special action *only* in this round." << endl << endl;
-    cout << "In later rounds, please still choose the car that you like." << endl << endl;
+    cout << "In this question, you will need to choose the car that you *dislike*." << endl << endl;
+    cout << "Note that you need to do this special action *only* in this question." << endl << endl;
+    cout << "In later questions, please still choose the car that you like." << endl << endl;
     enter_to_continue();
     cout << endl;
     print_table_title(cout);
@@ -279,8 +301,8 @@ void print_result_list(point_set_t* P, const vector<point_t *> &point_return){
 
 void print_result_list(point_set_t* P, const vector<int> &ids){
     cout << endl;
-    cout << vline << endl;
-    cout << "This algorithm has finished."  << endl;
+    cout << vline << endl << endl;
+    // cout << "This algorithm has finished."  << endl;
     cout << "These are the cars recommended by this algorithm:" << endl;
     print_table_title(cout);
     for(int i=0; i < ids.size(); i++){

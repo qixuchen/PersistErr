@@ -172,8 +172,8 @@ int user_study_main_body(){
     p_2 = scale_up(p_set);
     point_set_t *P = point_reload(p_set);
 
-    // intro();
-    // part1_info();
+    intro();
+    part1_info();
 
     // the exact Algorithm
     print_alg_start(0);
@@ -185,25 +185,25 @@ int user_study_main_body(){
     sampling::sampling(p_set, P0, k, w, SCORE_SELECT, 1);
     print_alg_end(1);
 
-    // // the HDPI Algorithm
-    // print_alg_start(2);
-    // rev_HDPI(p_set, P0, w, 2);
-    // print_alg_end(2);
+    // the HDPI Algorithm
+    print_alg_start(2);
+    rev_HDPI(p_set, P0, w, 2);
+    print_alg_end(2);
 
-    // // PointPrune Algorithm
-    // print_alg_start(0);
-    // PointPrune_v2(p_set, P0, 3, w, max, min, 0);
-    // print_alg_end(0);
+    // PointPrune Algorithm
+    print_alg_start(3);
+    PointPrune_v2(p_set, P0, 3, w, max, min, 3);
+    print_alg_end(3);
 
-    // // Active Ranking Algorithm
-    // print_alg_start(1);
-    // Active_Ranking(p_set, P0, w, 1);
-    // print_alg_end(1);
+    // Active Ranking Algorithm
+    print_alg_start(4);
+    Active_Ranking(p_set, P0, w, 4);
+    print_alg_end(4);
 
-    // // Preference Learning Algorithm
-    // print_alg_start(5);
-    // Preference_Learning(p_set, P0, w, 5);
-    // print_alg_end(5);
+    // Preference Learning Algorithm
+    print_alg_start(5);
+    Preference_Learning(p_set, P0, w, 5);
+    print_alg_end(5);
 
     part1_end();
 
@@ -219,6 +219,9 @@ int user_study_main_body(){
         if(dissat_lists.size() > 0){
             dissat_info();
         }
+        else{
+            part2_second_task_skip();
+        }
         for(int i = 0; i < TOT_ALG_COUNT; i++){
             if(dissat_lists.find(i) == dissat_lists.end()){
                 dissat_score_list[i] = 0;
@@ -229,11 +232,16 @@ int user_study_main_body(){
         }
         part2_end();
     }
+    else{   // only 1 final answer, part 2 skipped 
+        for(int i = 0; i < TOT_ALG_COUNT; i++){
+            dissat_score_list[i] = 0;
+        }
+        part2_skip();
+    }
    
     write_summary();
 
-
-
+    end();
     
     release_point_set(P, true);
     release_point_set(P0, true);

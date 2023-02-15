@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#define TOT_ALG_COUNT 2
+#define TOT_ALG_COUNT 6
 
 extern double best_score;
 extern int correct_count;

@@ -28,7 +28,13 @@ void part1_end();
 
 void part2_info();
 
+void part2_skip();
+
+void part2_second_task_skip();
+
 void part2_end();
+
+void end();
 
 int show_to_user(point_set_t* P, int p_idx, int q_idx);
 

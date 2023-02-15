@@ -296,7 +296,6 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
     question_asked_list[alg_id] = round;
     best_pid_list[alg_id] = points_return[alg_best]->id; 
     proc_time_list[alg_id] = avg_time(round);
-    cout << "avg time: " << avg_time(round)<< endl; 
     return_size_list[alg_id] = points_return.size();
     write_results_to_file(alg_id, points_return, alg_best);
     for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
