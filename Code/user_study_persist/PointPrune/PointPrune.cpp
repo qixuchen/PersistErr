@@ -191,12 +191,10 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
 
             stop_timer();
             if(best_p1==p1){
-                user_choice = checking_varyk(p2, p1, checknum, max, min)==1 ? p2 : p1;
-                round += checknum;
+                user_choice = checking_varyk(p2, p1, checknum, max, min, round)==1 ? p2 : p1;
             }
             else{
-                user_choice = checking_varyk(p1, p2, checknum, max, min)==1 ? p1 : p2;
-                round += checknum;
+                user_choice = checking_varyk(p1, p2, checknum, max, min, round)==1 ? p1 : p2;
             }
             start_timer();
 
@@ -298,6 +296,7 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
     proc_time_list[alg_id] = avg_time(round);
     return_size_list[alg_id] = points_return.size();
     write_results_to_file(alg_id, points_return, alg_best);
+    record_ques_history(alg_id);
     for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
     return 0;
 }

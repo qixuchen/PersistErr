@@ -54,6 +54,8 @@ int alg_top1_select(const vector<point_t *> &point_return);
 
 void write_results_to_file(const int alg_id, const vector<point_t *> &point_return, const int best_idx);
 
+void record_ques_history(const int alg_id);
+
 void write_cf_info(const int alg_id, const vector<int> &cr_belong);
 
 void print_alg_start(const int alg_num);

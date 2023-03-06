@@ -13,6 +13,8 @@ double proc_time_list[TOT_ALG_COUNT] = {0};
 int dissat_score_list[TOT_ALG_COUNT] = {0};
 std::vector<std::string> file_names = {"1.txt", "2.txt", "3.txt", "4.txt", "5.txt", "6.txt"};
 std::vector<std::vector<int>> recommendation_list(TOT_ALG_COUNT, std::vector<int>());
+std::vector<int> user_choices;
+std::vector<std::pair<int, int>> displayed_questions;
 std::vector<std::pair<int,int>> inconsistency;
 
 using namespace std::chrono;
@@ -50,4 +52,6 @@ void reset_stats(){
     correct_count = 0;
     tot_time = 0;
     inconsistency.clear();
+    user_choices.clear();
+    displayed_questions.clear();
 }

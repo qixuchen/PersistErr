@@ -512,6 +512,7 @@ namespace exact_rev{
         proc_time_list[alg_id] = avg_time(round);
         return_size_list[alg_id] = points_return.size();
         write_results_to_file(alg_id, points_return, alg_best);
+        record_ques_history(alg_id);
         write_cf_info(alg_id, cr_belong);
         for(auto p : points_return) recommendation_list[alg_id].push_back(p->id);
         return 0;

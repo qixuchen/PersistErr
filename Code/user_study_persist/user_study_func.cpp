@@ -234,17 +234,17 @@ int show_to_user(point_set_t* P, int p_idx, int q_idx)
         int opt = inconsistency_asking(P, p_idx, q_idx);
         inconsistency.push_back( (opt == 1) ? make_pair(p_idx, q_idx) : make_pair(q_idx, p_idx));
         // cout << "Inconsistency added; " << p_idx << "\t" << q_idx << endl;
-        return opt;
+        option = opt;
     }
     else{
         int ic1 = inconsistency[0].first, ic2 = inconsistency[0].second;
         if(ic1 == p_idx && ic2 == q_idx){ 
             // cout << "Auto answer;" << p_idx << "\t" << q_idx << endl;
-            return 1;
+            option = 1;
         }
         else if(ic1 == q_idx && ic2 == p_idx){
             // cout << "Auto answer;" << q_idx << "\t" << p_idx << endl;
-            return 2;
+            option = 2;
         }
         else{
             cout << "Please choose the car you favor more:" << endl;
@@ -260,9 +260,11 @@ int show_to_user(point_set_t* P, int p_idx, int q_idx)
                     option = stoi(buf);
                 }
             }
-            return option;
         }
     }
+    displayed_questions.push_back(make_pair(p_idx, q_idx));
+    user_choices.push_back(option);
+    return option;
 }
 
 
@@ -298,17 +300,17 @@ int show_to_user(const point_t* p1, const point_t* p2)
         int opt = inconsistency_asking(p1, p2);
         inconsistency.push_back( (opt == 1) ? make_pair(p1->id, p2->id) : make_pair(p2->id, p1->id) );
         // cout << "Inconsistency added; " << p1->id << "\t" << p2->id << endl;
-        return opt;
+        option = opt;
     }
     else{
         int ic1 = inconsistency[0].first, ic2 = inconsistency[0].second;
         if(ic1 == p1->id && ic2 == p2->id){
             // cout << "Auto answer;" << p1->id << "\t" << p2->id << endl;
-            return 1;
+            option = 1;
         }
         else if(ic1 == p2->id && ic2 == p1->id){
             // cout << "Auto answer;" << p2->id << "\t" << p1->id << endl;
-            return 2;
+            option = 2;
         }
         else{
             cout << "Please choose the car you favor more:" << endl;
@@ -324,9 +326,11 @@ int show_to_user(const point_t* p1, const point_t* p2)
                     option = stoi(buf);
                 }
             }
-            return option;
         }
     }
+    displayed_questions.push_back(make_pair(p1->id, p2->id));
+    user_choices.push_back(option);
+    return option;
 }
 
 
@@ -393,6 +397,31 @@ void write_results_to_file(const int alg_id, const vector<point_t *> &point_retu
     ofs << point_return.size()<<endl;
     for(auto p: point_return){
         ofs << p->id << endl;
+    }
+    ofs.close();
+}
+
+
+/**    @brief write the question asked by an algorithm and user's choices to a file in directory logs
+ * 
+ *             format:
+ *                      quest 1 point 1
+ *                      quest 1 point 2
+ *                      user choice (1 or 2)
+ * 
+ *                      quest 2 point 1
+ *                      quest 2 point 2
+ *                      user choice (1 or 2)
+ * 
+*/
+void record_ques_history(const int alg_id){
+    ofstream ofs;
+    ofs.open("../logs/history/" + to_string(alg_id+1) + ".txt", ofstream::out);
+    int size = user_choices.size();
+    for(int i = 0; i < size; i++){
+        ofs << displayed_questions[i].first << endl;
+        ofs << displayed_questions[i].second << endl;
+        ofs << user_choices[i] << endl << endl;
     }
     ofs.close();
 }

@@ -20,6 +20,8 @@ extern int dissat_score_list[TOT_ALG_COUNT];
 extern std::vector<std::string> file_names;
 extern std::vector<std::vector<int>> recommendation_list;
 extern std::vector<std::pair<int,int>> inconsistency;
+extern std::vector<int> user_choices;
+extern std::vector<std::pair<int, int>> displayed_questions;
 
 // #define EXACT_ALG 0
 // #define SAMPLING_ALG 1

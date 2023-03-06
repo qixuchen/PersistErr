@@ -9,7 +9,6 @@
 #ifndef USER_MODE_H
 #define USER_MODE_H
 
-int checking_varyk(point_t* p1, point_t* p2, int k, double *max, double *min);
+int checking_varyk(point_t* p1, point_t* p2, int k, double *max, double *min, int &round);
 
-int checking_samek(point_t* p1, point_t* p2, int k, double *max, double *min);
 #endif
