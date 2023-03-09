@@ -70,13 +70,13 @@ int confirm_favorite_item(point_set_t* P, std::vector<int> final_list, int possi
 
 std::set<int> find_dissatisfactory_lists(point_set_t *P, int best_pid);
 
-void dissat_info();
+void dissat_info_best();
 
-int ask_dissat_score(point_set_t *P,  vector<int> &ids);
+int ask_dissat_score_best(point_set_t *P,  int best_id);
 
-int ask_dissat_score(const point_set_t* P, int car_id);
+void dissat_info(int dissat_score_best);
 
-int ask_satisfactory_level(const point_set_t* P, const int num_questions_asked, const int p_result_id, const char *alg_name, FILE *w_ptr);
+int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best);
 
 void record_to_file(FILE *wPtr, int *records, int r_size);
 

@@ -23,7 +23,8 @@ int checking_varyk(point_t* p1, point_t* p2, int k, double * max, double * min, 
         ++round;
         double scale = (double)(90 + (rand()%10)) / 100; //generate a random number from 0.91-0.99
         for(int i = 0; i < dim; i++){
-            if(i==0 || i==3){ // a small value is preferred
+            // if(i == 0 || i == 3){ // a small value is preferred
+            if(i == 0){
                 scaled_p1->coord[i] = (1 - scale * p1->coord[i]) * (max[i]-min[i]) + min[i];
                 scaled_p2->coord[i] = (1 - scale * p2->coord[i]) * (max[i]-min[i]) + min[i];
             }

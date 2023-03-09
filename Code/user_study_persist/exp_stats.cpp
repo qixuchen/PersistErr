@@ -6,6 +6,7 @@ double return_size = 0;
 int correct_count = 0;
 double tot_time = 0;
 int jump = 1;
+int dissat_score_best = 0;
 int question_asked_list[TOT_ALG_COUNT] = {0};
 int best_pid_list[TOT_ALG_COUNT] = {0};
 int return_size_list[TOT_ALG_COUNT] = {0};

@@ -47,34 +47,34 @@ std::vector<point_t *> choose_1k(point_set_t *p_set)
     int count = 0, index = 0, dim = p_set->points[0]->dim;
     while(count < 1000)
     {
-        if(1000 < p_set->points[index]->coord[0] && p_set->points[index]->coord[0] < 100000
-            && 2001 < p_set->points[index]->coord[1] && p_set->points[index]->coord[1]< 2017
-            && 50 < p_set->points[index]->coord[2] && p_set->points[index]->coord[2]< 1000
-            && 5000 < p_set->points[index]->coord[3] && p_set->points[index]->coord[3]< 150000
-        )
+        // if(1000 < p_set->points[index]->coord[0] && p_set->points[index]->coord[0] < 100000
+        //     && 2001 < p_set->points[index]->coord[1] && p_set->points[index]->coord[1]< 2017
+        //     && 50 < p_set->points[index]->coord[2] && p_set->points[index]->coord[2]< 1000
+        //     && 5000 < p_set->points[index]->coord[3] && p_set->points[index]->coord[3]< 150000
+        // )
+        // {
+        bool is_same = false;
+        for (int j = 0; j < p.size(); j++)
         {
-            bool is_same = false;
-            for (int j = 0; j < p.size(); j++)
+            if (is_same_point(p_set->points[index], p[j]))
             {
-                if (is_same_point(p_set->points[index], p[j]))
-                {
-                    is_same = true;
-                    break;
-                }
-            }
-            if (!is_same)
-            {
-                point_t *pp = alloc_point(dim);
-                for (int i = 0; i < dim; i++)
-                {
-                    pp->coord[i] = p_set->points[index]->coord[i];
-                }
-                pp->dim = p_set->points[index]->dim;
-                pp->id = p_set->points[index]->id;
-                p.push_back(pp);
-                count++;
+                is_same = true;
+                break;
             }
         }
+        if (!is_same)
+        {
+            point_t *pp = alloc_point(dim);
+            for (int i = 0; i < dim; i++)
+            {
+                pp->coord[i] = p_set->points[index]->coord[i];
+            }
+            pp->dim = p_set->points[index]->dim;
+            pp->id = p_set->points[index]->id;
+            p.push_back(pp);
+            count++;
+        }
+        // }
         ++index;
     }
     return p;
@@ -107,7 +107,8 @@ void normalize_set(std::vector<point_t *> p_set, double *max, double *min)
     {
         for (int j = 0; j < dim; j++)
         {
-            if (j == 0 || j == 3)
+            // if (j == 0 || j == 3)
+            if(j == 0)
             {
                 p_set[i]->coord[j] = 1 - (p_set[i]->coord[j] - min[j]) / (max[j] - min[j]);
             }
@@ -161,7 +162,8 @@ int user_study_main_body(){
     double theta = 0.05;
 
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"car.txt");
+    point_set_t *P0 = read_points((char*)"airbnb.txt");
+    //point_set_t *P0 = read_points((char*)"car.txt");
 
     std::vector<point_t *> p_set, p_1, p_2;
     p_1 = choose_1k(P0);
@@ -169,7 +171,7 @@ int user_study_main_body(){
     double max[dim], min[dim];
     normalize_set(p_1, max, min);
     skyband(p_1, p_set, 1, P0->numberOfPoints);
-    p_2 = scale_up(p_set);
+    // p_2 = scale_up(p_set);
     point_set_t *P = point_reload(p_set);
 
     intro();
@@ -224,28 +226,39 @@ int user_study_main_body(){
         display_final_list(P0, final_cand);
         possible_best_idx = ask_favorite_item(cand_num);
         best_idx = confirm_favorite_item(P0, final_cand, possible_best_idx);
+        dissat_info_best();
+        dissat_score_best = ask_dissat_score_best(P0, final_cand[best_idx]);
         std::set<int> dissat_lists = find_dissatisfactory_lists(P0, final_cand[best_idx]);
-        if(dissat_lists.size() > 0){
-            dissat_info();
+        if(dissat_lists.size() > 0 && dissat_score_best < 10){
+            dissat_info(dissat_score_best);
+        }
+        if(dissat_score_best == 10){
+            for(int i = 0; i < TOT_ALG_COUNT; i++){
+                dissat_score_list[i] = dissat_score_best;
+            }
         }
         else{
-            part2_second_task_skip();
-        }
-        for(int i = 0; i < TOT_ALG_COUNT; i++){
-            if(dissat_lists.find(i) == dissat_lists.end()){
-                dissat_score_list[i] = 0;
-            }
-            else{
-                dissat_score_list[i] = ask_dissat_score(P0, recommendation_list[i]);
+            for(int i = 0; i < TOT_ALG_COUNT; i++){
+                if(dissat_lists.find(i) == dissat_lists.end()){
+                    dissat_score_list[i] = dissat_score_best;
+                }
+                else{
+                    dissat_score_list[i] = ask_dissat_score(P0, recommendation_list[i], dissat_score_best);
+                }
             }
         }
         part2_end();
     }
-    else{   // only 1 final answer, part 2 skipped 
+    else{   // only 1 final answer
+        cout << "===============================================================================================" << endl << endl;
+        cout << "                                     Beginning of Part 2" << endl << endl;
+        cout << "===============================================================================================" << endl << endl;
+        dissat_info_best();
+        dissat_score_best = ask_dissat_score_best(P0, final_cand[0]);
         for(int i = 0; i < TOT_ALG_COUNT; i++){
-            dissat_score_list[i] = 0;
+            dissat_score_list[i] = dissat_score_best;
         }
-        part2_skip();
+        part2_end();
     }
    
     write_summary();

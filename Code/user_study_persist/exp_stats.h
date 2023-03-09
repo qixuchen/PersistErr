@@ -12,6 +12,7 @@ extern int correct_count;
 extern double question_num;
 extern double return_size;
 extern int jump;
+extern int dissat_score_best;
 extern int question_asked_list[TOT_ALG_COUNT];
 extern int best_pid_list[TOT_ALG_COUNT];
 extern int return_size_list[TOT_ALG_COUNT];

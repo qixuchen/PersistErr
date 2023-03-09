@@ -782,7 +782,6 @@ int Preference_Learning(std::vector<point_t *> original_set, point_set_t *P0, in
     question_asked_list[alg_id] = round;
     best_pid_list[alg_id] = points_return[alg_best]->id; 
     proc_time_list[alg_id] = avg_time(round);
-    cout << "avg time: " << avg_time(round)<< endl; 
     return_size_list[alg_id] = points_return.size();
     write_results_to_file(alg_id, points_return, alg_best);
     record_ques_history(alg_id);
