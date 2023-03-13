@@ -17,6 +17,7 @@ extern int question_asked_list[TOT_ALG_COUNT];
 extern int best_pid_list[TOT_ALG_COUNT];
 extern int return_size_list[TOT_ALG_COUNT];
 extern double proc_time_list[TOT_ALG_COUNT];
+extern int hit_list[TOT_ALG_COUNT];
 extern int dissat_score_list[TOT_ALG_COUNT];
 extern std::vector<std::string> file_names;
 extern std::vector<std::vector<int>> recommendation_list;

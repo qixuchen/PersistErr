@@ -548,6 +548,7 @@ void dissat_info_best(){
 }
 
 int ask_dissat_score_best(point_set_t *P,  int best_id){
+    cout << vline << endl;
     cout << "This is the favorite airbnb you chose." << endl;
     cout << endl;
     print_table_title(cout);
@@ -599,13 +600,14 @@ int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best){
     return ans;
 }
 
-void write_summary(){
+void write_summary(int best_idx){
     ofstream ofs;
-    ofs.open("../logs/summary", ofstream::out);
-    ofs << dissat_score_best << endl;
+    ofs.open("../logs/summary.txt", ofstream::out);
+    ofs << best_idx << "\t" << dissat_score_best << endl;
     for(int i = 0; i < TOT_ALG_COUNT; i++){
         ofs << question_asked_list[i] << "\t";
         ofs << proc_time_list[i] << "\t";
+        ofs << hit_list[i] << "\t";
         ofs << dissat_score_list[i] << "\t" << endl;
     }
     ofs.close();

@@ -158,7 +158,7 @@ int user_study_main_body(){
 
     // parameters
     int k = 2;
-    int w = 4;
+    int w = 5;
     double theta = 0.05;
 
     srand(time(NULL));
@@ -229,6 +229,9 @@ int user_study_main_body(){
         dissat_info_best();
         dissat_score_best = ask_dissat_score_best(P0, final_cand[best_idx]);
         std::set<int> dissat_lists = find_dissatisfactory_lists(P0, final_cand[best_idx]);
+        for(int i = 0; i < TOT_ALG_COUNT; i++){
+            if(dissat_lists.find(i) == dissat_lists.end()) hit_list[i] = 1;
+        }
         if(dissat_lists.size() > 0 && dissat_score_best < 10){
             dissat_info(dissat_score_best);
         }
@@ -250,6 +253,10 @@ int user_study_main_body(){
         part2_end();
     }
     else{   // only 1 final answer
+        best_idx = 0;
+        for(int i = 0; i < TOT_ALG_COUNT; i++){
+            hit_list[i] = 1;
+        }
         cout << "===============================================================================================" << endl << endl;
         cout << "                                     Beginning of Part 2" << endl << endl;
         cout << "===============================================================================================" << endl << endl;
@@ -261,7 +268,7 @@ int user_study_main_body(){
         part2_end();
     }
    
-    write_summary();
+    write_summary(final_cand[best_idx]);
 
     end();
     
