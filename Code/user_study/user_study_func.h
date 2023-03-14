@@ -12,6 +12,7 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <stdlib.h>
 
 #ifndef USER_STUDY_FUNC
 #define USER_STUDY_FUNC
@@ -81,6 +82,8 @@ int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best);
 void record_to_file(FILE *wPtr, int *records, int r_size);
 
 void write_summary(int best_idx);
+
+void log_lock();
 
 
 

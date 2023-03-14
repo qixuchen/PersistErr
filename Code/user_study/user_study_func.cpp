@@ -62,7 +62,40 @@ bool is_number(const string& s){
     return true;
 }
 
+void pre_check(){
+    cout << "---------------------------------Welcome to our user study----------------------------------------" << endl;
+    string wid, pnumber, ams;
+    cout << endl << "Please tell me your worker ID: ";
+    getline(cin, wid);
+    cout << endl << "Please tell me what is your participant number (enter 1 - 30): ";
+    getline(cin, pnumber);
+    cout << endl << "Please tell me which country is Amsterdam in: " << endl;
+    cout << "1. Germany" << endl;
+    cout << "2. Norway" << endl;
+    cout << "3. France" << endl;
+    cout << "4. Netherlands" << endl;
+    cout << "5. Iceland" << endl;
+    cout << endl << "Your choice (enter 1 - 5):";
+    getline(cin, ams);
+
+    ofstream ofs;
+    ofs.open("../logs/misc/workid.txt", ofstream::out);
+    ofs << wid << endl;
+    ofs.close();
+
+    ofs.open("../logs/misc/pnumber.txt", ofstream::out);
+    ofs << pnumber << endl;
+    ofs.close();
+
+    ofs.open("../logs/misc/ams.txt", ofstream::out);
+    ofs << ams << endl;
+    ofs.close();
+
+    cout << endl << endl;
+}
+
 void intro(){
+    pre_check();
     cout << "-------------------------Welcome to the recommending airbnb system--------------------------------" << endl;
     cout << "Imagine that you are planning a trip to a new conuntry and want to rent an airbnb. There are " << endl
            << "thousands of airbnbs on the website." << endl << endl;
@@ -167,6 +200,7 @@ void end(){
     cout << "                                     End of User Study" << endl << endl;
     cout << "===============================================================================================" << endl << endl;
     cout << "Genuinely thank you for taking the user study." << endl << endl;
+    cout << "Your completion code is: C5EPB200" << endl;
 }
 
 
@@ -526,3 +560,6 @@ void record_to_file(FILE *wPtr, int *records, int r_size){
     fprintf(wPtr, "\n");
 }
 
+void log_lock(){
+    system("chmod -R 444 ../logs/*.txt");
+}
