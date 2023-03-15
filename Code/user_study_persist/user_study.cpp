@@ -180,27 +180,27 @@ int user_study_main_body(){
         part1_info();
     }
     if(jump <= 1){
-        // the exact Algorithm
+        // PointPrune Algorithm
         print_alg_start(0);
-        exact_rev::Exact_revised(p_set, P0, k, w, SCORE_SELECT, 0);
+        PointPrune_v2(p_set, P0, 3, w, max, min, 0);
         print_alg_end(0);
     }
     if(jump <= 2){
-        // the sampling Algorithm
+        // the HDPI Algorithm
         print_alg_start(1);
-        sampling::sampling(p_set, P0, k, w, SCORE_SELECT, 1);
+        rev_HDPI(p_set, P0, w, 1);
         print_alg_end(1);
     }
     if(jump <= 3){
-        // the HDPI Algorithm
+        // the exact Algorithm
         print_alg_start(2);
-        rev_HDPI(p_set, P0, w, 2);
+        exact_rev::Exact_revised(p_set, P0, k, w, SCORE_SELECT, 2);
         print_alg_end(2);
     }
     if(jump <= 4){
-        // PointPrune Algorithm
+        // the sampling Algorithm
         print_alg_start(3);
-        PointPrune_v2(p_set, P0, 3, w, max, min, 3);
+        sampling::sampling(p_set, P0, k, w, SCORE_SELECT, 3);
         print_alg_end(3);
     }
     if(jump <= 5){
