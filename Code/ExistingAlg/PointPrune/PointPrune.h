@@ -15,4 +15,8 @@
  */
 int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w, double theta);
 
+/**
+ * @brief           PointPrune assuming user makes persistent errors
+ */
+int PointPrune_Persist(std::vector<point_t *> p_set, point_t *u, int checknum, int w, double theta);
 #endif

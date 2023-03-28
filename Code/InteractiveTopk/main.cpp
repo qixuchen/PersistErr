@@ -17,25 +17,49 @@
 #include <ctime>
 #include <iostream>
 #include <sys/time.h>
+#include <string>
+#include <fstream>
 
 int main(int argc, char *argv[])
 {
+    int num_repeat;
+    string input_file, alg_name;
+    if(argc == 1){
+        input_file = "4d100k.txt";
+        alg_name = "sampling";
+        num_repeat = 100;
+    }
+    else if(argc != 4){
+        cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT" << endl;
+        cout << "ALG_NAME: exact | sampling | optimal" << endl;
+        exit(-1);
+    }
+    else{
+        num_repeat = atoi(argv[1]);
+        alg_name = argv[2];
+        input_file = argv[3];
+    }
+    string ofile_name = string("./results/") + alg_name + "_" + input_file + "_" + to_string(num_repeat)+".txt";
+    ofstream ofile;
+    ofile.open(ofile_name);
+
     // parameters
     int k = 2;
-    int num_repeat = 10;
-    int w = 4;
+    int w = 5;
     double theta = 0.05;
 
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"4d100k.txt");
+    point_set_t *P0 = read_points((char*) input_file.c_str());
+    cout << alg_name << endl;
     int dim = P0->points[0]->dim; //obtain the dimension of the point
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, 1);
-    cout << "skyline size: " << p_set.size() << endl;
+    // cout << "skyline size: " << p_set.size() << endl;
     point_set_t *P = point_reload(p_set);
 
     for(int i = 0; i < num_repeat; i++){
         cout << "round " << i << endl;
+        ofile << "round " << i << endl;
         // generate the utility vector
         point_t *u = alloc_point(dim);
         double sum = 0;
@@ -51,16 +75,28 @@ int main(int argc, char *argv[])
         find_top_k(u, P, top_current, 1);
         best_score = dot_prod(u, top_current[0]);
 
-        exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
-        // sampling::sampling(p_set, u, k, w, SCORE_SELECT, theta);
-        // optimal::optimal(p_set, u, k, w, RAND_SELECT, theta);
+        if(alg_name.compare("exact") == 0){
+            exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
+        }
+        if(alg_name.compare("sampling") == 0){
+            sampling::sampling(p_set, u, k, w, SCORE_SELECT, theta);
+        }
+        if(alg_name.compare("optimal") == 0){
+            optimal::optimal(p_set, u, k, w, RAND_SELECT, theta);
+        }
     }
     
 
-    std::cout << "correct count: " << correct_count << std::endl;
-    std::cout << "avg question num: "<< question_num/num_repeat << std::endl;
-    std::cout << "avg return size: "<< return_size/num_repeat << std::endl;
-    std::cout << "avg time: "<< avg_time() << std::endl;
+    cout << "correct count: " << correct_count << endl;
+    cout << "avg question num: "<< question_num/num_repeat << endl;
+    cout << "avg return size: "<< return_size/num_repeat << endl;
+    cout << "avg time: "<< avg_time() << endl;
+
+    ofile << "correct count: " << correct_count << endl;
+    ofile << "avg question num: "<< question_num/num_repeat << endl;
+    ofile << "avg return size: "<< return_size/num_repeat << endl;
+    ofile << "avg time: "<< avg_time() << endl;
+    ofile.close();
     release_point_set(P, true);
     return 0;
 }

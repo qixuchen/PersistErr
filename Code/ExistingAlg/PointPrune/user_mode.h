@@ -17,4 +17,6 @@ point_t* checking(point_t* u, point_t* p1, point_t* p2, double err_rate, int k, 
 
 point_t* checking_varyk(point_t* u, point_t* p1, point_t* p2, double err_rate, int k, int &round);
 
+point_t* checking_varyk_persist(point_t* u, point_t* p1, point_t* p2, double err_rate, int k, int &round);
+
 #endif

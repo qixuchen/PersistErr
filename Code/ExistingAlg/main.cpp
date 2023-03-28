@@ -14,27 +14,51 @@
 #include <ctime>
 #include <sys/time.h>
 #include "exp_stats.h"
+#include <string>
+#include <fstream>
 
 
 int main(int argc, char *argv[])
 {
-    int num_repeat = 50;
-    int w = 4;
+    int num_repeat;
+    string input_file, alg_name;
+    if(argc == 1){
+        input_file = "4d100k.txt";
+        alg_name = "hdpi";
+        num_repeat = 100;
+    }
+    else if(argc != 4){
+        cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT" << endl;
+        cout << "ALG_NAME: hdpi | pointprune | persist | active | util | pref | uh" << endl;
+        exit(-1);
+    }
+    else{
+        num_repeat = atoi(argv[1]);
+        alg_name = argv[2];
+        input_file = argv[3];
+    }
+    string ofile_name = string("./results/") + alg_name + "_" + input_file + "_" + to_string(num_repeat)+".txt";
+    ofstream ofile;
+    ofile.open(ofile_name);
+
+    int w = 5;
     double theta = 0.05;
 
     //reload point
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"5d100k.txt");
+    point_set_t *P0 = read_points((char*) input_file.c_str());
+    cout << alg_name << endl;
     int dim = P0->points[0]->dim; //obtain the dimension of the point
     int k = 1;
     std::vector<point_t *> p_set, p0;
     skyband(P0, p_set, k);
-    cout << "Skyline size: " << p_set.size() << endl;
+    // cout << "Skyline size: " << p_set.size() << endl;
     point_set_t *P = point_reload(p_set);
 
 
     for(int i = 0; i < num_repeat; i++){
         cout << "round " << i << endl;
+        ofile << "round " << i << endl;
         // generate the utility vector
         point_t *u = alloc_point(dim);
         double sum = 0;
@@ -56,31 +80,48 @@ int main(int argc, char *argv[])
         double v1 = dot_prod(u, top_current[0]);
         double v2 = dot_prod(u, top_current[1]);
         double epsilon = (v1 - v2) / v1;
-        int prune_option = RTREE, dom_option = HYPER_PLANE, stop_option = EXACT_BOUND, cmp_option = SIMPLEX;
+        int prune_option = RTREE, dom_option = HYPER_PLANE, stop_option = EXACT_BOUND, cmp_option = RANDOM;
 
-        // the HDPI Algorithm
-        rev_HDPI(p_set, u, 1, w, theta);
-
-        // PointPrune Algorithm
-        // PointPrune_v2(p_set, u, 3, w, theta);
-
-        // the UtilityApprox Algorithm
-        // utilityapprox(P, u, 2, epsilon, maxRound, w, theta);
-
-        // Algorithm: Active Ranking
-        // Active_Ranking(p_set, u, k, w, theta);
-        
-        // Algorithm: Preference Learning
-        // Preference_Learning_accuracy(p_set, u, k, w, theta);
-
-        // the UH-Simplex algorithm
-        // max_utility(P, u, 2, epsilon, maxRound, cmp_option, stop_option, prune_option, dom_option, w, theta);
-
+        if(alg_name.compare("hdpi")==0){
+            // the HDPI Algorithm
+            rev_HDPI(p_set, u, 1, w, theta);
+        }
+        if(alg_name.compare("pointprune")==0){
+            // PointPrune Algorithm
+            PointPrune_v2(p_set, u, 3, w, theta);
+        }
+        if(alg_name.compare("persist")==0){
+            // PointPrune_Persist Algorithm
+            PointPrune_Persist(p_set, u, 3, w, theta);
+        }
+        if(alg_name.compare("util")==0){
+            // the UtilityApprox Algorithm
+            utilityapprox(P, u, 2, epsilon, maxRound, w, theta);
+        }
+        if(alg_name.compare("active")==0){
+            // Algorithm: Active Ranking
+            Active_Ranking(p_set, u, k, w, theta);
+        }
+        if(alg_name.compare("pref")==0){
+            // Algorithm: Preference Learning
+            Preference_Learning_accuracy(p_set, u, k, w, theta);
+        }
+        if(alg_name.compare("uh")==0){
+            // the UH-Simplex algorithm
+            max_utility(P, u, 2, epsilon, maxRound, cmp_option, stop_option, prune_option, dom_option, w, theta);
+        }
     }
     std::cout << "correct count: " << correct_count << std::endl;
     std::cout << "avg question num: "<< question_num/num_repeat << std::endl;
     std::cout << "avg return size: "<< return_size/num_repeat << std::endl;
     std::cout << "avg time: "<< avg_time() << std::endl;
+
+    ofile << "correct count: " << correct_count << endl;
+    ofile << "avg question num: "<< question_num/num_repeat << endl;
+    ofile << "avg return size: "<< return_size/num_repeat << endl;
+    ofile << "avg time: "<< avg_time() << endl;
+    ofile.close();
+
     release_point_set(P, true);
     return 0;
 }
