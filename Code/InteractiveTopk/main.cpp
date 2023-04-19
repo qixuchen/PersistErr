@@ -4,12 +4,9 @@
 #include "Others/pruning.h"
 #include "HDPI/HDPI.h"
 #include "rev_HDPI/rev_HDPI.h"
-#include "exact/exact.h"
 #include "exact/Exact_revised.h"
-#include "exact/optimal.h"
 #include "sampling/sampling.h"
 #include "optimal/optimal.h"
-#include "approx/approx.h"
 #include "RH/alg_one.h"
 #include "2DPI/2dPI.h"
 #include "Others/qhull_build.h"
@@ -27,10 +24,10 @@ int main(int argc, char *argv[])
     if(argc == 1){
         input_file = "4d100k.txt";
         alg_name = "sampling";
-        num_repeat = 100;
-    }
+        num_repeat = 5;
+    } 
     else if(argc != 4){
-        cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT" << endl;
+        cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
         cout << "ALG_NAME: exact | sampling | optimal" << endl;
         exit(-1);
     }
@@ -39,7 +36,8 @@ int main(int argc, char *argv[])
         alg_name = argv[2];
         input_file = argv[3];
     }
-    string ofile_name = string("./results/") + alg_name + "_" + input_file + "_" + to_string(num_repeat)+".txt";
+    
+    string ofile_name = string("./results/") + alg_name + "_" + input_file + "_" + to_string(num_repeat) + ".txt";
     ofstream ofile;
     ofile.open(ofile_name);
 
@@ -59,7 +57,6 @@ int main(int argc, char *argv[])
 
     for(int i = 0; i < num_repeat; i++){
         cout << "round " << i << endl;
-        ofile << "round " << i << endl;
         // generate the utility vector
         point_t *u = alloc_point(dim);
         double sum = 0;
@@ -79,10 +76,10 @@ int main(int argc, char *argv[])
             exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
         }
         if(alg_name.compare("sampling") == 0){
-            sampling::sampling(p_set, u, k, w, SCORE_SELECT, theta);
+            sampling::sampling(p_set, u, k, w, RAND_SELECT, theta);
         }
         if(alg_name.compare("optimal") == 0){
-            optimal::optimal(p_set, u, k, w, RAND_SELECT, theta);
+            optimal::optimal(p_set, u, k, w, SCORE_SELECT, theta);
         }
     }
     
@@ -91,11 +88,13 @@ int main(int argc, char *argv[])
     cout << "avg question num: "<< question_num/num_repeat << endl;
     cout << "avg return size: "<< return_size/num_repeat << endl;
     cout << "avg time: "<< avg_time() << endl;
+    // cout << "preprocessing time: " << total_time()/num_repeat << endl;
 
     ofile << "correct count: " << correct_count << endl;
     ofile << "avg question num: "<< question_num/num_repeat << endl;
     ofile << "avg return size: "<< return_size/num_repeat << endl;
     ofile << "avg time: "<< avg_time() << endl;
+    // ofile << "preprocessing time: " << total_time()/num_repeat << endl;
     ofile.close();
     release_point_set(P, true);
     return 0;

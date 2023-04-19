@@ -30,3 +30,7 @@ void incre_total_time_microsec(){
 double avg_time(){
     return tot_time / question_num;
 }
+
+double total_time(){
+    return tot_time;
+}

@@ -517,7 +517,7 @@ namespace sampling{
 
 
     int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
-        int num_sample = 250;
+        int num_sample = 1000;
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
         find_convh_vertices(p_set, convh);

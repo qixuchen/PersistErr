@@ -23,13 +23,13 @@ int main(int argc, char *argv[])
     int num_repeat;
     string input_file, alg_name;
     if(argc == 1){
-        input_file = "4d100k.txt";
-        alg_name = "hdpi";
+        input_file = "4d100.txt";
+        alg_name = "pref";
         num_repeat = 100;
     }
     else if(argc != 4){
-        cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT" << endl;
-        cout << "ALG_NAME: hdpi | pointprune | persist | active | util | pref | uh" << endl;
+        cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
+        cout << "ALG_NAME: exact | sampling | optimal" << endl;
         exit(-1);
     }
     else{
@@ -37,10 +37,12 @@ int main(int argc, char *argv[])
         alg_name = argv[2];
         input_file = argv[3];
     }
-    string ofile_name = string("./results/") + alg_name + "_" + input_file + "_" + to_string(num_repeat)+".txt";
+
+    string ofile_name = string("./results/") + "_" + alg_name + "_" + input_file + "_" + to_string(num_repeat) + ".txt";
     ofstream ofile;
     ofile.open(ofile_name);
 
+    // parameters
     int w = 5;
     double theta = 0.05;
 
