@@ -19,4 +19,10 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_t *u, int checknum, int w,
  * @brief           PointPrune assuming user makes persistent errors
  */
 int PointPrune_Persist(std::vector<point_t *> p_set, point_t *u, int checknum, int w, double theta);
+
+/**
+ * @brief           PointPrune assuming user makes 50% of persistent errors and 50% of random errors
+ */
+int PointPrune_Combine(std::vector<point_t *> p_set, point_t *u, int checknum, int w, double theta);
+
 #endif

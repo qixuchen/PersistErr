@@ -27,5 +27,12 @@ point_t* find_estimate(std::vector<point_t*> V);
 //@param k                  The threshold tok-k
 int Preference_Learning_accuracy(std::vector<point_t*> original_set, point_t* u, int k, int w, double theta);
 
+//@brief Find one of the top-k point by pairwise learning. Use the cos() of real u and estimated u as the accuracy.
+//       The stop condition is that cos() should satisfy the given threshold
+//@param original_set       The original dataset
+//@param u                  The real utility vector
+//@param k                  The threshold tok-k
+int Preference_Learning_persist(std::vector<point_t *> original_set, point_t *u, int k, int w, double theta);
+
 
 #endif

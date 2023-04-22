@@ -761,3 +761,210 @@ int Preference_Learning_accuracy(std::vector<point_t *> original_set, point_t *u
     return_size += output_size;
     return 0;
 }
+
+
+
+//@brief Find one of the top-k point by pairwise learning. Use the cos() of real u and estimated u as the accuracy.
+//       The stop condition is that cos() should satisfy the given threshold
+//@param original_set       The original dataset
+//@param u                  The real utility vector
+//@param k                  The threshold tok-k
+int Preference_Learning_persist(std::vector<point_t *> original_set, point_t *u, int k, int w, double theta)
+{
+    start_timer();
+    std::set<std::pair<point_t *, point_t *>> asked_pairs;
+    int round = 0;
+    int M;
+    //p_set: randomly choose 1000 points
+    std::vector<point_t *> p_set;
+    if (original_set.size() < 1000)
+    {
+        M = original_set.size();
+        for (int i = 0; i < M; i++)
+        {
+            bool is_same = false;
+            for (int j = 0; j < p_set.size(); j++)
+            {
+                if (is_same_point(p_set[j], original_set[i]))
+                {
+                    is_same = true;
+                    break;
+                }
+            }
+            if (!is_same)
+            {
+                p_set.push_back(original_set[i]);
+            }
+        }
+        point_random(p_set);
+    }
+    else
+    {
+        int cco = 0;
+        for (int i = 0; i < 1100; i++)
+        {
+            int ide = rand() % original_set.size();
+            bool is_same = false;
+            for (int j = 0; j < p_set.size(); j++)
+            {
+                if (is_same_point(p_set[j], original_set[ide]))
+                {
+                    is_same = true;
+                    break;
+                }
+            }
+            if (!is_same)
+            {
+                p_set.push_back(original_set[ide]);
+                cco++;
+                if (cco >= 1000)
+                {
+                    break;
+                }
+            }
+        }
+    }
+    int dim = p_set[0]->dim;
+    M = p_set.size();
+    double accuracy = 0, de_accuracy = 100;
+
+    //the normal vectors
+    std::vector<point_t *> V;
+    for (int i = 0; i < dim; i++)
+    {
+        point_t *b = alloc_point(dim);
+        for (int j = 0; j < dim; j++)
+        {
+            if (i == j)
+            {
+                b->coord[j] = 1;
+            }
+            else
+            {
+                b->coord[j] = 0;
+            }
+        }
+        V.push_back(b);
+    }
+
+    //build a hyperplane for each pair of points
+    std::vector<hyperplane_t *> h_set;
+    for (int i = 0; i < M; i++)
+    {
+        for (int j = 0; j < M; j++)
+        {
+            if (i != j && !is_same_point(p_set[i], p_set[j]))
+            {
+                hyperplane_t *h1 = alloc_hyperplane(p_set[i], p_set[j], 0);
+                hyperplane_nomarlize(h1);
+                h_set.push_back(h1);
+                hyperplane_t *h2 = alloc_hyperplane(p_set[j], p_set[i], 0);
+                hyperplane_nomarlize(h2);
+                h_set.push_back(h2);
+            }
+        }
+    }
+
+    s_node_t *stree_root = alloc_s_node(dim);
+    build_spherical_tree(h_set, stree_root);
+
+    //initial
+    point_t *estimate_u = find_estimate(V);
+    point_nomarlize(estimate_u);
+
+    while (accuracy < 0.99999 && de_accuracy > 0)
+    {
+        round++;
+        hyperplane_t *best = NULL;
+        best = orthogonal_search(stree_root, estimate_u, best);
+        point_t *p = best->point1;
+        point_t *q = best->point2;
+        point_t *pt = alloc_point(dim);
+        if(asked_pairs.find(make_pair(p,q)) != asked_pairs.end()){ // a persistent error, answer is the same as before
+            for (int i = 0; i < dim; i++)
+                {
+                    pt->coord[i] = best->normal->coord[i];
+                }
+        }
+        else if(asked_pairs.find(make_pair(q,p)) != asked_pairs.end()){
+            for (int i = 0; i < dim; i++)
+                {
+                    pt->coord[i] = -best->normal->coord[i];
+                }
+        }
+        else{
+            double v1 = dot_prod(u, p);
+            double v2 = dot_prod(u, q);
+            if (v1 >= v2)
+            {
+                if((double) rand()/RAND_MAX > theta){
+                    for (int i = 0; i < dim; i++)
+                    {
+                        pt->coord[i] = best->normal->coord[i];
+                        asked_pairs.insert(make_pair(p, q));
+                    }
+                }
+                else{
+                    for (int i = 0; i < dim; i++)
+                    {
+                        pt->coord[i] = -best->normal->coord[i];
+                        asked_pairs.insert(make_pair(q, p));
+                    }
+                }
+            }
+            else
+            {
+                if((double) rand()/RAND_MAX > theta){
+                    for (int i = 0; i < dim; i++)
+                    {
+                        pt->coord[i] = -best->normal->coord[i];
+                        asked_pairs.insert(make_pair(q, p));
+                    }
+                }
+                else{
+                    for (int i = 0; i < dim; i++)
+                    {
+                        pt->coord[i] = best->normal->coord[i];
+                        asked_pairs.insert(make_pair(p, q));
+                    }
+                }
+            }
+        }
+        V.push_back(pt);
+        estimate_u = find_estimate(V);
+        for (int i = 0; i < dim; i++)
+        {
+            estimate_u->coord[i] = estimate_u->coord[i] < 0 ? 0 : estimate_u->coord[i];
+        }
+        point_nomarlize(estimate_u);
+        double ac = cosine0(u, estimate_u);
+        de_accuracy = fabs(ac - accuracy);
+        accuracy = ac;
+    }
+    //Find the top-k point based on estimated utility vector
+    std::vector<point_t *> top_current;
+    find_top_k(estimate_u, original_set, top_current, w);
+    release_point(estimate_u);
+    while(h_set.size()>0)
+    {
+        hyperplane_t *hh = h_set[h_set.size()-1];
+        release_hyperplane(hh);
+        h_set.pop_back();
+    }
+
+    stop_timer();
+
+    //get the returned points
+    int output_size = min(w, int(top_current.size()));
+    bool best_point_included = false;
+    for(int i=0; i < output_size; i++){
+        if(dot_prod(u, top_current[i]) >= best_score){
+            best_point_included = true;
+            break;
+        }
+    }
+    correct_count += best_point_included;
+    question_num += round;
+    return_size += output_size;
+    return 0;
+}

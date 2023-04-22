@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     if(argc == 1){
         input_file = "4d100.txt";
         alg_name = "pref";
-        num_repeat = 100;
+        num_repeat = 1000;
     }
     else if(argc != 4){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
@@ -96,6 +96,10 @@ int main(int argc, char *argv[])
             // PointPrune_Persist Algorithm
             PointPrune_Persist(p_set, u, 3, w, theta);
         }
+        if(alg_name.compare("combine")==0){
+            // PointPrune_Persist Algorithm
+            PointPrune_Combine(p_set, u, 3, w, theta);
+        }
         if(alg_name.compare("util")==0){
             // the UtilityApprox Algorithm
             utilityapprox(P, u, 2, epsilon, maxRound, w, theta);
@@ -107,6 +111,10 @@ int main(int argc, char *argv[])
         if(alg_name.compare("pref")==0){
             // Algorithm: Preference Learning
             Preference_Learning_accuracy(p_set, u, k, w, theta);
+        }
+        if(alg_name.compare("pref_persist")==0){
+            // Algorithm: Preference Learning persist
+            Preference_Learning_persist(p_set, u, k, w, theta);
         }
         if(alg_name.compare("uh")==0){
             // the UH-Simplex algorithm
