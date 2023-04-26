@@ -72,6 +72,8 @@ else ()
                 sampling/sampling.cpp
                 optimal/optimal.h
                 optimal/optimal.cpp
+                optimal/optimal_exact.cpp
+                optimal/optimal_exact.h
                 Others/data_struct.h
                 Others/data_utility.cpp
                 Others/data_utility.h

@@ -7,6 +7,7 @@
 #include "exact/Exact_revised.h"
 #include "sampling/sampling.h"
 #include "optimal/optimal.h"
+#include "optimal/optimal_exact.h"
 #include "RH/alg_one.h"
 #include "2DPI/2dPI.h"
 #include "Others/qhull_build.h"
@@ -23,8 +24,8 @@ int main(int argc, char *argv[])
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "sampling";
-        num_repeat = 5;
+        alg_name = "opt_exact";
+        num_repeat = 100;
     } 
     else if(argc != 4){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
@@ -80,6 +81,9 @@ int main(int argc, char *argv[])
         }
         if(alg_name.compare("optimal") == 0){
             optimal::optimal(p_set, u, k, w, SCORE_SELECT, theta);
+        }
+        if(alg_name.compare("opt_exact") == 0){
+            optimal_exact::optimal_exact(p_set, u, k, w, SCORE_SELECT, theta);
         }
     }
     
