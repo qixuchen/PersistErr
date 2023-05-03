@@ -22,21 +22,25 @@
 #include <unordered_set>
 
 
-#ifndef OPT_EXACT
-#define OPT_EXACT
+#ifndef OPT_QUESTION
+#define OPT_QUESTION
 
 #define SCORE_SELECT 1
 #define RAND_SELECT 2
+#define PURE_RANDOM 3
 
-namespace optimal_exact{
+namespace optimal_question{
 
-    struct conf_region
+    struct sample_set
     {
-        std::set<point_t *> points;
-        std::vector<halfspace_set_t *> partitions;
+        std::set<point_t *> data;
+        // key:sample point, value: data point
+        std::set<point_t *> sample;
     };
 
-    int optimal_exact(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta);
+    int optimal_listwise(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta, int s);
+
+    int optimal_sup_inf(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta, int s);
 }
 
 #endif

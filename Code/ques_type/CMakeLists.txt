@@ -74,8 +74,8 @@ else ()
                 sampling/sampling_listwise.cpp
                 optimal/optimal.h
                 optimal/optimal.cpp
-                optimal/optimal_exact.cpp
-                optimal/optimal_exact.h
+                optimal/optimal_question.h
+                optimal/optimal_question.cpp
                 Others/data_struct.h
                 Others/data_utility.cpp
                 Others/data_utility.h
