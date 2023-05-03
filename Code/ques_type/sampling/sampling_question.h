@@ -21,13 +21,13 @@
 #include <random>
 #include <unordered_set>
 
-#ifndef SAMPLING_LISTWISE
-#define SAMPLING_LISTWISE
+#ifndef SAMPLING_QUESTION
+#define SAMPLING_QUESTION
 
 #define SCORE_SELECT 1
 #define RAND_SELECT 2
 
-namespace sampling_listwise{
+namespace sampling_question{
 
     struct sample_set
     {

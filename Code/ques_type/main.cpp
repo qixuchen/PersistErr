@@ -5,8 +5,9 @@
 #include "HDPI/HDPI.h"
 #include "rev_HDPI/rev_HDPI.h"
 #include "exact/Exact_revised.h"
+#include "exact/exact_question.h"
 #include "sampling/sampling.h"
-#include "sampling/sampling_listwise.h"
+#include "sampling/sampling_question.h"
 #include "optimal/optimal.h"
 #include "optimal/optimal_question.h"
 #include "RH/alg_one.h"
@@ -25,7 +26,7 @@ int main(int argc, char *argv[])
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "sampling_sup_inf";
+        alg_name = "exact_sup_inf";
         num_repeat = 20;
     } 
     else if(argc != 4){
@@ -78,14 +79,20 @@ int main(int argc, char *argv[])
         if(alg_name.compare("exact") == 0){
             exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
         }
+        if(alg_name.compare("exact_listwise") == 0){
+            exact_question::exact_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
+        }
+        if(alg_name.compare("exact_sup_inf") == 0){
+            exact_question::exact_sup_inf(p_set, u, k, w, SCORE_SELECT, theta, s);
+        }
         if(alg_name.compare("sampling") == 0){
             sampling::sampling(p_set, u, k, w, RAND_SELECT, theta);
         }
         if(alg_name.compare("sampling_listwise") == 0){
-            sampling_listwise::sampling_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
+            sampling_question::sampling_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
         }
         if(alg_name.compare("sampling_sup_inf") == 0){
-            sampling_listwise::sampling_sup_inf(p_set, u, k, w, RAND_SELECT, theta, s);
+            sampling_question::sampling_sup_inf(p_set, u, k, w, RAND_SELECT, theta, s);
         }
         if(alg_name.compare("optimal") == 0){
             optimal::optimal(p_set, u, k, w, SCORE_SELECT, theta);

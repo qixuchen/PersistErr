@@ -68,10 +68,12 @@ else ()
                 rev_HDPI/rev_HDPI.h
                 exact/Exact_revised.h
                 exact/Exact_revised.cpp
+                exact/exact_question.h
+                exact/exact_question.cpp
                 sampling/sampling.h
                 sampling/sampling.cpp
-                sampling/sampling_listwise.h
-                sampling/sampling_listwise.cpp
+                sampling/sampling_question.h
+                sampling/sampling_question.cpp
                 optimal/optimal.h
                 optimal/optimal.cpp
                 optimal/optimal_question.h

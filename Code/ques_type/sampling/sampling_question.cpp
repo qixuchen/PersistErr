@@ -1,7 +1,7 @@
-#include "sampling_listwise.h"
+#include "sampling_question.h"
 
 
-namespace sampling_listwise{
+namespace sampling_question{
 
     /** @brief check if a preference is already in the known_preference set
      *  @return true if the preference is already in the set
@@ -502,7 +502,7 @@ namespace sampling_listwise{
             for(int j = 0; j < candidate_points.size() - 1; j++){
                 for(int m = 1; m < candidate_points.size(); m++){
                     point_t *cand1 = candidate_points[j], *cand2 = candidate_points[m];       
-                    if(preference_exist(known_preferences, cand1, cand2)) break; // make sure this pair was not used before
+                    if(preference_exist(known_preferences, cand1, cand2)) continue; // make sure this pair was not used before
                     selected_points.insert(cand1);
                     selected_points.insert(cand2);
                     while(selected_points.size() > s){                            
