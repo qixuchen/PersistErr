@@ -329,6 +329,15 @@ namespace sampling_listwise{
     }
 
 
+    /** @brief      Initialize the hyperplane candidates 
+     */
+    void construct_hy_candidates(std::map<int, hyperplane_t *> &hyperplane_candidates, const std::vector<item *> &choose_item_set){
+        for(int i = 0; i<choose_item_set.size(); ++i){
+            hyperplane_candidates.insert(make_pair(i, choose_item_set[i]->hyper));
+        }
+    }
+
+
     /** @brief      Compute the priority of an item's related hyperplane
      */
     double compute_hy_priority_update_upper_bound(item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
@@ -391,48 +400,52 @@ namespace sampling_listwise{
     }
 
 
-
-    /** @brief      Initialize the hyperplane candidates 
-     */
-    void construct_hy_candidates(std::map<int, hyperplane_t *> &hyperplane_candidates, const std::vector<item *> &choose_item_set){
-        for(int i = 0; i<choose_item_set.size(); ++i){
-            hyperplane_candidates.insert(make_pair(i, choose_item_set[i]->hyper));
-        }
-    }
-
-
-    /** @brief    Randomly determine the next question
-     */
-    std::pair<point_t *, point_t *> rand_select_hyperplane(const std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &selected_questions){
-        point_t *p1 = 0, *p2 = 0; 
+    /** @brief      Find s points using the score-based selection
+     *              first find the first p_size hyperplanes with the highest priority
+     *              then find s points from these hyperplanes
+     */ 
+    std::vector<point_t *> score_select_s_points_lazy_update(std::vector<item *> &choose_item_set, 
+                                std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &known_preferences, int s){
         int k = s_sets.size() - 1;
-        std::vector<point_t *> candidate_points;
-        for(int i=0; i <= k; i++){
-            for(int j = 0; j <= i; j++){
-                for(auto p: s_sets[j].data){
-                    candidate_points.push_back(p);
-                }
+        std::vector<std::vector<point_t*>> points_in_region;
+        std::vector<int> cand_to_be_removed;
+        for(int i=0; i<=k; ++i){
+            std::vector<point_t*> points(s_sets[i].data.begin(), s_sets[i].data.end());
+            points_in_region.push_back(points);
+        }
+        int p_size = (s - 1) * (s - 2) / 2 + 1;
+        std::vector<std::pair<int, double>> highest_priorities(p_size, std::make_pair(-1, 0));
+        for(auto c : hyperplane_candidates){
+            item_t *item_ptr = choose_item_set[c.first];
+            point_t *p1 = item_ptr->hyper->point1, *p2 = item_ptr->hyper->point2;
+            if(known_preferences.find(make_pair(p1, p2)) != known_preferences.end() ||
+                            known_preferences.find(make_pair(p2, p1)) != known_preferences.end()){ // the preference is already known
+                cand_to_be_removed.push_back(c.first);
+                continue;
             }
-            if(candidate_points.size() < 2) continue;
-            auto rng = std::default_random_engine {};
-            std::shuffle(candidate_points.begin(), candidate_points.end(), rng);
-            
-            for(int j = 0; j < candidate_points.size() - 1; j++){
-                for(int k = 1; k < candidate_points.size(); k++){
-                    point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
-                    if(selected_questions.size() != 0){
-                        if(selected_questions.find(make_pair(cand1, cand2)) != selected_questions.end() ||
-                            selected_questions.find(make_pair(cand2, cand1)) != selected_questions.end()) break; // make sure this pair was not used before
-                    }
-                    p1 = cand1, p2 = cand2;
-                    selected_questions.insert(make_pair(p1, p2));
-                    return make_pair(p1, p2);
-                }
+            double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
+            if(priority > highest_priorities[p_size - 1].second){
+                highest_priorities[p_size - 1].second = priority;
+                highest_priorities[p_size - 1].first = c.first;
+                std::sort(highest_priorities.begin(), highest_priorities.end(), [](const std::pair<int, double> &a, const std::pair<int, double> &b){
+                    return a.second > b.second;
+                });
             }
         }
-        return make_pair(p1, p2);
+        std::set<point_t *> selected_points;
+        int i = 0;
+        while(i < p_size && highest_priorities[i].first >= 0 && selected_points.size() < s){
+            int ind = highest_priorities[i].first;
+            hyperplane_t *hy = hyperplane_candidates[ind];
+            point_t *p1 = hy->point1, *p2 = hy->point2;
+            if(selected_points.size() < s) selected_points.insert(p1);
+            if(selected_points.size() < s) selected_points.insert(p2);
+            i++;
+        }
+        for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
+        std::vector<point_t *> res(selected_points.begin(), selected_points.end());
+        return res;
     }
-
 
     
     /** @brief    Randomly select s points for the question
@@ -521,12 +534,58 @@ namespace sampling_listwise{
         }
         return cur_best;
     }
-    
 
-    bool pair_compare(const std::pair<int, int>& a, const std::pair<int, int>& b){
-        return a.second > b.second; // Sort in decreasing order of values
+    /** @brief User's choose 1 out of s points if persistent error is made
+     *         Randomly pick two points in each round, compare them, discard the loser
+     *         Return the final choice
+     */
+    int persist_listwise_user_choice_v2(std::vector<point_t *> point_cand, point_t *u, double theta, std::set<std::pair<point_t *, point_t *>> &underlying_preferences){
+        std::vector<point_t *> point_cand_cp = point_cand;
+        while(point_cand.size() > 1){
+            int i = (int) rand() % point_cand.size();
+            int j = (int) rand() % point_cand.size();
+            if(i == j) continue;
+            if(underlying_preferences.find(make_pair(point_cand[i], point_cand[j])) != underlying_preferences.end()){
+                point_cand.erase(point_cand.begin() + j);
+            }
+            else if(underlying_preferences.find(make_pair(point_cand[j], point_cand[i])) != underlying_preferences.end()){
+                point_cand.erase(point_cand.begin() + i);
+            }
+            else{
+                double u1 = dot_prod(point_cand[i], u), u2 = dot_prod(point_cand[j], u);
+                if(u1 > u2){
+                    if((double) rand()/RAND_MAX > theta){
+                        underlying_preferences.insert(make_pair(point_cand[i], point_cand[j]));
+                        point_cand.erase(point_cand.begin() + j);
+                    }
+                    else{
+                        underlying_preferences.insert(make_pair(point_cand[j], point_cand[i]));
+                        point_cand.erase(point_cand.begin() + i);
+                    }
+                }
+                else{
+                    if((double) rand()/RAND_MAX > theta){
+                        underlying_preferences.insert(make_pair(point_cand[j], point_cand[i]));
+                        point_cand.erase(point_cand.begin() + i);
+                    }
+                    else{
+                        underlying_preferences.insert(make_pair(point_cand[i], point_cand[j]));
+                        point_cand.erase(point_cand.begin() + j);
+                    }
+                }
+            }
+        }
+        int final_choice = 0;
+        for(int i = 0; i < point_cand_cp.size(); i++){
+            if(point_cand_cp[i] == point_cand[0]){
+                final_choice = i;
+                break;
+            }
+        }
+        return final_choice;
     }
 
+    
 
     /** @brief User divide s points into superior and inferior groups
      *         First compared all pairs of points, rank them in decreasing order of wins
@@ -576,7 +635,9 @@ namespace sampling_listwise{
             pairs.push_back(std::make_pair(i, wins[i]));
         }
         // Sort the vector of pairs by value in decreasing order
-        std::sort(pairs.begin(), pairs.end(), pair_compare);
+        std::sort(pairs.begin(), pairs.end(), [](const std::pair<int, int> &a, const std::pair<int, int> &b){
+            return a.second > b.second;
+        });;
         for(int i = 0; i < split; i++){
             superior_group.push_back(point_cand[pairs[i].first]);
         }
@@ -653,17 +714,24 @@ namespace sampling_listwise{
         while(points_return.size() > w){
             round++;
             point *p1 = 0, *p2 = 0;
-            std::vector<point_t *> considered_points;
-            std::vector<point_t *> point_cand = rand_select_s_points(s_sets, known_preferences, s);
+            std::vector<point_t *> considered_points, point_cand;
+            if(select_opt == SCORE_SELECT){
+                point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, s);
+            }
+            else{
+                point_cand = rand_select_s_points(s_sets, known_preferences, s);
+            }
             if(point_cand.size() < 2){
                 std::cout << "not enough points to select" << std::endl;
                 break;
             }
-            int user_choice = persist_listwise_user_choice(point_cand, u, theta, underlying_preferences);
+            int user_choice = persist_listwise_user_choice_v2(point_cand, u, theta, underlying_preferences);
 
             for(int i=0; i < point_cand.size(); i++){
                 if(i == user_choice) continue;
                 std::pair<point_t *, point_t *> pref = make_pair(point_cand[user_choice], point_cand[i]);
+                if(known_preferences.find(make_pair(point_cand[user_choice], point_cand[i])) != known_preferences.end() || 
+                    known_preferences.find(make_pair(point_cand[i], point_cand[user_choice]))!= known_preferences.end() ) continue;
                 known_preferences.insert(pref);
                 halfspace_t *hs = alloc_halfspace(point_cand[i], point_cand[user_choice], 0, true);
                 sampling_recurrence(s_sets, hs, lookup);
@@ -745,8 +813,13 @@ namespace sampling_listwise{
         while(points_return.size() > w){
             round++;
             point *p1 = 0, *p2 = 0;
-            std::vector<point_t *> considered_points, sup_points, inf_points;
-            std::vector<point_t *> point_cand = rand_select_s_points(s_sets, known_preferences, s);
+            std::vector<point_t *> considered_points, point_cand, sup_points, inf_points;
+            if(select_opt == SCORE_SELECT){
+                point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, s);
+            }
+            else{
+                point_cand = rand_select_s_points(s_sets, known_preferences, s);
+            }
             if(point_cand.size() < 2){
                 std::cout << "not enough points to select" << std::endl;
                 break;
@@ -756,6 +829,8 @@ namespace sampling_listwise{
             for(int i=0; i < sup_points.size(); i++){
                 for(int j=0; j<inf_points.size(); j++){
                     std::pair<point_t *, point_t *> pref = make_pair(sup_points[i], inf_points[j]);
+                    if(known_preferences.find(make_pair(sup_points[i], inf_points[j])) != known_preferences.end() || 
+                        known_preferences.find(make_pair(inf_points[j], sup_points[i]))!= known_preferences.end() ) continue;
                     known_preferences.insert(pref);
                     halfspace_t *hs = alloc_halfspace(inf_points[j], sup_points[i], 0, true);
                     sampling_recurrence(s_sets, hs, lookup);
@@ -800,99 +875,99 @@ namespace sampling_listwise{
     }
 
 
-    int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
-        int num_sample = 1000;
-        int dim = p_set[0]->dim;
-        vector<point_t *> convh;
-        find_convh_vertices(p_set, convh);
+//     int sampling(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
+//         int num_sample = 1000;
+//         int dim = p_set[0]->dim;
+//         vector<point_t *> convh;
+//         find_convh_vertices(p_set, convh);
 
-        //half_set_set          contains all the partitions(intersection of halfspaces)
-        //considered_half_set   contains all the possible partitions considered
-        //choose_item_points    contains all the points used to construct hyperplanes(questions)
-        //choose_item_set       contains all the hyperplanes(questions) which can be asked user
-        std::vector<halfspace_set_t *> half_set_set;
-        std::set<int> considered_half_set;   //[i] shows the index in half_set_set
-        std::vector<point_t *> choose_item_points;
-        std::vector<item *> choose_item_set;
-        std::vector<std::vector<double>> rand_points;
-        std::vector<double> shift_point;
-        std::map<point_t *, point_t *> lookup;
+//         //half_set_set          contains all the partitions(intersection of halfspaces)
+//         //considered_half_set   contains all the possible partitions considered
+//         //choose_item_points    contains all the points used to construct hyperplanes(questions)
+//         //choose_item_set       contains all the hyperplanes(questions) which can be asked user
+//         std::vector<halfspace_set_t *> half_set_set;
+//         std::set<int> considered_half_set;   //[i] shows the index in half_set_set
+//         std::vector<point_t *> choose_item_points;
+//         std::vector<item *> choose_item_set;
+//         std::vector<std::vector<double>> rand_points;
+//         std::vector<double> shift_point;
+//         std::map<point_t *, point_t *> lookup;
 
-        construct_halfspace_set(convh, choose_item_points, half_set_set, considered_half_set);
-        build_choose_item_table(half_set_set, choose_item_points, choose_item_set);
-        build_lookup_table(lookup, half_set_set, num_sample);
+//         construct_halfspace_set(convh, choose_item_points, half_set_set, considered_half_set);
+//         build_choose_item_table(half_set_set, choose_item_points, choose_item_set);
+//         build_lookup_table(lookup, half_set_set, num_sample);
 
-        std::vector<sample_set> s_sets;
-        for(int i=0; i <= k; i++){
-            s_sets.push_back(sample_set());
-        }
-        initialize_sample_sets(s_sets, lookup);
+//         std::vector<sample_set> s_sets;
+//         for(int i=0; i <= k; i++){
+//             s_sets.push_back(sample_set());
+//         }
+//         initialize_sample_sets(s_sets, lookup);
 
-        std::map<int, hyperplane_t *> hyperplane_candidates;
-        construct_hy_candidates(hyperplane_candidates, choose_item_set);
-        std::vector<point_t *> points_return = compute_considered_set(s_sets);
-        std::set<std::pair<point_t *, point_t *>> selected_questions;
-        int round = 0;
-        start_timer();
-        while(points_return.size() > w){
-            point *p1 =0, *p2 =0;
-            if(select_opt == SCORE_SELECT){
-                // int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, s_sets);
-                int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets);
-                if(best_idx < 0) break;
-                p1 = choose_item_set[best_idx]->hyper->point1;
-                p2 = choose_item_set[best_idx]->hyper->point2;
-            }
-            else{ // using random select
-                std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(s_sets, selected_questions);
-                p1 = point_pair.first, p2 = point_pair.second;
-                if(p1 == 0 || p2 == 0) break;
-            }
-            halfspace_t *hs = 0;
-            if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
-                else hs = alloc_halfspace(p1, p2, 0, true);
-            }
-            else{
-                if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p1, p2, 0, true);
-                else hs = alloc_halfspace(p2, p1, 0, true);
-            }
-            sampling_recurrence(s_sets, hs, lookup);
-            release_halfspace(hs);
+//         std::map<int, hyperplane_t *> hyperplane_candidates;
+//         construct_hy_candidates(hyperplane_candidates, choose_item_set);
+//         std::vector<point_t *> points_return = compute_considered_set(s_sets);
+//         std::set<std::pair<point_t *, point_t *>> selected_questions;
+//         int round = 0;
+//         start_timer();
+//         while(points_return.size() > w){
+//             point *p1 =0, *p2 =0;
+//             if(select_opt == SCORE_SELECT){
+//                 // int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, s_sets);
+//                 int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets);
+//                 if(best_idx < 0) break;
+//                 p1 = choose_item_set[best_idx]->hyper->point1;
+//                 p2 = choose_item_set[best_idx]->hyper->point2;
+//             }
+//             else{ // using random select
+//                 std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(s_sets, selected_questions);
+//                 p1 = point_pair.first, p2 = point_pair.second;
+//                 if(p1 == 0 || p2 == 0) break;
+//             }
+//             halfspace_t *hs = 0;
+//             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
+//                 if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
+//                 else hs = alloc_halfspace(p1, p2, 0, true);
+//             }
+//             else{
+//                 if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p1, p2, 0, true);
+//                 else hs = alloc_halfspace(p2, p1, 0, true);
+//             }
+//             sampling_recurrence(s_sets, hs, lookup);
+//             release_halfspace(hs);
 
-            std::vector<point_t *> considered_points = compute_considered_set(s_sets);
-            if(considered_points.size() == 0) {
-                break;
-            }
-            points_return = considered_points;
-            round++;
-        }
+//             std::vector<point_t *> considered_points = compute_considered_set(s_sets);
+//             if(considered_points.size() == 0) {
+//                 break;
+//             }
+//             points_return = considered_points;
+//             round++;
+//         }
 
-        // free the related data structures
-        while(half_set_set.size() > 0){
-            halfspace_set_t * hs_s_ptr = half_set_set[half_set_set.size() - 1];
-            release_halfspace_set(hs_s_ptr);
-            half_set_set.pop_back();
-        }
-        while(choose_item_set.size() > 0){
-            item * item_ptr = choose_item_set[choose_item_set.size() - 1];
-            release_item(item_ptr);
-            choose_item_set.pop_back();
-        }
-        // clear sample points
-        std::vector<point_t *> sample_free;
-        for(int i = 0; i <= k; i++){
-            for(auto it = s_sets[i].sample.begin(); it != s_sets[i].sample.end(); it++){
-                sample_free.push_back(*it);
-            }
-        }
-        for(auto p : sample_free) release_point(p);
+//         // free the related data structures
+//         while(half_set_set.size() > 0){
+//             halfspace_set_t * hs_s_ptr = half_set_set[half_set_set.size() - 1];
+//             release_halfspace_set(hs_s_ptr);
+//             half_set_set.pop_back();
+//         }
+//         while(choose_item_set.size() > 0){
+//             item * item_ptr = choose_item_set[choose_item_set.size() - 1];
+//             release_item(item_ptr);
+//             choose_item_set.pop_back();
+//         }
+//         // clear sample points
+//         std::vector<point_t *> sample_free;
+//         for(int i = 0; i <= k; i++){
+//             for(auto it = s_sets[i].sample.begin(); it != s_sets[i].sample.end(); it++){
+//                 sample_free.push_back(*it);
+//             }
+//         }
+//         for(auto p : sample_free) release_point(p);
 
-        stop_timer();
-        bool success = check_correctness(points_return, u, best_score);
-        if(success) ++correct_count;
-        question_num += round;
-        return_size += points_return.size();
-        return 0;
-    }
+//         stop_timer();
+//         bool success = check_correctness(points_return, u, best_score);
+//         if(success) ++correct_count;
+//         question_num += round;
+//         return_size += points_return.size();
+//         return 0;
+//     }
 }
