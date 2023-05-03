@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "optimal_sup_inf";
-        num_repeat = 10;
+        alg_name = "sampling_sup_inf";
+        num_repeat = 20;
     } 
     else if(argc != 4){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     int k = 2;
     int w = 5;
     double theta = 0.05;
-    int s = 10;
+    int s = 4;
 
     srand(time(NULL));
     point_set_t *P0 = read_points((char*) input_file.c_str());
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             sampling_listwise::sampling_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
         }
         if(alg_name.compare("sampling_sup_inf") == 0){
-            sampling_listwise::sampling_sup_inf(p_set, u, k, w, SCORE_SELECT, theta, s);
+            sampling_listwise::sampling_sup_inf(p_set, u, k, w, RAND_SELECT, theta, s);
         }
         if(alg_name.compare("optimal") == 0){
             optimal::optimal(p_set, u, k, w, SCORE_SELECT, theta);
