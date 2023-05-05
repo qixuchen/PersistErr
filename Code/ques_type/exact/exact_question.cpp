@@ -279,7 +279,10 @@ namespace exact_question{
         hyperplane_t *hy_res = 0;
         for(auto c : hyperplane_candidates){
             item_t *item_ptr = choose_item_set[c.first];
-            if(preference_exist(known_preferences, item_ptr->hyper->point1, item_ptr->hyper->point2)) continue;
+            if(preference_exist(known_preferences, item_ptr->hyper->point1, item_ptr->hyper->point2)){
+                cand_to_be_removed.push_back(c.first);
+                continue;
+            }
             if(item_ptr->upper_bound > highest_priority || item_ptr->upper_bound == 0){
                 double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
                 if(priority > highest_priority){
@@ -317,12 +320,14 @@ namespace exact_question{
         for(auto c : hyperplane_candidates){
             item_t *item_ptr = choose_item_set[c.first];
             point_t *p1 = item_ptr->hyper->point1, *p2 = item_ptr->hyper->point2;
-            if(known_preferences.find(make_pair(p1, p2)) != known_preferences.end() ||
-                            known_preferences.find(make_pair(p2, p1)) != known_preferences.end()){ // the preference is already known
+            if(preference_exist(known_preferences, p1, p2)){ // the preference is already known
                 cand_to_be_removed.push_back(c.first);
                 continue;
             }
             double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
+            if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
+                cand_to_be_removed.push_back(c.first);
+            }
             if(priority > highest_priorities[p_size - 1].second){
                 highest_priorities[p_size - 1].second = priority;
                 highest_priorities[p_size - 1].first = c.first;
@@ -337,8 +342,17 @@ namespace exact_question{
             int ind = highest_priorities[i].first;
             hyperplane_t *hy = hyperplane_candidates[ind];
             point_t *p1 = hy->point1, *p2 = hy->point2;
-            if(selected_points.size() < s) selected_points.insert(p1);
-            if(selected_points.size() < s) selected_points.insert(p2);
+            // MUST: make sure there is no "incomplete pair" in the selected points
+            // If s = 4, and we have pair (p1, p2), (p1, p3), (p4, p5)
+            // If the function returns p1 - p4 and the user chooses p4 in this case
+            // nothing will be updated and there will be a dead loop
+            std::set<point_t *> test = selected_points;
+            test.insert(p1);
+            test.insert(p2);
+            if(test.size() <= s){
+                selected_points.insert(p1);
+                selected_points.insert(p2);
+            }
             i++;
         }
         for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
@@ -351,17 +365,21 @@ namespace exact_question{
      */
     std::pair<point_t *, point_t *> rand_select_hyperplane(const vector<conf_region> &conf_regions, std::set<std::pair<point_t *, point_t *>> &known_preferences){
         point_t *p1 = 0, *p2 = 0; 
+        std::set<point_t *> candidate_set;
         int k = conf_regions.size() - 1;
-        std::vector<point_t *> candidate_points;
         for(int i=0; i <= k; i++){
             for(int j = 0; j <= i; j++){
                 for(auto p: conf_regions[j].points){
-                    candidate_points.push_back(p);
+                    candidate_set.insert(p);
                 }
             }
-            if(candidate_points.size() < 2) continue;
-            auto rng = std::default_random_engine {};
-            std::shuffle(candidate_points.begin(), candidate_points.end(), rng);
+            if(candidate_set.size() < 2) continue;
+            std::vector<point_t *> candidate_points(candidate_set.begin(), candidate_set.end());
+            // Obtain a random seed for the random number engine
+            std::random_device rd;
+            // Use the random seed to initialize the random number engine
+            std::mt19937 g(rd());
+            std::shuffle(candidate_points.begin(), candidate_points.end(), g);
             for(int j = 0; j < candidate_points.size() - 1; j++){
                 for(int k = 1; k < candidate_points.size(); k++){
                     point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
@@ -377,19 +395,21 @@ namespace exact_question{
     /** @brief    Randomly select s points for the question
      */
     std::vector<point_t *> rand_select_s_points(const vector<conf_region> &conf_regions, std::set<std::pair<point_t *, point_t *>> &known_preferences, int s){
-        std::set<point_t *> selected_points;
+        std::set<point_t *> selected_points, candidate_set;
         int k = conf_regions.size() - 1;
-        std::vector<point_t *> candidate_points;
         for(int i=0; i <= k; i++){
             for(int j = 0; j <= i; j++){
                 for(auto p: conf_regions[j].points){
-                    candidate_points.push_back(p);
+                    candidate_set.insert(p);
                 }
             }
-            if(candidate_points.size() < 2) continue;
-            auto rng = std::default_random_engine {};
-            std::shuffle(candidate_points.begin(), candidate_points.end(), rng);
-            
+            if(candidate_set.size() < 2) continue;
+            std::vector<point_t *> candidate_points(candidate_set.begin(), candidate_set.end());
+            // Obtain a random seed for the random number engine
+            std::random_device rd;
+            // Use the random seed to initialize the random number engine
+            std::mt19937 g(rd());
+            std::shuffle(candidate_points.begin(), candidate_points.end(), g);
             for(int j = 0; j < candidate_points.size() - 1; j++){
                 for(int m = 1; m < candidate_points.size(); m++){
                     point_t *cand1 = candidate_points[j], *cand2 = candidate_points[m];       
@@ -683,11 +703,19 @@ namespace exact_question{
             if(conf_regions[k-1].points.size() == 0){ // since R^{k-1} is empty, we need to ask pairwise questions
                 if(select_opt == SCORE_SELECT){
                     int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, conf_regions, known_preferences);
+                    if(best_idx < 0){
+                        std::cout << "no hyperplane to select" << std::endl;
+                        break;
+                    }
                     point_cand.push_back(choose_item_set[best_idx]->hyper->point1);
                     point_cand.push_back(choose_item_set[best_idx]->hyper->point2);
                 }
                 else{
                     std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(conf_regions, known_preferences);
+                    if(point_pair.first == NULL || point_pair.second == NULL){
+                        std::cout << "not enough points to select" << std::endl;
+                        break;
+                    }
                     point_cand.push_back(point_pair.first);
                     point_cand.push_back(point_pair.second);
                 }
@@ -786,11 +814,19 @@ namespace exact_question{
             if(conf_regions[k-1].points.size() == 0){ // since R^{k-1} is empty, we need to ask pairwise questions
                 if(select_opt == SCORE_SELECT){
                     int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, conf_regions, known_preferences);
+                    if(best_idx < 0){
+                        std::cout << "no hyperplane to select" << std::endl;
+                        break;
+                    }
                     point_cand.push_back(choose_item_set[best_idx]->hyper->point1);
                     point_cand.push_back(choose_item_set[best_idx]->hyper->point2);
                 }
                 else{
                     std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(conf_regions, known_preferences);
+                    if(point_pair.first == NULL || point_pair.second == NULL){
+                        std::cout << "not enough points to select" << std::endl;
+                        break;
+                    }
                     point_cand.push_back(point_pair.first);
                     point_cand.push_back(point_pair.second);
                 }
@@ -852,96 +888,4 @@ namespace exact_question{
         cout << "return size: " << points_return.size() << endl;
         return 0;
     }
-
-
-    // int Exact_revised(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
-    //     start_timer();
-    //     int dim = p_set[0]->dim;
-    //     vector<point_t *> convh;
-    //     find_convh_vertices(p_set, convh);
-
-    //     //half_set_set          contains all the partitions(intersection of halfspaces)
-    //     //considered_half_set   contains all the possible partitions considered
-    //     //choose_item_points    contains all the points used to construct hyperplanes(questions)
-    //     //choose_item_set       contains all the hyperplanes(questions) which can be asked user
-    //     std::vector<halfspace_set_t *> half_set_set;
-    //     std::set<int> considered_half_set;   //[i] shows the index in half_set_set
-    //     std::vector<point_t *> choose_item_points;
-    //     std::vector<item *> choose_item_set;
-    //     construct_halfspace_set(convh, choose_item_points, half_set_set, considered_half_set);
-    //     build_choose_item_table(half_set_set, choose_item_points, choose_item_set);
-        
-    //     // initialize conf_Region R^0 ... R^k
-    //     vector<conf_region> conf_regions;
-    //     for(int i=0; i<=k; i++){
-    //         conf_regions.push_back(conf_region());
-    //     }
-    //     initialize_conf_region(conf_regions[0], half_set_set); // conf_region[0] now contains all partitions
-
-    //     // key: index of the item in choose_item_set; value: pointer to the hyperplane
-    //     std::map<int, hyperplane_t *> hyperplane_candidates;
-    //     construct_hy_candidates(hyperplane_candidates, choose_item_set);
-    //     std::set<point_t *> points_return = compute_considered_set(conf_regions);
-    //     std::set<std::pair<point_t *, point_t *>> selected_questions;
-    //     int round = 0;
-    //     while(points_return.size() > w){
-    //         point *p1 =0, *p2 =0;
-    //         if(select_opt == SCORE_SELECT){
-    //             // int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, conf_regions);
-    //             int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, conf_regions);
-    //             if(best_idx < 0) break;
-    //             p1 = choose_item_set[best_idx]->hyper->point1;
-    //             p2 = choose_item_set[best_idx]->hyper->point2;
-    //         }
-    //         else{ // using random select
-    //             std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(conf_regions, selected_questions);
-    //             p1 = point_pair.first, p2 = point_pair.second;
-    //             if(p1 == 0 || p2 == 0) break;
-    //         }
-    //         halfspace_t *hs = 0;
-    //         if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
-    //             if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
-    //             else hs = alloc_halfspace(p1, p2, 0, true);
-    //         }
-    //         else{
-    //             if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p1, p2, 0, true);
-    //             else hs = alloc_halfspace(p2, p1, 0, true);
-    //         }
-    //         exact_recur(conf_regions, hs);
-    //         release_halfspace(hs);
-    //         std::set<point_t *> considered_points = compute_considered_set(conf_regions);
-    //         if(considered_points.size() == 0){ 
-    //             break;
-    //         }
-    //         points_return = considered_points;
-    //         round++;
-    //     }
-        
-    //     stop_timer();
-    //     // free the related data structures
-    //     while(half_set_set.size() > 0){
-    //         halfspace_set_t * hs_s_ptr = half_set_set[half_set_set.size() - 1];
-    //         release_halfspace_set(hs_s_ptr);
-    //         half_set_set.pop_back();
-    //     }
-    //     while(choose_item_set.size() > 0){
-    //         item * item_ptr = choose_item_set[choose_item_set.size() - 1];
-    //         release_item(item_ptr);
-    //         choose_item_set.pop_back();
-    //     }
-
-    //     // clear conf regions
-    //     for(int i = 0; i <= k; i++){
-    //         auto it = conf_regions[i].partitions.begin();
-    //         while(it != conf_regions[i].partitions.end()){
-    //             release_halfspace_set(*it);
-    //             ++it;
-    //         }
-    //     } 
-    //     bool success = check_correctness(points_return, u, best_score);
-    //     if(success) ++correct_count;
-    //     question_num += round;
-    //     return_size += points_return.size();
-    //     return 0;
-    // }
 }

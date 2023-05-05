@@ -432,6 +432,9 @@ namespace optimal_question{
                 continue;
             }
             double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
+            if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
+                cand_to_be_removed.push_back(c.first);
+            }
             if(priority > highest_priorities[p_size - 1].second){
                 highest_priorities[p_size - 1].second = priority;
                 highest_priorities[p_size - 1].first = c.first;
@@ -441,17 +444,22 @@ namespace optimal_question{
             }
         }
         std::set<point_t *> selected_points;
-        if(stage1){
-            selected_points.insert(stg1_pair.first);
-            selected_points.insert(stg1_pair.second);
-        }
         int i = 0;
         while(i < p_size && highest_priorities[i].first >= 0 && selected_points.size() < s){
             int ind = highest_priorities[i].first;
             hyperplane_t *hy = hyperplane_candidates[ind];
             point_t *p1 = hy->point1, *p2 = hy->point2;
-            if(selected_points.size() < s) selected_points.insert(p1);
-            if(selected_points.size() < s) selected_points.insert(p2);
+            // MUST: make sure there is no "incomplete pair" in the selected points
+            // If s = 4, and we have pair (p1, p2), (p1, p3), (p4, p5)
+            // If the function returns p1 - p4 and the user chooses p4 in this case
+            // nothing will be updated and there will be a dead loop
+            std::set<point_t *> test = selected_points;
+            test.insert(p1);
+            test.insert(p2);
+            if(test.size() <= s){
+                selected_points.insert(p1);
+                selected_points.insert(p2);
+            }
             i++;
         }
         for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
@@ -738,6 +746,10 @@ namespace optimal_question{
             std::vector<point_t *> considered_points, point_cand;
             if(s_sets[k-1].data.size() == 0){ // since R^{k-1} is empty, we need to ask pairwise questions
                 int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences);
+                    if(best_idx < 0){
+                        std::cout << "no hyperplane to select" << std::endl;
+                        break;
+                    }
                 point_cand.push_back(choose_item_set[best_idx]->hyper->point1);
                 point_cand.push_back(choose_item_set[best_idx]->hyper->point2);
             }
@@ -846,6 +858,10 @@ namespace optimal_question{
             std::vector<point_t *> considered_points, point_cand, sup_points, inf_points;
             if(s_sets[k-1].data.size() == 0){ // since R^{k-1} is empty, we need to ask pairwise questions
                 int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences);
+                    if(best_idx < 0){
+                        std::cout << "no hyperplane to select" << std::endl;
+                        break;
+                    }
                 point_cand.push_back(choose_item_set[best_idx]->hyper->point1);
                 point_cand.push_back(choose_item_set[best_idx]->hyper->point2);
             }

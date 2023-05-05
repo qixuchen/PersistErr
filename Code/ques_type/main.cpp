@@ -22,14 +22,15 @@
 
 int main(int argc, char *argv[])
 {
-    int num_repeat;
+    int num_repeat, s;
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "exact_sup_inf";
-        num_repeat = 20;
+        alg_name = "exact_listwise";
+        num_repeat = 100;
+        s = 4;
     } 
-    else if(argc != 4){
+    else if(argc != 5){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
         cout << "ALG_NAME: exact | sampling | optimal" << endl;
         exit(-1);
@@ -38,9 +39,10 @@ int main(int argc, char *argv[])
         num_repeat = atoi(argv[1]);
         alg_name = argv[2];
         input_file = argv[3];
+        s = atoi(argv[4]);
     }
     
-    string ofile_name = string("./results/") + alg_name + "_" + input_file + "_" + to_string(num_repeat) + ".txt";
+    string ofile_name = string("./results/") + alg_name + "_" + to_string(s) + ".txt";
     ofstream ofile;
     ofile.open(ofile_name);
 
@@ -48,7 +50,6 @@ int main(int argc, char *argv[])
     int k = 2;
     int w = 5;
     double theta = 0.05;
-    int s = 4;
 
     srand(time(NULL));
     point_set_t *P0 = read_points((char*) input_file.c_str());
@@ -92,7 +93,7 @@ int main(int argc, char *argv[])
             sampling_question::sampling_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
         }
         if(alg_name.compare("sampling_sup_inf") == 0){
-            sampling_question::sampling_sup_inf(p_set, u, k, w, RAND_SELECT, theta, s);
+            sampling_question::sampling_sup_inf(p_set, u, k, w, SCORE_SELECT, theta, s);
         }
         if(alg_name.compare("optimal") == 0){
             optimal::optimal(p_set, u, k, w, SCORE_SELECT, theta);
