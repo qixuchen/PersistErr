@@ -371,43 +371,6 @@ namespace sampling_question{
     }
 
 
-    /** @brief       Find the best hyperplane to ask
-     *               Using lazy updating trick
-     */
-    int find_best_hyperplane_lazy_update(std::vector<item *> &choose_item_set, 
-                                std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &known_preferences){
-        int k = s_sets.size()-1;
-        std::vector<std::vector<point_t*>> points_in_region;
-        std::vector<int> cand_to_be_removed;
-        for(int i=0; i<=k; ++i){
-            std::vector<point_t*> points(s_sets[i].data.begin(), s_sets[i].data.end());
-            points_in_region.push_back(points);
-        }
-        double highest_priority = 0;
-        int highest_index = -1;
-        hyperplane_t *hy_res = 0;
-        for(auto c : hyperplane_candidates){
-            item_t *item_ptr = choose_item_set[c.first];
-            if(preference_exist(known_preferences, item_ptr->hyper->point1, item_ptr->hyper->point2)) continue;
-            if(item_ptr->upper_bound > highest_priority || item_ptr->upper_bound == 0){
-                double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
-                if(priority > highest_priority){
-                    highest_priority = priority;
-                    highest_index = c.first;
-                    hy_res = c.second;
-                }
-                if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
-                    cand_to_be_removed.push_back(c.first);
-                }
-            }
-        }
-        // MUST: remove the selected candidate
-        if(highest_index >= 0) hyperplane_candidates.erase(highest_index);
-        for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
-        return highest_index;
-    }
-
-
     /** @brief      Find s points using the score-based selection
      *              first find the first p_size hyperplanes with the highest priority
      *              then find s points from these hyperplanes
@@ -416,17 +379,25 @@ namespace sampling_question{
                                 std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &known_preferences, int s){
         int k = s_sets.size() - 1;
         std::vector<std::vector<point_t*>> points_in_region;
+        std::set<point_t*> candidate_set;
         std::vector<int> cand_to_be_removed;
-        for(int i=0; i<=k; ++i){
+        for(int i = 0; i <= k; ++i){
             std::vector<point_t*> points(s_sets[i].data.begin(), s_sets[i].data.end());
             points_in_region.push_back(points);
+        }
+        for(int i = 0; i <= k; ++i){
+            for(auto p: s_sets[i].data){
+                candidate_set.insert(p);
+            }
         }
         int p_size = (s - 1) * (s - 2) / 2 + 1;
         std::vector<std::pair<int, double>> highest_priorities(p_size, std::make_pair(-1, 0));
         for(auto c : hyperplane_candidates){
             item_t *item_ptr = choose_item_set[c.first];
             point_t *p1 = item_ptr->hyper->point1, *p2 = item_ptr->hyper->point2;
-            if(preference_exist(known_preferences, p1, p2)){ // the preference is already known
+            if(preference_exist(known_preferences, p1, p2)
+                || candidate_set.find(p1) == candidate_set.end()
+                || candidate_set.find(p2) == candidate_set.end()){ // the preference is already known or some point is already discarded
                 cand_to_be_removed.push_back(c.first);
                 continue;
             }
@@ -464,37 +435,6 @@ namespace sampling_question{
         for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
         std::vector<point_t *> res(selected_points.begin(), selected_points.end());
         return res;
-    }
-
-
-    /** @brief    Randomly determine the next question
-     */
-    std::pair<point_t *, point_t *> rand_select_hyperplane(const std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &known_preferences){
-        point_t *p1 = 0, *p2 = 0; 
-        std::set<point_t *> candidate_set;
-        int k = s_sets.size() - 1;
-        for(int i=0; i <= k; i++){
-            for(int j = 0; j <= i; j++){
-                for(auto p: s_sets[j].data){
-                    candidate_set.insert(p);
-                }
-            }
-            if(candidate_set.size() < 2) continue;
-            std::vector<point_t *> candidate_points(candidate_set.begin(), candidate_set.end());
-            // Obtain a random seed for the random number engine
-            std::random_device rd;
-            // Use the random seed to initialize the random number engine
-            std::mt19937 g(rd());
-            std::shuffle(candidate_points.begin(), candidate_points.end(), g);
-            for(int j = 0; j < candidate_points.size() - 1; j++){
-                for(int k = 1; k < candidate_points.size(); k++){
-                    point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
-                    if(preference_exist(known_preferences, cand1, cand2)) continue; // make sure this pair was not used before
-                    return make_pair(cand1, cand2);
-                }
-            }
-        }
-        return make_pair(p1, p2);
     }
 
     
@@ -766,37 +706,16 @@ namespace sampling_question{
             round++;
             point *p1 = 0, *p2 = 0;
             std::vector<point_t *> considered_points, point_cand;
-            if(s_sets[k-1].data.size() == 0){ // since R^{k-1} is empty, we need to ask pairwise questions
-                if(select_opt == SCORE_SELECT){
-                    int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences);
-                    if(best_idx < 0){
-                        std::cout << "no hyperplane to select" << std::endl;
-                        break;
-                    }
-                    point_cand.push_back(choose_item_set[best_idx]->hyper->point1);
-                    point_cand.push_back(choose_item_set[best_idx]->hyper->point2);
-                }
-                else{
-                    std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(s_sets, known_preferences);
-                    if(point_pair.first == NULL || point_pair.second == NULL){
-                        std::cout << "not enough points to select" << std::endl;
-                        break;
-                    }
-                    point_cand.push_back(point_pair.first);
-                    point_cand.push_back(point_pair.second);
-                }
+
+            if(select_opt == SCORE_SELECT){
+                point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, s);
             }
             else{
-                if(select_opt == SCORE_SELECT){
-                    point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, s);
-                }
-                else{
-                    point_cand = rand_select_s_points(s_sets, known_preferences, s);
-                }
-                if(point_cand.size() < 2){
-                    std::cout << "not enough points to select" << std::endl;
-                    break;
-                }
+                point_cand = rand_select_s_points(s_sets, known_preferences, s);
+            }
+            if(point_cand.size() < 2){
+                std::cout << "not enough points to select" << std::endl;
+                break;
             }
             int user_choice = persist_listwise_user_choice_v2(point_cand, u, theta, underlying_preferences);
 
@@ -809,7 +728,7 @@ namespace sampling_question{
                 release_halfspace(hs);
                 points_return = compute_considered_set(s_sets);
                 if(points_return.size() <= w) break;
-                if(s_sets[k-1].data.size() == 0) break;
+                // if(s_sets[k-1].data.size() == 0) break;
             }
         }
 
@@ -884,37 +803,16 @@ namespace sampling_question{
             round++;
             point *p1 = 0, *p2 = 0;
             std::vector<point_t *> considered_points, point_cand, sup_points, inf_points;
-            if(s_sets[k-1].data.size() == 0){ // since R^{k-1} is empty, we need to ask pairwise questions
-                if(select_opt == SCORE_SELECT){
-                    int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences);
-                    if(best_idx < 0){
-                        std::cout << "no hyperplane to select" << std::endl;
-                        break;
-                    }
-                    point_cand.push_back(choose_item_set[best_idx]->hyper->point1);
-                    point_cand.push_back(choose_item_set[best_idx]->hyper->point2);
-                }
-                else{
-                    std::pair<point_t *, point_t *> point_pair = rand_select_hyperplane(s_sets, known_preferences);
-                    if(point_pair.first == NULL || point_pair.second == NULL){
-                        std::cout << "not enough points to select" << std::endl;
-                        break;
-                    }
-                    point_cand.push_back(point_pair.first);
-                    point_cand.push_back(point_pair.second);
-                }
+
+            if(select_opt == SCORE_SELECT){
+                point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, s);
             }
             else{
-                if(select_opt == SCORE_SELECT){
-                    point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, s);
-                }
-                else{
-                    point_cand = rand_select_s_points(s_sets, known_preferences, s);
-                }
-                if(point_cand.size() < 2){
-                    std::cout << "not enough points to select" << std::endl;
-                    break;
-                }
+                point_cand = rand_select_s_points(s_sets, known_preferences, s);
+            }
+            if(point_cand.size() < 2){
+                std::cout << "not enough points to select" << std::endl;
+                break;
             }
             persist_superior_inferior_user_choice(point_cand, u, theta, underlying_preferences, sup_points, inf_points);
 

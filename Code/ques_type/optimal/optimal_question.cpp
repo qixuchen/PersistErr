@@ -372,41 +372,72 @@ namespace optimal_question{
     }
 
 
-    /** @brief       Find the best hyperplane to ask
-     *               Using lazy updating trick
-     */
-    int find_best_hyperplane_lazy_update(std::vector<item *> &choose_item_set, 
-                                std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &known_preferences){
-        int k = s_sets.size()-1;
+    /** @brief      Find s points using the score-based selection
+     *              first find the first p_size hyperplanes with the highest priority
+     *              then find s points from these hyperplanes
+     */ 
+    std::vector<point_t *> score_select_s_points_lazy_update(std::vector<item *> &choose_item_set, 
+                                std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &known_preferences, int s){
+        int k = s_sets.size() - 1;
         std::vector<std::vector<point_t*>> points_in_region;
+        std::set<point_t*> candidate_set;
         std::vector<int> cand_to_be_removed;
-        for(int i=0; i<=k; ++i){
+        for(int i = 0; i <= k; ++i){
             std::vector<point_t*> points(s_sets[i].data.begin(), s_sets[i].data.end());
             points_in_region.push_back(points);
         }
-        double highest_priority = 0;
-        int highest_index = -1;
-        hyperplane_t *hy_res = 0;
-        for(auto c : hyperplane_candidates){
-            item_t *item_ptr = choose_item_set[c.first];
-            if(preference_exist(known_preferences, item_ptr->hyper->point1, item_ptr->hyper->point2)) continue;
-            if(item_ptr->upper_bound > highest_priority || item_ptr->upper_bound == 0){
-                double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
-                if(priority > highest_priority){
-                    highest_priority = priority;
-                    highest_index = c.first;
-                    hy_res = c.second;
-                }
-                if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
-                    cand_to_be_removed.push_back(c.first);
-                }
+        for(int i = 0; i <= k; ++i){
+            for(auto p: s_sets[i].data){
+                candidate_set.insert(p);
             }
         }
-        // MUST: remove the selected candidate
-        if(highest_index >= 0) hyperplane_candidates.erase(highest_index);
+        int p_size = (s - 1) * (s - 2) / 2 + 1;
+        std::vector<std::pair<int, double>> highest_priorities(p_size, std::make_pair(-1, 0));
+        for(auto c : hyperplane_candidates){
+            item_t *item_ptr = choose_item_set[c.first];
+            point_t *p1 = item_ptr->hyper->point1, *p2 = item_ptr->hyper->point2;
+            if(preference_exist(known_preferences, p1, p2)
+                || candidate_set.find(p1) == candidate_set.end()
+                || candidate_set.find(p2) == candidate_set.end()){ // the preference is already known or some point is already discarded
+                cand_to_be_removed.push_back(c.first);
+                continue;
+            }
+            double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
+            if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
+                cand_to_be_removed.push_back(c.first);
+            }
+            if(priority > highest_priorities[p_size - 1].second){
+                highest_priorities[p_size - 1].second = priority;
+                highest_priorities[p_size - 1].first = c.first;
+                std::sort(highest_priorities.begin(), highest_priorities.end(), [](const std::pair<int, double> &a, const std::pair<int, double> &b){
+                    return a.second > b.second;
+                });
+            }
+        }
+        std::set<point_t *> selected_points;
+        int i = 0;
+        while(i < p_size && highest_priorities[i].first >= 0 && selected_points.size() < s){
+            int ind = highest_priorities[i].first;
+            hyperplane_t *hy = hyperplane_candidates[ind];
+            point_t *p1 = hy->point1, *p2 = hy->point2;
+            // MUST: make sure there is no "incomplete pair" in the selected points
+            // If s = 4, and we have pair (p1, p2), (p1, p3), (p4, p5)
+            // If the function returns p1 - p4 and the user chooses p4 in this case
+            // nothing will be updated and there will be a dead loop
+            std::set<point_t *> test = selected_points;
+            test.insert(p1);
+            test.insert(p2);
+            if(test.size() <= s){
+                selected_points.insert(p1);
+                selected_points.insert(p2);
+            }
+            i++;
+        }
         for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
-        return highest_index;
+        std::vector<point_t *> res(selected_points.begin(), selected_points.end());
+        return res;
     }
+
 
 
     /** @brief      Find s points using the score-based selection
@@ -705,10 +736,6 @@ namespace optimal_question{
         vector<point_t *> convh;
         find_convh_vertices(p_set, convh);
 
-        //half_set_set          contains all the partitions(intersection of halfspaces)
-        //considered_half_set   contains all the possible partitions considered
-        //choose_item_points    contains all the points used to construct hyperplanes(questions)
-        //choose_item_set       contains all the hyperplanes(questions) which can be asked user
         std::vector<halfspace_set_t *> half_set_set;
         std::set<int> considered_half_set;   //[i] shows the index in half_set_set
         std::vector<point_t *> choose_item_points;
@@ -744,27 +771,19 @@ namespace optimal_question{
             round++;
             point *p1 = 0, *p2 = 0;
             std::vector<point_t *> considered_points, point_cand;
-            if(s_sets[k-1].data.size() == 0){ // since R^{k-1} is empty, we need to ask pairwise questions
-                int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences);
-                    if(best_idx < 0){
-                        std::cout << "no hyperplane to select" << std::endl;
-                        break;
-                    }
-                point_cand.push_back(choose_item_set[best_idx]->hyper->point1);
-                point_cand.push_back(choose_item_set[best_idx]->hyper->point2);
+
+            if(round < stage1_target && s_sets[k-1].data.size()>0){ // run stage 1
+                auto point_pair = stage1_decide_point_pair(half_set_set, known_preferences, PS, focus, PS_pos);
+                // point_cand.push_back(point_pair.first);
+                // point_cand.push_back(point_pair.second);
+                point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, true, point_pair, s);
             }
             else{
-                if(round < stage1_target && s_sets[k-1].data.size()>0){ // run stage 1
-                    auto point_pair = stage1_decide_point_pair(half_set_set, known_preferences, PS, focus, PS_pos);
-                    point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, true, point_pair, s);
-                }
-                else{
-                    point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, false, make_pair(p1, p2), s);
-                }
-                if(point_cand.size() < 2){
-                    std::cout << "not enough points to select" << std::endl;
-                    break;
-                }
+                point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, s);
+            }
+            if(point_cand.size() < 2){
+                std::cout << "not enough points to select" << std::endl;
+                break;
             }
             int user_choice = persist_listwise_user_choice_v2(point_cand, u, theta, underlying_preferences);
 
@@ -817,10 +836,6 @@ namespace optimal_question{
         vector<point_t *> convh;
         find_convh_vertices(p_set, convh);
 
-        //half_set_set          contains all the partitions(intersection of halfspaces)
-        //considered_half_set   contains all the possible partitions considered
-        //choose_item_points    contains all the points used to construct hyperplanes(questions)
-        //choose_item_set       contains all the hyperplanes(questions) which can be asked user
         std::vector<halfspace_set_t *> half_set_set;
         std::set<int> considered_half_set;   //[i] shows the index in half_set_set
         std::vector<point_t *> choose_item_points;
@@ -856,27 +871,19 @@ namespace optimal_question{
             round++;
             point *p1 = 0, *p2 = 0;
             std::vector<point_t *> considered_points, point_cand, sup_points, inf_points;
-            if(s_sets[k-1].data.size() == 0){ // since R^{k-1} is empty, we need to ask pairwise questions
-                int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences);
-                    if(best_idx < 0){
-                        std::cout << "no hyperplane to select" << std::endl;
-                        break;
-                    }
-                point_cand.push_back(choose_item_set[best_idx]->hyper->point1);
-                point_cand.push_back(choose_item_set[best_idx]->hyper->point2);
+
+            if(round < stage1_target && s_sets[k-1].data.size()>0){ // run stage 1
+                auto point_pair = stage1_decide_point_pair(half_set_set, known_preferences, PS, focus, PS_pos);
+                // point_cand.push_back(point_pair.first);
+                // point_cand.push_back(point_pair.second);
+                point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, true, point_pair, s);
             }
             else{
-                if(round < stage1_target && s_sets[k-1].data.size()>0){ // run stage 1
-                    auto point_pair = stage1_decide_point_pair(half_set_set, known_preferences, PS, focus, PS_pos);
-                    point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, true, point_pair, s);
-                }
-                else{
-                    point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, false, make_pair(p1, p2), s);
-                }
-                if(point_cand.size() < 2){
-                    std::cout << "not enough points to select" << std::endl;
-                    break;
-                }
+                point_cand = score_select_s_points_lazy_update(choose_item_set, hyperplane_candidates, s_sets, known_preferences, s);
+            }
+            if(point_cand.size() < 2){
+                std::cout << "not enough points to select" << std::endl;
+                break;
             }
             persist_superior_inferior_user_choice(point_cand, u, theta, underlying_preferences, sup_points, inf_points);
 

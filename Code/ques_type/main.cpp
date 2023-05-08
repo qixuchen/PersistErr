@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "exact_listwise";
+        alg_name = "sampling_listwise";
         num_repeat = 100;
-        s = 4;
+        s = 10;
     } 
     else if(argc != 5){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
             exact_question::exact_sup_inf(p_set, u, k, w, SCORE_SELECT, theta, s);
         }
         if(alg_name.compare("sampling") == 0){
-            sampling::sampling(p_set, u, k, w, RAND_SELECT, theta);
+            sampling::sampling(p_set, u, k, w, SCORE_SELECT, theta);
         }
         if(alg_name.compare("sampling_listwise") == 0){
             sampling_question::sampling_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
