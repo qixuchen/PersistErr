@@ -14,5 +14,7 @@ void start_timer();
 void stop_timer();
 void incre_total_time_microsec();
 double avg_time();
+double total_time();
+void compute_time_stats();
 
 #endif

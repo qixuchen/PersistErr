@@ -588,7 +588,7 @@ namespace exact_question{
                 std::cout << "not enough points to select" << std::endl;
                 break;
             }
-            int user_choice = persist_listwise_user_choice_v2(point_cand, u, theta, underlying_preferences);
+            int user_choice = persist_listwise_user_choice(point_cand, u, theta, underlying_preferences);
 
             for(int i=0; i < point_cand.size(); i++){
                 if(i == user_choice) continue;

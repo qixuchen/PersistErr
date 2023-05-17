@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
             exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
         }
         if(alg_name.compare("exact_listwise") == 0){
-            exact_question::exact_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
+            exact_question::exact_listwise(p_set, u, k, w, RAND_SELECT, theta, s);
         }
         if(alg_name.compare("exact_sup_inf") == 0){
             exact_question::exact_sup_inf(p_set, u, k, w, SCORE_SELECT, theta, s);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
             sampling::sampling(p_set, u, k, w, SCORE_SELECT, theta);
         }
         if(alg_name.compare("sampling_listwise") == 0){
-            sampling_question::sampling_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
+            sampling_question::sampling_listwise(p_set, u, k, w, RAND_SELECT, theta, s);
         }
         if(alg_name.compare("sampling_sup_inf") == 0){
             sampling_question::sampling_sup_inf(p_set, u, k, w, SCORE_SELECT, theta, s);

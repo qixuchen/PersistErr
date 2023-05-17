@@ -144,6 +144,7 @@ int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRoun
 
     // determine the attribute with highest rating in prefs
     for (i = 1; i < D; ++i)
+    {
         if (u->coord[i] > u->coord[istar])
         {
             if((double) rand()/RAND_MAX > theta){
@@ -155,7 +156,7 @@ int utilityapprox(point_set_t *P, point_t *u, int s, double epsilon, int maxRoun
                 istar = i;
             }
         }
-
+    }
     //if (VERBOSE)
     //printf("istar = %d\n", istar);
 
