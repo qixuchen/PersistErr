@@ -9,7 +9,6 @@
 #include "optimal/optimal.h"
 #include "optimal/optimal_exact.h"
 #include "RH/alg_one.h"
-#include "2DPI/2dPI.h"
 #include "Others/qhull_build.h"
 #include <vector>
 #include <ctime>
@@ -23,8 +22,8 @@ int main(int argc, char *argv[])
     int num_repeat;
     string input_file, alg_name;
     if(argc == 1){
-        input_file = "4d100k.txt";
-        alg_name = "opt_exact";
+        input_file = "4d100.txt";
+        alg_name = "sampling";
         num_repeat = 100;
     } 
     else if(argc != 4){

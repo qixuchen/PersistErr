@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(InteractiveTopk)
+project(PersistErr)
 
 enable_testing()
 
@@ -57,9 +57,7 @@ else ()
         add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-ldl")
         add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-DBOOST_NO_AUTO_PTR")
 
-        add_executable(InteractiveTopk
-                2DPI/2dPI.cpp
-                2DPI/2dPI.h
+        add_executable(PersistErr
                 RH/alg_one.cpp
                 RH/alg_one.h
                 HDPI/HDPI.cpp
@@ -123,6 +121,6 @@ else ()
                 Qhull/userprintf.cpp
                 Qhull/userprintf_rbox.cpp)
 
-        target_link_libraries(InteractiveTopk glpk)
-        TARGET_LINK_LIBRARIES(InteractiveTopk ${LP_SOLVE})
+        target_link_libraries(PersistErr glpk)
+        TARGET_LINK_LIBRARIES(PersistErr ${LP_SOLVE})
 endif()
