@@ -23,10 +23,10 @@ int main(int argc, char *argv[])
     int num_repeat;
     string input_file, alg_name;
     if(argc == 1){
-        input_file = "4d100.txt";
-        alg_name = "pref";
-        num_repeat = 1000;
-    }
+        input_file = "4d100k.txt";
+        alg_name = "util";
+        num_repeat = 100;
+    } 
     else if(argc != 4){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
         cout << "ALG_NAME: exact | sampling | optimal" << endl;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
         double v1 = dot_prod(u, top_current[0]);
         double v2 = dot_prod(u, top_current[1]);
         double epsilon = (v1 - v2) / v1;
-        int prune_option = RTREE, dom_option = HYPER_PLANE, stop_option = EXACT_BOUND, cmp_option = RANDOM;
+        int prune_option = RTREE, dom_option = HYPER_PLANE, stop_option = EXACT_BOUND, cmp_option = SIMPLEX;
 
         if(alg_name.compare("hdpi")==0){
             // the HDPI Algorithm

@@ -235,6 +235,14 @@ namespace optimal_exact{
     }
 
 
+    bool only_Rk_nonempty(std::vector<conf_region> &conf_regions){
+        for(int i = 0; i < conf_regions.size() - 1; i++){
+            if(conf_regions[i].points.size() > 0) return false;
+        }
+        return true;
+    }
+
+
     /**
      *  @brief Decide the pair of points to be displayed in stage 1
     */
@@ -428,7 +436,7 @@ namespace optimal_exact{
         while(points_return.size() > w){
             point_t *p1 = 0, *p2 = 0;
             halfspace_t *hs = 0;
-            if(round < stage1_target && conf_regions[k-1].points.size()>0){ // run stage 1
+            if(round < stage1_target && !only_Rk_nonempty(conf_regions)){ // run stage 1
                 auto point_pair = stage1_decide_point_pair(half_set_set, PS, focus, PS_pos);
                 p1 = point_pair.first;
                 p2 = point_pair.second;

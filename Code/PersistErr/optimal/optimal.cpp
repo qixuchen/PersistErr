@@ -412,6 +412,13 @@ namespace optimal{
         return max(num1, num2);
     }
 
+    bool only_Rk_nonempty(std::vector<sample_set> &s_sets){
+        for(int i = 0; i < s_sets.size() - 1; i++){
+            if(s_sets[i].data.size() > 0) return false;
+        }
+        return true;
+    }
+
 
     /**
      *  @brief Decide the pair of points to be displayed in stage 1
@@ -600,13 +607,13 @@ namespace optimal{
         construct_hy_candidates(hyperplane_candidates, choose_item_set);
         std::vector<point_t *> points_return = compute_considered_set(s_sets);
         std::set<std::pair<point_t *, point_t *>> selected_questions;
-        
+
         int round = 0;
         start_timer();
         while(points_return.size() > w){
             point_t *p1 = 0, *p2 = 0;
             halfspace_t *hs = 0;
-            if(round < stage1_target && s_sets[k-1].data.size()>0){ // run stage 1
+            if(round < stage1_target && !only_Rk_nonempty(s_sets)){ // run stage 1
                 auto point_pair = stage1_decide_point_pair(half_set_set, PS, focus, PS_pos);
                 p1 = point_pair.first;
                 p2 = point_pair.second;
