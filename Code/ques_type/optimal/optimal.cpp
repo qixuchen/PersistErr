@@ -412,6 +412,14 @@ namespace optimal{
     }
 
 
+    bool only_Rk_nonempty(std::vector<sample_set> &s_sets){
+        for(int i = 0; i < s_sets.size() - 1; i++){
+            if(s_sets[i].data.size() > 0) return false;
+        }
+        return true;
+    }
+
+
     /**
      *  @brief Decide the pair of points to be displayed in stage 1
     */
@@ -605,7 +613,7 @@ namespace optimal{
         while(points_return.size() > w){
             point_t *p1 = 0, *p2 = 0;
             halfspace_t *hs = 0;
-            if(round < stage1_target && s_sets[k-1].data.size()>0){ // run stage 1
+            if(round < stage1_target && !only_Rk_nonempty(s_sets)){ // run stage 1
                 auto point_pair = stage1_decide_point_pair(half_set_set, PS, focus, PS_pos);
                 p1 = point_pair.first;
                 p2 = point_pair.second;

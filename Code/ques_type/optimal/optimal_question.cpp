@@ -698,6 +698,14 @@ namespace optimal_question{
     }
 
 
+    bool only_Rk_nonempty(std::vector<sample_set> &s_sets){
+        for(int i = 0; i < s_sets.size() - 1; i++){
+            if(s_sets[i].data.size() > 0) return false;
+        }
+        return true;
+    }
+
+
     /**
      *  @brief Decide the pair of points to be displayed in stage 1
     */
@@ -772,7 +780,7 @@ namespace optimal_question{
             point *p1 = 0, *p2 = 0;
             std::vector<point_t *> considered_points, point_cand;
 
-            if(round < stage1_target && s_sets[k-1].data.size()>0){ // run stage 1
+            if(round < stage1_target && !only_Rk_nonempty(s_sets)){ // run stage 1
                 auto point_pair = stage1_decide_point_pair(half_set_set, known_preferences, PS, focus, PS_pos);
                 // point_cand.push_back(point_pair.first);
                 // point_cand.push_back(point_pair.second);
@@ -825,7 +833,6 @@ namespace optimal_question{
         if(success) ++correct_count;
         question_num += round;
         return_size += points_return.size();
-        cout << "return size: " << points_return.size() << endl;
         return 0;
     }
 
@@ -872,7 +879,7 @@ namespace optimal_question{
             point *p1 = 0, *p2 = 0;
             std::vector<point_t *> considered_points, point_cand, sup_points, inf_points;
 
-            if(round < stage1_target && s_sets[k-1].data.size()>0){ // run stage 1
+            if(round < stage1_target && !only_Rk_nonempty(s_sets)){ // run stage 1
                 auto point_pair = stage1_decide_point_pair(half_set_set, known_preferences, PS, focus, PS_pos);
                 // point_cand.push_back(point_pair.first);
                 // point_cand.push_back(point_pair.second);
@@ -930,7 +937,6 @@ namespace optimal_question{
         if(success) ++correct_count;
         question_num += round;
         return_size += points_return.size();
-        cout << "return size: " << points_return.size() << endl;
         return 0;
     }
     
