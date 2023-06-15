@@ -10,6 +10,7 @@
 #include "sampling/sampling_question.h"
 #include "optimal/optimal.h"
 #include "optimal/optimal_question.h"
+#include "optimal/optimal_exact_question.h"
 #include "RH/alg_one.h"
 #include "2DPI/2dPI.h"
 #include "Others/qhull_build.h"
@@ -26,9 +27,9 @@ int main(int argc, char *argv[])
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "sampling_listwise";
+        alg_name = "opt_exact_listwise";
         num_repeat = 100;
-        s = 10;
+        s = 4;
     } 
     else if(argc != 5){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
@@ -103,6 +104,12 @@ int main(int argc, char *argv[])
         }
         if(alg_name.compare("optimal_sup_inf") == 0){
             optimal_question::optimal_sup_inf(p_set, u, k, w, SCORE_SELECT, theta, s);
+        }
+        if(alg_name.compare("opt_exact_listwise") == 0){
+            opt_exact_question::opt_exact_listwise(p_set, u, k, w, SCORE_SELECT, theta, s);
+        }
+        if(alg_name.compare("opt_exact_sup_inf") == 0){
+            opt_exact_question::opt_exact_sup_inf(p_set, u, k, w, SCORE_SELECT, theta, s);
         }
     }
     
