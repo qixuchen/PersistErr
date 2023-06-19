@@ -176,6 +176,8 @@ namespace exact_rev{
             std::random_device rd;
             // Use the random seed to initialize the random number engine
             std::mt19937 g(rd());
+            // shuffle the vector
+            std::shuffle(candidate_points.begin(), candidate_points.end(), g);
             for(int j = 0; j < candidate_points.size() - 1; j++){
                 for(int k = 1; k < candidate_points.size(); k++){
                     point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];

@@ -206,6 +206,14 @@ namespace optimal{
     }
 
 
+    /** @brief check if a preference is already in the known_preference set
+     *  @return true if the preference is already in the set
+    */
+    bool preference_exist(std::set<std::pair<point_t *, point_t *>> &known_preferences, point_t *p1, point_t *p2){
+        return known_preferences.find(std::make_pair(p1, p2)) != known_preferences.end() || known_preferences.find(std::make_pair(p2, p1)) != known_preferences.end();
+    }
+
+
     /** @brief      Find the points still not pruned
     */
     std::vector<point_t *> compute_considered_set(const std::vector<sample_set> &s_sets){
@@ -239,39 +247,6 @@ namespace optimal{
     }
 
 
-    /** @brief       Find the best hyperplane to ask
-     */
-    int find_best_hyperplane(const std::vector<item *> &choose_item_set, 
-                                std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<sample_set> &s_sets){
-        int k = s_sets.size()-1;
-        std::vector<std::vector<point_t*>> points_in_region;
-        std::vector<int> cand_to_be_removed;
-        for(int i=0; i<=k; ++i){
-            std::vector<point_t*> points(s_sets[i].data.begin(), s_sets[i].data.end());
-            points_in_region.push_back(points);
-        }
-        double highest_priority = 0;
-        int highest_index = -1;
-        hyperplane_t *hy_res = 0;
-        for(auto c : hyperplane_candidates){
-            item_t *item_ptr = choose_item_set[c.first];
-            double priority = compute_hy_priority(item_ptr, points_in_region);
-            if(priority > highest_priority){
-                highest_priority = priority;
-                highest_index = c.first;
-                hy_res = c.second;
-            }
-            if(priority == 0){ // The hyperplane does not intersect any region. Remove it.
-                cand_to_be_removed.push_back(c.first);
-            }
-        }
-        // MUST: remove the selected candidate
-        if(highest_index >= 0) hyperplane_candidates.erase(highest_index);
-        for(auto ind : cand_to_be_removed) hyperplane_candidates.erase(ind);
-        return highest_index;
-    }
-
-
     /** @brief      Compute the priority of an item's related hyperplane
      */
     double compute_hy_priority_update_upper_bound(item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
@@ -301,8 +276,8 @@ namespace optimal{
     /** @brief       Find the best hyperplane to ask
      *               Using lazy updating trick
      */
-    int find_best_hyperplane_lazy_update(std::vector<item *> &choose_item_set, 
-                                std::map<int, hyperplane_t *> &hyperplane_candidates, std::vector<sample_set> &s_sets){
+    int find_best_hyperplane_lazy_update(std::vector<item *> &choose_item_set, std::map<int, hyperplane_t *> &hyperplane_candidates, 
+                                            std::vector<sample_set> &s_sets, std::set<std::pair<point_t *, point_t *>> &selected_questions){
         int k = s_sets.size()-1;
         std::vector<std::vector<point_t*>> points_in_region;
         std::vector<int> cand_to_be_removed;
@@ -314,6 +289,10 @@ namespace optimal{
         int highest_index = -1;
         hyperplane_t *hy_res = 0;
         for(auto c : hyperplane_candidates){
+            if(preference_exist(selected_questions, c.second->point1, c.second->point2)){// make sure this pair was not used before
+                cand_to_be_removed.push_back(c.first);
+                continue; 
+            }
             item_t *item_ptr = choose_item_set[c.first];
             if(item_ptr->upper_bound > highest_priority || item_ptr->upper_bound == 0){
                 double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
@@ -365,8 +344,7 @@ namespace optimal{
             for(int j = 0; j < candidate_points.size() - 1; j++){
                 for(int k = 1; k < candidate_points.size(); k++){
                     point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
-                    if(selected_questions.find(make_pair(cand1, cand2)) != selected_questions.end() ||
-                        selected_questions.find(make_pair(cand2, cand1)) != selected_questions.end()) continue; // make sure this pair was not used before
+                    if(preference_exist(selected_questions, cand1, cand2)) continue; // make sure this pair was not used before
                     p1 = cand1, p2 = cand2;
                     selected_questions.insert(make_pair(p1, p2));
                     return make_pair(p1, p2);
@@ -627,16 +605,15 @@ namespace optimal{
                 else if(select_opt == RAND_SELECT){
                     auto point_pair = rand_select_hyperplane(s_sets, selected_questions);
                     p1 = point_pair.first, p2 = point_pair.second;
-                    if(p1 == 0 || p2 == 0) break;
                 }
                 else{
-                // int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, s_sets);
-                int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets);
-                if(best_idx < 0) break;
+                int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, s_sets, selected_questions);
                 p1 = choose_item_set[best_idx]->hyper->point1;
                 p2 = choose_item_set[best_idx]->hyper->point2;
                 }
             }
+            selected_questions.insert(make_pair(p1, p2));
+
             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
                 if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
                 else hs = alloc_halfspace(p1, p2, 0, true);

@@ -2,12 +2,23 @@
 
 namespace optimal_exact{
 
+
+
     bool check_correctness(const std::set<point_t *> &considered_points, point_t *u, double best_score){
         for(auto p : considered_points){
             if(dot_prod(u, p) == best_score) return true;
         }
         return false;
     }
+
+
+    /** @brief check if a preference is already in the known_preference set
+     *  @return true if the preference is already in the set
+    */
+    bool preference_exist(std::set<std::pair<point_t *, point_t *>> &known_preferences, point_t *p1, point_t *p2){
+        return known_preferences.find(std::make_pair(p1, p2)) != known_preferences.end() || known_preferences.find(std::make_pair(p2, p1)) != known_preferences.end();
+    }
+
 
     /** @brief compute the set of points whose partition intersects with R^0 ... R^k
     */
@@ -47,11 +58,12 @@ namespace optimal_exact{
             std::random_device rd;
             // Use the random seed to initialize the random number engine
             std::mt19937 g(rd());
+            // shuffle the vector
+            std::shuffle(candidate_points.begin(), candidate_points.end(), g);
             for(int j = 0; j < candidate_points.size() - 1; j++){
                 for(int k = 1; k < candidate_points.size(); k++){
                     point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
-                    if(selected_questions.find(make_pair(cand1, cand2)) != selected_questions.end() ||
-                            selected_questions.find(make_pair(cand2, cand1)) != selected_questions.end()) continue; // make sure this pair was not used before
+                    if(preference_exist(selected_questions, cand1, cand2)) continue; // make sure this pair was not used before
                     p1 = cand1, p2 = cand2;
                     selected_questions.insert(make_pair(p1, p2));
                     return make_pair(p1, p2);
@@ -91,8 +103,8 @@ namespace optimal_exact{
     /** @brief       Find the best hyperplane to ask
      *               Using lazy updating trick
      */
-    int find_best_hyperplane_lazy_update(std::vector<item *> &choose_item_set, 
-                                std::map<int, hyperplane_t *> &hyperplane_candidates, const std::vector<conf_region> &conf_regions){
+    int find_best_hyperplane_lazy_update(std::vector<item *> &choose_item_set, std::map<int, hyperplane_t *> &hyperplane_candidates, 
+                                            const std::vector<conf_region> &conf_regions, std::set<std::pair<point_t *, point_t *>> &selected_questions){
         int k = conf_regions.size() - 1;
         std::vector<std::vector<point_t*>> points_in_region;
         std::vector<int> cand_to_be_removed;
@@ -104,6 +116,10 @@ namespace optimal_exact{
         int highest_index = -1;
         hyperplane_t *hy_res = 0;
         for(auto c : hyperplane_candidates){
+            if(preference_exist(selected_questions, c.second->point1, c.second->point2)){// make sure this pair was not used before
+                    cand_to_be_removed.push_back(c.first);
+                    continue; 
+                }
             item_t *item_ptr = choose_item_set[c.first];
             if(item_ptr->upper_bound > highest_priority || item_ptr->upper_bound == 0){
                 double priority = compute_hy_priority_update_upper_bound(item_ptr, points_in_region);
@@ -445,16 +461,15 @@ namespace optimal_exact{
                 if(select_opt == RAND_SELECT){
                     auto point_pair = rand_select_hyperplane(conf_regions, selected_questions);
                     p1 = point_pair.first, p2 = point_pair.second;
-                    if(p1 == 0 || p2 == 0) break;
                 }
                 else{
-                    // int best_idx = find_best_hyperplane(choose_item_set, hyperplane_candidates, conf_regions);
-                    int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, conf_regions);
-                    if(best_idx < 0) break;
+                    int best_idx = find_best_hyperplane_lazy_update(choose_item_set, hyperplane_candidates, conf_regions, selected_questions);
                     p1 = choose_item_set[best_idx]->hyper->point1;
                     p2 = choose_item_set[best_idx]->hyper->point2;
                 }
             }
+            selected_questions.insert(make_pair(p1, p2));
+
             if(dot_prod(u, p1) > dot_prod(u, p2)){ //p1 > p2
                 if((double) rand()/RAND_MAX > theta) hs = alloc_halfspace(p2, p1, 0, true);
                 else hs = alloc_halfspace(p1, p2, 0, true);

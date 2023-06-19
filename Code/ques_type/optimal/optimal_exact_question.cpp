@@ -36,39 +36,6 @@ namespace opt_exact_question{
     }
 
 
-        /** @brief    Randomly determine the next question
-     */
-    std::pair<point_t *, point_t *> rand_select_hyperplane(const std::vector<conf_region> &conf_regions, std::set<std::pair<point_t *, point_t *>> &selected_questions){
-        point_t *p1 = 0, *p2 = 0; 
-        std::set<point_t *> candidate_set;
-        int k = conf_regions.size() - 1;
-        for(int i=0; i <= k; i++){
-            for(int j = 0; j <= i; j++){
-                for(auto p: conf_regions[j].points){
-                    candidate_set.insert(p);
-                }
-            }
-            if(candidate_set.size() < 2) continue;
-            std::vector<point_t *> candidate_points(candidate_set.begin(), candidate_set.end());
-            // Obtain a random seed for the random number engine
-            std::random_device rd;
-            // Use the random seed to initialize the random number engine
-            std::mt19937 g(rd());
-            for(int j = 0; j < candidate_points.size() - 1; j++){
-                for(int k = 1; k < candidate_points.size(); k++){
-                    point_t *cand1 = candidate_points[j], *cand2 = candidate_points[k];
-                    if(selected_questions.find(make_pair(cand1, cand2)) != selected_questions.end() ||
-                            selected_questions.find(make_pair(cand2, cand1)) != selected_questions.end()) continue; // make sure this pair was not used before
-                    p1 = cand1, p2 = cand2;
-                    selected_questions.insert(make_pair(p1, p2));
-                    return make_pair(p1, p2);
-                }
-            }
-        }
-        return make_pair(p1, p2);
-    }
-
-
      /** @brief      Compute the priority of an item's related hyperplane
      */
     double compute_hy_priority_update_upper_bound(item *item_ptr, const std::vector<std::vector<point_t*>> &points_in_region){
@@ -501,18 +468,6 @@ namespace opt_exact_question{
         return res;
     }
 
-    /**
-     *  @brief Return 2 random points in the set of points still considered in stage 2
-    */
-    auto rand_select_stage2(const std::vector<point_t *> &points_return){
-        int size = points_return.size();
-        int p1_idx = rand() % size;
-        int p2_idx = rand() % size;
-        while(p1_idx == p2_idx){
-            p2_idx = rand() % size;
-        }
-        return make_pair(points_return[p1_idx], points_return[p2_idx]);
-    }
 
     /**
      * @brief Build all the partition(intersection of the halfspace), each partition corresponds to a top-1 point
