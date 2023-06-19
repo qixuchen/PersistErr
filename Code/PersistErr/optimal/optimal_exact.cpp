@@ -397,7 +397,6 @@ namespace optimal_exact{
      *  
     */
     int optimal_exact(std::vector<point_t *> p_set, point_t *u, int k, int w, int select_opt, double theta){
-        start_timer();
         int dim = p_set[0]->dim;
         vector<point_t *> convh;
         find_convh_vertices(p_set, convh);
@@ -434,6 +433,7 @@ namespace optimal_exact{
         
         int round = 0;
         while(points_return.size() > w){
+            start_timer();
             point_t *p1 = 0, *p2 = 0;
             halfspace_t *hs = 0;
             if(round < stage1_target && !only_Rk_nonempty(conf_regions)){ // run stage 1
@@ -465,6 +465,7 @@ namespace optimal_exact{
             }
             exact_recur(conf_regions, hs);
             release_halfspace(hs);
+            stop_timer();
             std::set<point_t *> considered_points = compute_considered_set(conf_regions);
             if(considered_points.size() == 0){ 
                 break;
@@ -472,7 +473,6 @@ namespace optimal_exact{
             points_return = considered_points;
             round++;
         }
-        stop_timer();
 
         // free the related data structures
         while(half_set_set.size() > 0){
