@@ -72,6 +72,10 @@ else ()
                 optimal/optimal.cpp
                 optimal/optimal_exact.cpp
                 optimal/optimal_exact.h
+                SEFC/SEFC.cpp
+                SEFC/SEFC.h
+                SEFC/SEFC_v2.cpp
+                SEFC/SEFC_v2.h
                 Others/data_struct.h
                 Others/data_utility.cpp
                 Others/data_utility.h
