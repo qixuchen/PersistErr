@@ -3,11 +3,11 @@
 
 This Directory contains the source code of the proposed algorithms.
 
-	(1). *FC* (can be found in directory `optimal`)
-  
-	(2). *SE-random* and *SE-score* (can be found in directory `exact`)
-  
-	(3). *SS-random* and *SS-score* (can be found in directory `sampling`)
+(1). *FC* (can be found in directory `optimal`)
+
+(2). *SE-random* and *SE-score* (can be found in directory `exact`)
+
+(3). *SS-random* and *SS-score* (can be found in directory `sampling`)
   
 Make sure there is a folder called `output` under the directory `PersistErr`.
 They will be used for storing some intermediate results.

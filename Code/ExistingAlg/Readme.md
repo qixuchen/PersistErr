@@ -3,18 +3,18 @@
 
 This Directory contains the source code of the following (adapted) exisiting algorithms.
 
-	(1). *HD-PI*
+(1). *HD-PI*
 
-	(2). *UtilApprox*
+(2). *UtilApprox*
 
-	(3). *Verify-Point*
+(3). *Verify-Point*
 
-	(4). *Pref-Learn*
+(4). *Pref-Learn*
 
-	(5). *UH-Simplex*
+(5). *UH-Simplex*
 
-	(6). *Active-Ranking*
-  
+(6). *Active-Ranking*
+
 Make sure there is a folder called `output` under the directory `ExistingAlg`.
 They will be used for storing some intermediate results.
 

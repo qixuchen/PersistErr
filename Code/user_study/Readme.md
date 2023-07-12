@@ -2,17 +2,17 @@ This Directory contains the code for user study on the follwing algorithms.
 
 The following algorithms are included in the user study:
 
-	(1). *SE-score* (ours)
-  
-	(2). *SS-score* (ours)
+(1). *SE-score* (ours)
 
-    (3). *Verify-Point*
-   
-    (4). *HD-PI*
-  
-	(5). *Pref-Learn*
-  
-	(6). *Active-Ranking*
+(2). *SS-score* (ours)
+
+(3). *Verify-Point*
+
+(4). *HD-PI*
+
+(5). *Pref-Learn*
+
+(6). *Active-Ranking*
 
 The real datasets `airbnb` used in the user study can be found in another directory `input`.
 Link to the original dataset can be found in our paper.
