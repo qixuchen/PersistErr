@@ -83,7 +83,6 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
     int dim = p_set[0]->dim;
     find_top1(p_set, top);
     skyline_c(top, p_set_1);
-
     //half_set_set          contains all the partitions(intersection of halfspaces)
     //considered_half_set   contains all the possible partitions considered
     //choose_item_points    contains all the points used to construct hyperplanes(questions) (set C in the paper)
@@ -106,7 +105,6 @@ int PointPrune_v2(std::vector<point_t *> p_set, point_set_t *P0, int checknum, i
         choose_item * c_i=deepcopy_choose_item(choose_item_set[i]);
         choose_item_set_cp.push_back(c_i);
     }
-
     point_t* point_result = NULL, *true_point_result = NULL;
     halfspace_t *hy=NULL, *hy_cp=NULL;
     bool encounter_err = false, end_premature=false;
