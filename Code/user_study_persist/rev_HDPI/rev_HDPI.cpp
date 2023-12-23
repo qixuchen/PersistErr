@@ -305,6 +305,7 @@ int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w, int alg_id){
 
     stop_timer();
     int opt = show_to_user(P0, choose_item_set[index]->hyper->point1->id, choose_item_set[index]->hyper->point2->id);
+    round++;
     start_timer();
 
     //initial
@@ -314,7 +315,6 @@ int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w, int alg_id){
     point_t* point_result = NULL;
     while (considered_half_set.size() > w)
     {
-        round++;
         if (opt == 1)
         {
             hy = alloc_halfspace(choose_item_set[index]->hyper->point2, choose_item_set[index]->hyper->point1, 0, true);
@@ -344,6 +344,7 @@ int rev_HDPI(std::vector<point_t *> p_set, point_set_t *P0, int w, int alg_id){
         if(considered_half_set.size() > w){
             stop_timer();
             opt = show_to_user(P0, choose_item_set[index]->hyper->point1->id, choose_item_set[index]->hyper->point2->id);
+            round++;
             start_timer();
         }
     }
