@@ -78,49 +78,41 @@ void intro(){
 }
 
 void part1_info(){
+    cout << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
+    cout << "                                    Beginning of Section 4" << endl << endl;
+    cout << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
+    enter_to_continue();
+
+    cout << "In Section 4, we want to evaluate algorithms' performance given (1) using a limited number of " << endl 
+         << "questions, and (2) some *incorrect* input is given by the user." << endl << endl;
+    enter_to_continue();
+
+    cout << "Therefore, similar to Section 2, each algorithm will only ask you at most 10 questions." << endl << endl;
+    cout << "Besides, similar to Section 3, in the **first** question of each algorithm, we will ask you to" << endl 
+         << "do something special." << endl << endl;
+    cout << "For this question, instead of picking the one you **prefer**, please pick the one that you " << endl
+            << "think is **less preferred**." << endl << endl;
+    cout << "This is because we want to see if the algorithm can find your favorite airbnb even if some " << endl
+            << "*incorrect* input is given by the user." << endl << endl;
+    cout << "We will notify you when you should do this special action." << endl << endl;
+    enter_to_continue();
+
     cout << "===============================================================================================" << endl << endl;
     cout << "                                     Beginning of Part 1" << endl << endl;
     cout << "===============================================================================================" << endl << endl;
     cout << "In Part 1, there are 6 algorithms and each will ask you some questions." << endl << endl;
-    cout << "In each question, you will be presented 2 options of airbnbs and you need to pick the one that" << endl
-            << "you favor more. For example, enter 1 if you think airbnb 1 is more preferred to airbnb 2." << endl << endl;
-    cout << "Each airbnb is described with the following 4 atrributes:" << endl
-            << "    Price               Price per night" << endl
-            << "                        Range from USD 20 - 2000" << endl
-            << "    Cleanliness         Average rating on cleanliness of the airbnb" << endl
-            << "                        Range from 0 - 5" << endl
-            << "    Location            Average rating on location convenience" << endl
-            << "                        Range from 0 - 5" << endl
-            << "    Review PM           Average number of reviews in each month" << endl 
-            << "                        Range from 0 - 8.82" << endl << endl;
+    cout << "In each question, you will be presented 2 options of airbnbs and you need to pick one of them." << endl << endl;
+
+    cout << "For the first question of each algorithm, please pick the one that you think is *less preferred*." << endl << endl;
+    cout << "For the remaining questions of each algorithm, please still pick the one that you prefer." << endl << endl;
     enter_to_continue();
     cout << endl;
 
-    cout << "However, in the **first** question of each algorithm, we will ask you to do something special." << endl << endl;
-    cout << "For this question, instead of picking the one you **prefer**, please pick the one that you " << endl
-            << "think is **less preferred**." << endl << endl;
-    cout << "This is because we want to see if the algorithm can find your favorite airbnb even if some *incorrect*" << endl
-            << "input is given by the user." << endl << endl;
-    cout << "We will notify you when you should do this special action." << endl << endl;
-    enter_to_continue();
-    cout << endl;
-
-    cout << "By the end of each algorithm, a list of airbnbs will be recommended by this algorithm." << endl;
-    cout << "For example, a recommendation list may look like follows:" << endl << endl;
-
-    cout << "These are the airbnbs recommended by this algorithm:" << endl;
-    cout << "--------------------------------------------------------" << endl;
-    cout << "|          |Price(USD)|     Clean|  Location| Review PM|" << endl;
-    cout << "--------------------------------------------------------" << endl;
-    cout << "|  Option 1|        74|      4.77|      4.57|      8.16|" << endl;
-    cout << "--------------------------------------------------------" << endl;
-    cout << "|  Option 2|        46|      4.73|      4.83|      2.00|" << endl;
-    cout << "--------------------------------------------------------" << endl;
-    cout << "|  Option 3|        85|      5.00|      4.37|      7.80|" << endl;
-    cout << "--------------------------------------------------------" << endl << endl;
-
-    cout << "You will need to select 1 airbnb from the recommendation list that you think is the best." << endl;
-    cout << "For example, enter 3 if you think option 3 is your favorite among the recommended airbnbs." << endl << endl;
+    cout << "Similar to previous sections, by the end of each algorithm, a list of airbnbs will be" << endl
+         << "recommended by this algorithm." << endl << endl;
+    cout << "Your task is to select 1 airbnb from the recommendation list that you think is the best." << endl << endl;
     enter_to_continue();
     cout << endl;
 }
@@ -172,6 +164,13 @@ void part2_end(){
 
 
 void end(){
+    cout << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
+    cout << "                                      End of Section 4" << endl << endl;
+    cout << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
+    cout << "Section completed 4 / 4" << endl << endl;
+    enter_to_continue();
     cout << "===============================================================================================" << endl << endl;
     cout << "                                     End of User Study" << endl << endl;
     cout << "===============================================================================================" << endl << endl;

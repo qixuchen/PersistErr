@@ -96,14 +96,16 @@ void pre_check(){
 
 void intro(){
     // pre_check();
-    cout << "-------------------------Welcome to the recommending airbnb system--------------------------------" << endl;
+    cout << "-------------------------Welcome to the recommending airbnb system--------------------------------" << endl << endl;
     cout << "Imagine that you are planning a trip to a new conuntry and want to rent an airbnb. There are " << endl
            << "thousands of airbnbs on the website." << endl << endl;
     cout << "Since renting a good airbnb can greatly affect the happiness of your journey, You will want to find" << endl
            << "your favorite airbnb." << endl << endl;
-    cout << "In our research project, we want to study several recommendation algorithms and see whether they" << endl
-           << "can help you find your favorite airbnb if some **incorrect** input is given by the user." << endl << endl;
-    cout << "This survey consists of 2 parts. Based on your answers in Part 1, there is a small chance that " << endl
+    cout << "In our research project, we want to study several recommendation algorithms and see whether they can" << endl
+           << "help you find your favorite airbnb in different senarios if some **incorrect** input is given by"  << endl
+           << "the user." << endl << endl;
+    cout << "This survey consists of 4 sections. Each section has 2 parts. " << endl << endl;
+    cout << "For each section, based on your answers in Part 1, there is a small chance that " << endl
            << "Part 2 is skipped." << endl << endl;
     // enter_to_continue();
     enter_recover();
@@ -111,19 +113,27 @@ void intro(){
 }
 
 void part1_info(){
+    cout << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
+    cout << "                                    Beginning of Section 1" << endl << endl;
+    cout << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
+    cout << "Section 1 consists of 2 parts." << endl << endl;
+    enter_to_continue();
+
     cout << "===============================================================================================" << endl << endl;
     cout << "                                     Beginning of Part 1" << endl << endl;
     cout << "===============================================================================================" << endl << endl;
     cout << "In Part 1, there are 6 algorithms and each will ask you some questions." << endl << endl;
     cout << "In each question, you will be presented 2 options of airbnbs and you need to pick the one that" << endl
             << "you favor more. For example, enter 1 if you think airbnb 1 is more preferred to airbnb 2." << endl << endl;
-    cout << "Each airbnb is described with the following 4 atrributes:" << endl
+    cout << "Each airbnb is described with the following 4 atrributes:" << endl << endl
             << "    Price               Price per night" << endl
-            << "                        Range from USD 20 - 2000" << endl
+            << "                        Range from USD 20 - 2000" << endl << endl
             << "    Cleanliness         Average rating on cleanliness of the airbnb" << endl
-            << "                        Range from 0 - 5" << endl
+            << "                        Range from 0 - 5" << endl << endl
             << "    Location            Average rating on location convenience" << endl
-            << "                        Range from 0 - 5" << endl
+            << "                        Range from 0 - 5" << endl << endl
             << "    Review PM           Average number of reviews in each month" << endl 
             << "                        Range from 0 - 8.82" << endl << endl;
     enter_to_continue();
@@ -143,7 +153,7 @@ void part1_info(){
     cout << "|  Option 3|        85|      5.00|      4.37|      7.80|" << endl;
     cout << "--------------------------------------------------------" << endl << endl;
 
-    cout << "You will need to select 1 airbnb from the recommendation list that you think is the best." << endl;
+    cout << "Your task is to select 1 airbnb from the recommendation list that you think is the best." << endl << endl;
     cout << "For example, enter 3 if you think option 3 is your favorite among the recommended airbnbs." << endl << endl;
     enter_to_continue();
     cout << endl;
@@ -196,10 +206,13 @@ void part2_end(){
 
 
 void end(){
-    cout << "===============================================================================================" << endl << endl;
-    cout << "                                     End of User Study" << endl << endl;
-    cout << "===============================================================================================" << endl << endl;
-    cout << "Genuinely thank you for taking the user study." << endl << endl;
+    cout << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
+    cout << "                                       End of Section 1" << endl << endl;
+    cout << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
+    cout << "Section completed: 1 / 4." << endl << endl;
+    enter_to_continue();
     // cout << "Your completion code is: C5EPB200" << endl;
 }
 

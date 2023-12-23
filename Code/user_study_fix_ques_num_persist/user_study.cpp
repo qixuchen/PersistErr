@@ -160,7 +160,7 @@ int user_study_main_body(){
     int k = 2;
     int w = 5;
     double theta = 0.05;
-    int max_round = 5;
+    int max_round = 2;
 
     srand(time(NULL));
     point_set_t *P0 = read_points((char*)"airbnb.txt");
@@ -175,7 +175,7 @@ int user_study_main_body(){
     // p_2 = scale_up(p_set);
     point_set_t *P = point_reload(p_set);
 
-    intro();
+    // intro();
 
     if(jump <= 1){
         part1_info();
