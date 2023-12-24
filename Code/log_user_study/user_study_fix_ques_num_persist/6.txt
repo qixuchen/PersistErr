@@ -1,0 +1,10 @@
+question asked: 10
+processing time: 8690.2
+best point id: 986
+return size: 5
+returned pids: 
+986
+686
+693
+817
+608

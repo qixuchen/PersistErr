@@ -412,7 +412,7 @@ int alg_top1_select(const vector<point_t *> &point_return){
 */
 void write_results_to_file(const int alg_id, const vector<point_t *> &point_return, const int best_idx){
     ofstream ofs;
-    ofs.open("../logs/" + file_names[alg_id], ofstream::out);
+    ofs.open("../../log_user_study/user_study_semi_fix_ques_num_persist/" + file_names[alg_id], ofstream::out);
     ofs << "question asked: " << question_asked_list[alg_id] << endl;
     ofs << "processing time: " << proc_time_list[alg_id] << endl;
     ofs << "best point id: " << point_return[best_idx]->id << endl;
@@ -439,7 +439,7 @@ void write_results_to_file(const int alg_id, const vector<point_t *> &point_retu
 */
 void record_ques_history(const int alg_id){
     ofstream ofs;
-    ofs.open("../logs/history/" + to_string(alg_id+1) + ".txt", ofstream::out);
+    ofs.open("../../log_user_study/user_study_semi_fix_ques_num_persist_history/" + to_string(alg_id+1) + ".txt", ofstream::out);
     int size = user_choices.size();
     for(int i = 0; i < size; i++){
         ofs << displayed_questions[i].first << endl;
@@ -454,7 +454,7 @@ void record_ques_history(const int alg_id){
  */
 void write_cf_info(const int alg_id, const vector<int> &cr_belong){
     ofstream ofs;
-    ofs.open(string("../logs/") + "conf_reg" + file_names[alg_id], ofstream::out);
+    ofs.open(string("../../log_user_study/user_study_semi_fix_ques_num_persist/") + "conf_reg" + file_names[alg_id], ofstream::out);
     for(auto cr: cr_belong){
         ofs << cr << endl;
     }
@@ -617,7 +617,7 @@ int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best, i
 
 void write_summary(int best_idx){
     ofstream ofs;
-    ofs.open("../logs/summary.txt", ofstream::out);
+    ofs.open("../../log_user_study/user_study_semi_fix_ques_num_persist//summary.txt", ofstream::out);
     ofs << "best point idx \t" << "best point dissat score" << endl;
     ofs << best_idx << "\t" << dissat_score_best << endl;
     ofs << "# quest \t" << "time \t" << "hit \t" << "dissat score \t" << endl;

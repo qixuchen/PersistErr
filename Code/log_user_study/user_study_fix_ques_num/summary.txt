@@ -1,0 +1,9 @@
+best point idx 	best point dissat score
+1	1
+# quest 	time 	hit 	dissat score 	
+10	24662.5	1	1	
+10	4228.2	1	1	
+8	11194.8	0	1	
+4	18842.8	0	1	
+5	495.2	1	1	
+10	24371.2	0	1	
