@@ -174,7 +174,7 @@ void part2_end(){
 void end(){
     cout << "-----------------------------------------------------------------------------------------------" << endl ;
     cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
-    cout << "                                    Beginning of Section 3" << endl << endl;
+    cout << "                                       End of Section 3" << endl << endl;
     cout << "-----------------------------------------------------------------------------------------------" << endl ;
     cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
     cout << "Section completed 3 / 4" << endl << endl;
@@ -369,6 +369,17 @@ void print_result_list(point_set_t* P, const vector<int> &ids){
     cout<< vline <<endl;
 }
 
+void print_result_list(point_set_t* P, const vector<int> &ids, int i){
+    cout << endl;
+    cout << vline << endl << endl;
+    // cout << "This algorithm has finished."  << endl;
+    cout << "These are the airbnbs recommended by Algorithm " << i << ":" << endl;
+    print_table_title(cout);
+    for(int i=0; i < ids.size(); i++){
+        print_opt(cout, P, ids[i], i+1);
+    }
+    cout<< vline <<endl;
+}
 
 int alg_top1_select(const vector<point_t *> &point_return){
     cout << endl << "Please select your favorite one among the recommended airbnbs." << endl;
@@ -589,8 +600,8 @@ void dissat_info(int dissat_score_best){
 
 
 
-int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best){
-    print_result_list(P, ids);
+int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best, int i){
+    print_result_list(P, ids, i);
     int ans = -1;
     cout << "Please give a dissatisfaction score (" << dissat_score_best << " - 10) on this result list." << endl;
     while (ans < dissat_score_best || ans > 10){

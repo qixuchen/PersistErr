@@ -102,8 +102,8 @@ void intro(){
     cout << "Since renting a good airbnb can greatly affect the happiness of your journey, You will want to find" << endl
            << "your favorite airbnb." << endl << endl;
     cout << "In our research project, we want to study several recommendation algorithms and see whether they can" << endl
-           << "help you find your favorite airbnb in different senarios if some **incorrect** input is given by"  << endl
-           << "the user." << endl << endl;
+           << "help you find your favorite airbnb in different senarios if a user gives an *incorrect* response "  << endl
+           << "*unintentionally*." << endl << endl;
     cout << "This survey consists of 4 sections. Each section has 2 parts. " << endl << endl;
     cout << "For each section, based on your answers in Part 1, there is a small chance that " << endl
            << "Part 2 is skipped." << endl << endl;
@@ -127,7 +127,7 @@ void part1_info(){
     cout << "In Part 1, there are 6 algorithms and each will ask you some questions." << endl << endl;
     cout << "In each question, you will be presented 2 options of airbnbs and you need to pick the one that" << endl
             << "you favor more. For example, enter 1 if you think airbnb 1 is more preferred to airbnb 2." << endl << endl;
-    cout << "Each airbnb is described with the following 4 atrributes:" << endl << endl
+    cout << "Each airbnb is described with the following 4 attributes:" << endl << endl
             << "    Price               Price per night" << endl
             << "                        Range from USD 20 - 2000" << endl << endl
             << "    Cleanliness         Average rating on cleanliness of the airbnb" << endl
@@ -140,7 +140,7 @@ void part1_info(){
     cout << endl;
 
     cout << "By the end of each algorithm, a list of airbnbs will be recommended by this algorithm." << endl;
-    cout << "For example, a recommendation list may look like follows:" << endl << endl;
+    cout << "For example, a recommendation list may look like as follows." << endl << endl;
 
     cout << "These are the airbnbs recommended by this algorithm:" << endl;
     cout << "--------------------------------------------------------" << endl;
@@ -154,7 +154,7 @@ void part1_info(){
     cout << "--------------------------------------------------------" << endl << endl;
 
     cout << "Your task is to select 1 airbnb from the recommendation list that you think is the best." << endl << endl;
-    cout << "For example, enter 3 if you think option 3 is your favorite among the recommended airbnbs." << endl << endl;
+    cout << "For example, enter 3 if you think Option 3 is your favorite among the recommended airbnbs." << endl << endl;
     enter_to_continue();
     cout << endl;
 }
@@ -318,6 +318,17 @@ void print_result_list(point_set_t* P, const vector<int> &ids){
     cout<< vline <<endl;
 }
 
+void print_result_list(point_set_t* P, const vector<int> &ids, int i){
+    cout << endl;
+    cout << vline << endl << endl;
+    // cout << "This algorithm has finished."  << endl;
+    cout << "These are the airbnbs recommended by Algorithm " << i << ":" << endl;
+    print_table_title(cout);
+    for(int i=0; i < ids.size(); i++){
+        print_opt(cout, P, ids[i], i+1);
+    }
+    cout<< vline <<endl;
+}
 
 int alg_top1_select(const vector<point_t *> &point_return){
     cout << endl << "Please select your favorite one among the recommended airbnbs." << endl;
@@ -538,8 +549,8 @@ void dissat_info(int dissat_score_best){
 
 
 
-int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best){
-    print_result_list(P, ids);
+int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best, int i){
+    print_result_list(P, ids, i);
     int ans = -1;
     cout << "Please give a dissatisfaction score (" << dissat_score_best << " - 10) on this result list." << endl;
     while (ans < dissat_score_best || ans > 10){

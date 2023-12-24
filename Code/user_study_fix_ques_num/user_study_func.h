@@ -52,6 +52,8 @@ void print_result_list(point_set_t* P, const vector<point_t *> &point_return);
 
 void print_result_list(point_set_t* P, const vector<int> &ids);
 
+void print_result_list(point_set_t* P, const vector<int> &ids, int i);
+
 int alg_top1_select(const vector<point_t *> &point_return);
 
 void write_results_to_file(const int alg_id, const vector<point_t *> &point_return, const int best_idx);
@@ -78,7 +80,7 @@ int ask_dissat_score_best(point_set_t *P,  int best_id);
 
 void dissat_info(int dissat_score_best);
 
-int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best);
+int ask_dissat_score(point_set_t *P,  vector<int> &ids, int dissat_score_best, int i);
 
 void record_to_file(FILE *wPtr, int *records, int r_size);
 

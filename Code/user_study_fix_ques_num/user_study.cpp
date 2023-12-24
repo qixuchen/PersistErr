@@ -253,7 +253,7 @@ int user_study_main_body(){
                     dissat_score_list[i] = dissat_score_best;
                 }
                 else{
-                    dissat_score_list[i] = ask_dissat_score(P0, recommendation_list[i], dissat_score_best);
+                    dissat_score_list[i] = ask_dissat_score(P0, recommendation_list[i], dissat_score_best, i + 1);
                 }
             }
         }
