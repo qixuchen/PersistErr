@@ -1,6 +1,6 @@
 question asked: 10
-processing time: 8690.2
-best point id: 986
+processing time: 23611.8
+best point id: 686
 return size: 5
 returned pids: 
 986
