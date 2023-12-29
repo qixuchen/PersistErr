@@ -63,12 +63,12 @@ bool is_number(const string& s){
 }
 
 void pre_check(){
-    cout << "---------------------------------Welcome to our user study----------------------------------------" << endl;
+    cout << "---------------------------------Welcome to our user study----------------------------------------" << endl << endl;
     string wid, pnumber, ams;
-    cout << endl << "Please tell me your worker ID: ";
-    getline(cin, wid);
-    cout << endl << "Please tell me what is your participant number (enter 1 - 30): ";
-    getline(cin, pnumber);
+    // cout << endl << "Please tell me your worker ID: ";
+    // getline(cin, wid);
+    // cout << endl << "Please tell me what is your participant number (enter 1 - 30): ";
+    // getline(cin, pnumber);
     cout << endl << "Please tell me which country is Amsterdam in: " << endl;
     cout << "1. Germany" << endl;
     cout << "2. Norway" << endl;
@@ -79,24 +79,24 @@ void pre_check(){
     getline(cin, ams);
 
     ofstream ofs;
-    ofs.open("../logs/misc/workid.txt", ofstream::out);
-    ofs << wid << endl;
-    ofs.close();
+    // ofs.open("../logs/misc/workid.txt", ofstream::out);
+    // ofs << wid << endl;
+    // ofs.close();
 
-    ofs.open("../logs/misc/pnumber.txt", ofstream::out);
-    ofs << pnumber << endl;
-    ofs.close();
+    // ofs.open("../logs/misc/pnumber.txt", ofstream::out);
+    // ofs << pnumber << endl;
+    // ofs.close();
 
-    ofs.open("../logs/misc/ams.txt", ofstream::out);
+    ofs.open("../../log_user_study/ams.txt", ofstream::out);
     ofs << ams << endl;
     ofs.close();
-
-    cout << endl << endl;
+    cout << endl << "-----------------------------------------------------------------------------------------------" << endl ;
+    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
 }
 
 void intro(){
-    // pre_check();
-    cout << "-------------------------Welcome to the recommending airbnb system--------------------------------" << endl << endl;
+    pre_check();
+    // cout << "-------------------------Welcome to the recommending airbnb system--------------------------------" << endl << endl;
     cout << "Imagine that you are planning a trip to a new conuntry and want to rent an airbnb. There are " << endl
            << "thousands of airbnbs on the website." << endl << endl;
     cout << "Since renting a good airbnb can greatly affect the happiness of your journey, You will want to find" << endl
