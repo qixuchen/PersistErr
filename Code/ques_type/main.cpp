@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "opt_exact_listwise";
+        alg_name = "optimal_listwise";
         num_repeat = 100;
-        s = 4;
+        s = 10;
     } 
     else if(argc != 5){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;

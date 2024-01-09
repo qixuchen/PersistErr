@@ -23,9 +23,9 @@ int main(int argc, char *argv[])
     int num_repeat;
     string input_file, alg_name;
     if(argc == 1){
-        input_file = "HTRU.txt";
-        alg_name = "util";
-        num_repeat = 1000;
+        input_file = "4d100k.txt";
+        alg_name = "pref";
+        num_repeat = 15;
     } 
     else if(argc != 4){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;

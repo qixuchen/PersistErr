@@ -246,7 +246,7 @@ namespace optimal_exact{
     */
     int compute_stage1_num_question(int k, double theta){
         int num1 = k * ( k - 1 ) / 2;
-        int num2 = ceil((1 + sqrt(theta)) * k / theta);
+        int num2 = ceil((1 + sqrt(theta)) * k / (theta + 0.000001));
         return max(num1, num2);
     }
 

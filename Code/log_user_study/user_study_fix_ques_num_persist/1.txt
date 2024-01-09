@@ -1,10 +1,10 @@
 question asked: 10
-processing time: 30051.1
+processing time: 31566.5
 best point id: 471
 return size: 5
 returned pids: 
-785
-5
-262
 471
 625
+424
+96
+785
