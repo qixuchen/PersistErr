@@ -2,3 +2,10 @@ build/
 .vscode/
 output/
 Code/InteractiveTopk/build
+
+Code/input/4d100m.txt
+Code/input/4d10m.txt
+Code/input/6d10k.txt
+Code/input/6d1k.txt
+Code/input/sphere_4d_1000.txt
+Code/input/sphere_4d_100000.txt
