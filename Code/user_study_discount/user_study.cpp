@@ -210,13 +210,13 @@ int user_study_main_body(){
     
     // Setting 2
     print_alg_start(1);
-    sampling::sampling(p_set, P0, k, w, SCORE_SELECT, LABELED_PRICE, 1);
+    sampling::sampling(p_set_final_price, P0, k, w, SCORE_SELECT, LABELED_PRICE, 1);
     print_alg_end(1);
     
     // Setting 3
     print_alg_start(2);
     alg3_info();
-    sampling::sampling(p_set, P0, k, w, SCORE_SELECT, FINAL_PRICE, 2);
+    sampling::sampling(p_set_final_price, P0, k, w, SCORE_SELECT, FINAL_PRICE, 2);
     print_alg_end(2);
 
     part1_end();
@@ -232,7 +232,7 @@ int user_study_main_body(){
         best_idx = ask_favorite_item(cand_num);
         best_pid = final_cand[best_idx];
         for(int i = 0; i < TOT_ALG_COUNT; i++){
-            if(std::find(recommendation_list[i].begin(), recommendation_list[i].end(), final_cand[best_idx]) == recommendation_list[i].end()) hit_list[i] = 1;
+            if(std::find(recommendation_list[i].begin(), recommendation_list[i].end(), final_cand[best_idx]) != recommendation_list[i].end()) hit_list[i] = 1;
         }
         part2_info_v1_p2();
         // best_idx = confirm_favorite_item(P0, final_cand, possible_best_idx);

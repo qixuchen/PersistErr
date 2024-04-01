@@ -107,6 +107,7 @@ void pre_check(){
 
 void intro(){
     // pre_check();
+    cout << endl;
     cout << "-------------------------Welcome to the recommending airbnb system--------------------------------" << endl;
     cout << "Imagine that you are planning a trip to a new conuntry and want to rent an airbnb. There are " << endl
            << "thousands of airbnbs on the website." << endl << endl;
@@ -114,8 +115,6 @@ void intro(){
            << "find your favorite airbnb." << endl << endl;
     cout << "In our research project, we want to study several recommendation algorithms and see whether they" << endl
            << "can help you find your favorite airbnb under several different settings." << endl << endl;
-    cout << "This survey consists of 2 parts. Based on your answers in Part 1, there is a small chance that " << endl
-           << "Part 2 is skipped." << endl << endl;
     // enter_to_continue();
     enter_recover();
     cout << endl;
@@ -159,7 +158,7 @@ void part1_info(){
     cout << "------------------------------------------------------------------------" << endl << endl;
 
     cout << "Your task is to pick the option that you favor more. For example, if you think airbnb 1" << endl
-            << "is more preferred to airbnb 2, You could pick the option 1 by entering 1." << endl << endl;
+            << "is more preferred to airbnb 2, You could pick option 1 by entering 1." << endl << endl;
 
     enter_to_continue();
     cout << endl;
@@ -318,11 +317,11 @@ string format_opt(const point_t *p, const int opt, int display_mode){
     char *buffer = new char[1024];
     string option = "Option " + to_string(opt);
     if(display_mode==1){
-        sprintf(buffer, "|%10s|%15.0f|%10.2f|%10.2f|%10.2f|%9d%%|", option.c_str(), p->coord[0], p->coord[1], 
+        sprintf(buffer, "|%10s|%15d|%10.2f|%10.2f|%10.2f|%9d%%|", option.c_str(), static_cast<int>(p->coord[0]), p->coord[1], 
                 p->coord[2], p->coord[3], int(p->coord[4]));
     }
     else{
-        sprintf(buffer, "|%10s|%15.0f|%10.2f|%10.2f|%10.2f|", option.c_str(), p->coord[0] * (100 - p->coord[4]) / 100, p->coord[1], 
+        sprintf(buffer, "|%10s|%15d|%10.2f|%10.2f|%10.2f|", option.c_str(), static_cast<int>(ceil(p->coord[0] * (100 - p->coord[4]) / 100)), p->coord[1], 
                 p->coord[2], p->coord[3]);
     }
     return string(buffer);
@@ -610,8 +609,8 @@ int higher_than_expect(point_set_t* P, int pid){
 
     point_t * best_point = P->points[pid];
     cout << endl;
-    printf("The \"final price\" for this rent is:  %6d USD\n\n", int(best_point->coord[0] * (100 - best_point->coord[4]) / 100));
-    printf("which is about:  %6d RMB\n\n", int(best_point->coord[0] * (100 - best_point->coord[4]) / 100 * 7.23));
+    printf("The \"final price\" for this rent is:  %6d USD\n\n", static_cast<int>(ceil(best_point->coord[0] * (100 - best_point->coord[4]) / 100)));
+    // printf("which is about:  %6d RMB\n\n", int(best_point->coord[0] * (100 - best_point->coord[4]) / 100 * 7.23));
     printf("Do you think the price of this airbnb is *higher* than your expect?\n");
     int option = 0;
     while (option != 1 && option != 2){
