@@ -250,7 +250,8 @@ int user_study_main_body(){
     }
 
     part2_second_task();
-    higher = higher_than_expect(P0, (best_pid == best_pid_list[0])? best_pid_list[0] : best_pid_list[1]);
+    // cout << best_idx << endl;
+    higher = higher_than_expect(P0, best_pid_list[1], -1);
 
     part2_end();
    

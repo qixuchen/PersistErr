@@ -108,13 +108,13 @@ void pre_check(){
 void intro(){
     // pre_check();
     cout << endl;
-    cout << "-------------------------Welcome to the recommending airbnb system--------------------------------" << endl;
-    cout << "Imagine that you are planning a trip to a new conuntry and want to rent an airbnb. There are " << endl
-           << "thousands of airbnbs on the website." << endl << endl;
-    cout << "Since renting a good airbnb can greatly affect the happiness of your journey, you will want to" << endl
-           << "find your favorite airbnb." << endl << endl;
+    cout << "-------------------------Welcome to the recommending Airbnb system--------------------------------" << endl;
+    cout << "Imagine that you are planning a trip to a new conuntry and want to rent an Airbnb. There are " << endl
+           << "thousands of Airbnbs on the website." << endl << endl;
+    cout << "Since renting a good Airbnb can greatly affect the happiness of your journey, you will want to" << endl
+           << "find your favorite Airbnb." << endl << endl;
     cout << "In our research project, we want to study several recommendation algorithms and see whether they" << endl
-           << "can help you find your favorite airbnb under several different settings." << endl << endl;
+           << "can help you find your favorite Airbnb under several different settings." << endl << endl;
     // enter_to_continue();
     enter_recover();
     cout << endl;
@@ -124,12 +124,12 @@ void part1_info(){
     cout << "===============================================================================================" << endl << endl;
     cout << "                                     Beginning of Part 1" << endl << endl;
     cout << "===============================================================================================" << endl << endl;
-    cout << "In Part 1, there are 3 algorithms and each will ask you to compare some airbnbs." << endl << endl;
+    cout << "In Part 1, there are 3 algorithms and each will ask you to compare some Airbnbs." << endl << endl;
     
-    cout << "Each airbnb is described with the following 5 atrributes:" << endl
+    cout << "Each Airbnb is described with the following 5 atrributes:" << endl
             << "    Labeled Price       The price per night **before** applying the discount" << endl
             << "                        Range from USD 20 - 1500" << endl
-            << "    Cleanliness         Average rating on cleanliness of the airbnb" << endl
+            << "    Cleanliness         Average rating on cleanliness of the Airbnb" << endl
             << "                        Range from 0 - 5" << endl
             << "    Location            Average rating on location convenience" << endl
             << "                        Range from 0 - 5" << endl
@@ -147,7 +147,8 @@ void part1_info(){
     enter_to_continue();
     cout << endl;
 
-    cout << "In each question, you will be presented 2 airbnb options that may look like follows." << endl << endl;
+    cout << "In each question, you will be presented 2 Airbnb options." << endl;
+    cout << "For example, they may look like follows." << endl << endl;
 
     cout << "------------------------------------------------------------------------" << endl;
     cout << "|          |  Labeled Price|     Clean|  Location| Review PM|  Discount|" << endl;
@@ -157,13 +158,13 @@ void part1_info(){
     cout << "|  Option 2|            260|      4.77|      4.93|      3.46|       30%|" << endl;
     cout << "------------------------------------------------------------------------" << endl << endl;
 
-    cout << "Your task is to pick the option that you favor more. For example, if you think airbnb 1" << endl
-            << "is more preferred to airbnb 2, You could pick option 1 by entering 1." << endl << endl;
+    cout << "Your task is to pick the option that you favor more. For example, if you think Airbnb 1" << endl
+            << "is more preferred to Airbnb 2, You could pick option 1 by entering 1." << endl << endl;
 
     enter_to_continue();
     cout << endl;
 
-    cout << "By the end of each algorithm, a list of airbnbs will be recommended by this algorithm." << endl;
+    cout << "By the end of each algorithm, a list of Airbnbs will be recommended by this algorithm." << endl;
     cout << "For example, a recommendation list may look like follows:" << endl << endl;
 
     cout << "------------------------------------------------------------------------" << endl;
@@ -176,8 +177,8 @@ void part1_info(){
     cout << "|  Option 3|            101|      4.67|      4.80|      7.46|        5%|" << endl;
     cout << "------------------------------------------------------------------------" << endl << endl;
 
-    cout << "You will need to select 1 airbnb from the recommendation list that you think is the best." << endl;
-    cout << "For example, enter 3 if you think option 3 is your favorite among the recommended airbnbs." << endl << endl;
+    cout << "You will need to select 1 Airbnb from the recommendation list that you think is the best." << endl;
+    cout << "For example, enter 3 if you think option 3 is your favorite among the recommended Airbnbs." << endl << endl;
     enter_to_continue();
     cout << endl;
 }
@@ -201,7 +202,7 @@ void part2_info_v1_p1(){
 
     cout << "In Part 2, there are two tasks." << endl << endl;
 
-    cout << "The first task is to decide your favorite airbnb among the airbnbs you selected" << endl
+    cout << "The first task is to decide your favorite Airbnb among the Airbnbs you selected" << endl
             << "at the end of each algorithm in Part 1." << endl << endl;
     
     cout << "For these options, we have transformed them to only show their \"final price\"." << endl;
@@ -226,7 +227,7 @@ void part2_info_v2(){
 }
 
 void part2_second_task(){
-    cout << "We notice that you selected the following option in one of the previous algorithms." << endl << endl;
+    cout << "We notice that you selected the following option as the best choice in Algorithm 2." << endl << endl;
 }
 
 
@@ -315,7 +316,13 @@ string format_opt(const point_t *p, const int opt){
 
 string format_opt(const point_t *p, const int opt, int display_mode){
     char *buffer = new char[1024];
-    string option = "Option " + to_string(opt);
+    string option;
+    if(opt > 0){
+        option = "Option " + to_string(opt);
+    }
+    else{ // do not display option numbering
+        option = "";
+    }
     if(display_mode==1){
         sprintf(buffer, "|%10s|%15d|%10.2f|%10.2f|%10.2f|%9d%%|", option.c_str(), static_cast<int>(p->coord[0]), p->coord[1], 
                 p->coord[2], p->coord[3], int(p->coord[4]));
@@ -347,7 +354,7 @@ int show_to_user(point_set_t* P, int p_idx, int q_idx)
 {
     int option = 0;
     cout << endl;
-    cout << "Please choose the airbnb you favor more:" << endl;
+    cout << "Please choose the Airbnb you favor more:" << endl;
     print_table_title(cout);
     print_opt(cout, P, p_idx, 1);
     print_opt(cout, P, q_idx, 2);
@@ -369,7 +376,7 @@ int show_to_user(point_set_t* P, int p_idx, int q_idx, int display_mode)
 {
     int option = 0;
     cout << endl;
-    cout << "Please choose the airbnb you favor more:" << endl;
+    cout << "Please choose the Airbnb you favor more:" << endl;
     print_table_title(cout, display_mode);
     print_opt(cout, P, p_idx, 1, display_mode);
     print_opt(cout, P, q_idx, 2, display_mode);
@@ -392,7 +399,7 @@ int show_to_user(const point_t* p1, const point_t* p2)
 {
     int option = 0;
     cout << endl; 
-    cout << "Please choose the airbnb you favor more:" << endl;
+    cout << "Please choose the Airbnb you favor more:" << endl;
     print_table_title(cout);
     print_opt(cout, p1, 1);
     print_opt(cout, p2, 2);
@@ -413,7 +420,7 @@ int show_to_user(const point_t* p1, const point_t* p2)
 void print_result_list(point_set_t* P, const vector<point_t *> &point_return){
     cout << endl;
     cout << vline << endl << endl;
-    cout << "These are the airbnbs recommended by this algorithm:" << endl;
+    cout << "These are the Airbnbs recommended by this algorithm:" << endl;
     print_table_title(cout);
     for(int i=0; i < point_return.size(); i++){
         print_opt(cout, P, point_return[i]->id, i+1);
@@ -425,7 +432,7 @@ void print_result_list(point_set_t* P, const vector<point_t *> &point_return, in
     cout << endl;
     print_vline(display_mode);
     cout << endl;
-    cout << "These are the airbnbs recommended by this algorithm:" << endl;
+    cout << "These are the Airbnbs recommended by this algorithm:" << endl;
     print_table_title(cout, display_mode);
     for(int i=0; i < point_return.size(); i++){
         print_opt(cout, P, point_return[i]->id, i+1, display_mode);
@@ -437,7 +444,7 @@ void print_result_list(point_set_t* P, const vector<int> &ids){
     cout << endl;
     cout << vline << endl << endl;
     // cout << "This algorithm has finished."  << endl;
-    cout << "These are the airbnbs recommended by this algorithm:" << endl;
+    cout << "These are the Airbnbs recommended by this algorithm:" << endl;
     print_table_title(cout);
     for(int i=0; i < ids.size(); i++){
         print_opt(cout, P, ids[i], i+1);
@@ -447,7 +454,7 @@ void print_result_list(point_set_t* P, const vector<int> &ids){
 
 
 int alg_top1_select(const vector<point_t *> &point_return){
-    cout << endl << "Please select your favorite one among the recommended airbnbs." << endl;
+    cout << endl << "Please select your favorite one among the recommended Airbnbs." << endl;
     int option = 0, opt_range = point_return.size();
     while (option <= 0 || option > opt_range){
         string buf;
@@ -541,16 +548,16 @@ void print_alg_end(const int alg_num){
 
 
 /**
- * @brief Display airbnbs in the final list
+ * @brief Display Airbnbs in the final list
  * 
  * @param final_list 
  */
 void display_final_list(point_set_t* P, std::vector<int> final_list){
     int display_mode = 2;
     print_vline(display_mode);
-    cout << "The list of airbnbs selected by you in Part 1 are as follows." << endl << endl;
+    cout << "The list of Airbnbs selected by you in Part 1 are as follows." << endl << endl;
     for(int i = 0; i <final_list.size(); i++){
-        cout << "Recommended airbnb No. " << i+1 << ":" << endl;
+        cout << "Recommended Airbnb No. " << i+1 << ":" << endl;
         print_table_title(cout, display_mode);
         print_opt(cout, P, final_list[i], i+1, display_mode);
         print_vline(display_mode);
@@ -559,16 +566,16 @@ void display_final_list(point_set_t* P, std::vector<int> final_list){
 
 
 /**
- * @brief Ask the user to decide the favorite airbnb in all returned airbnbs
+ * @brief Ask the user to decide the favorite Airbnb in all returned Airbnbs
  * 
  * @param l_size Size of the final list
  * @return int 
  */
 int ask_favorite_item(int l_size){
     int favorite = 0;
-    printf("Please give a number from 1 to %d to indicate which airbnb\n"
-            "you like the most in the recommended airbnb listed above \n"
-            "(e.g., 2 means airbnb No. 2 is your favorite airbnb)", l_size);
+    printf("Please give a number from 1 to %d to indicate which Airbnb\n"
+            "you like the most in the recommended Airbnb listed above. \n"
+            "(e.g., 2 means Airbnb No. 2 is your favorite Airbnb).", l_size);
     while(favorite <1 || favorite > l_size){
         string buf;
         cout << endl << "Your choice (choose your favorite) (enter 1 to " << l_size << "): ";
@@ -601,17 +608,27 @@ int confirm_favorite_item(point_set_t* P, std::vector<int> final_list, int possi
     }
 }
 
-int higher_than_expect(point_set_t* P, int pid){
+int higher_than_expect(point_set_t* P, int pid, int idx){
     int display_mode = 1;
-    print_table_title(cout, display_mode);
-    print_opt(cout, P, pid, 1, display_mode);
-    print_vline(display_mode);
+
+    cout << "-------------------------------------------------------------" << endl;
+    printf("|%15s|%10s|%10s|%10s|%10s|\n", "Labeled Price", "Clean", "Location", "Review PM", "Discount");
+    cout << "-------------------------------------------------------------" << endl;
+    printf("|%15d|%10.2f|%10.2f|%10.2f|%9d%%|\n", static_cast<int>(P->points[pid]->coord[0]), P->points[pid]->coord[1], 
+                P->points[pid]->coord[2], P->points[pid]->coord[3], int(P->points[pid]->coord[4]));
+    cout << "-------------------------------------------------------------" << endl;
+    // print_table_title(cout, display_mode);
+    // print_opt(cout, P, pid, idx + 1, display_mode);
+    // print_vline(display_mode);
 
     point_t * best_point = P->points[pid];
     cout << endl;
-    printf("The \"final price\" for this rent is:  %6d USD\n\n", static_cast<int>(ceil(best_point->coord[0] * (100 - best_point->coord[4]) / 100)));
+    printf("The calculated \"final price\" for this rent is:   %d USD\n\n", static_cast<int>(ceil(best_point->coord[0] * (100 - best_point->coord[4]) / 100)));
     // printf("which is about:  %6d RMB\n\n", int(best_point->coord[0] * (100 - best_point->coord[4]) / 100 * 7.23));
-    printf("Do you think the price of this airbnb is *higher* than your expect?\n");
+    printf("Note that this Airbnb has a high discount rate as %d%%.\n", static_cast<int>(best_point->coord[4]));
+    cout << "You may expect that the final price of this Airbnb is very low. But, after you see the calculated" << endl
+            << "final price, do you think the real final price of this Airbnb is *higher* than your expectation?" << endl
+            << "Probably, due to your focus on the high discount rate?" << endl << endl;
     int option = 0;
     while (option != 1 && option != 2){
         string buf;
@@ -643,10 +660,10 @@ std::set<int> find_dissatisfactory_lists(point_set_t *P, int best_pid){
 
 void dissat_info_best(){
     cout << "------------------------------------------------------------------------------------------------" << endl << endl;
-    cout << "The second task is to provide your opinion on the airbnb recommended to you." << endl;
-    cout << "Please provide a **dissatisfaction score** for the favorite airbnb selected by you." << endl;
+    cout << "The second task is to provide your opinion on the Airbnb recommended to you." << endl;
+    cout << "Please provide a **dissatisfaction score** for the favorite Airbnb selected by you." << endl;
     cout << "The **dissatisfaction score** is an integer ranging from 0 to 10. It measures how *dissatisfied*" << endl
-            << "you will feel if you get this airbnb." << endl;
+            << "you will feel if you get this Airbnb." << endl;
     cout << "0 means the least dissatisfied, and 10 means the most dissatisfied." << endl << endl;
     enter_to_continue();
     cout << endl;
@@ -654,7 +671,7 @@ void dissat_info_best(){
 
 int ask_dissat_score_best(point_set_t *P,  int best_id){
     cout << vline << endl;
-    cout << "This is the favorite airbnb you chose." << endl;
+    cout << "This is the favorite Airbnb you chose." << endl;
     cout << endl;
     print_table_title(cout);
     print_opt(cout, P, best_id, 1);
@@ -676,10 +693,10 @@ int ask_dissat_score_best(point_set_t *P,  int best_id){
 void dissat_info(int dissat_score_best){
     cout << "------------------------------------------------------------------------------------------------" << endl << endl;
     cout << "Next, please also provide a **dissatisfaction score** to each recommendation list that does not" << endl
-            << "recommend your favorite airbnb." << endl << endl;
+            << "recommend your favorite Airbnb." << endl << endl;
 
     cout << "The **dissatisfaction score** is an integer ranging from " << dissat_score_best << " to 10. It measures how *dissatisfied*" << endl
-            << "you will feel if you get a airbnb from this list instead of your favorite airbnb." << endl;
+            << "you will feel if you get a Airbnb from this list instead of your favorite Airbnb." << endl;
     
     cout << dissat_score_best <<" means the least dissatisfied, and 10 means the most dissatisfied." << endl << endl;
 

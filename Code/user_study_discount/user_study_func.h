@@ -79,7 +79,7 @@ int ask_favorite_item(int l_size);
 
 int confirm_favorite_item(point_set_t* P, std::vector<int> final_list, int possible_best_idx);
 
-int higher_than_expect(point_set_t* P, int pid);
+int higher_than_expect(point_set_t* P, int pid, int best_idx);
 
 std::set<int> find_dissatisfactory_lists(point_set_t *P, int best_pid);
 
