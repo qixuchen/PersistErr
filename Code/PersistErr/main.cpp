@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "opt_exact";
-        num_repeat = 20;
+        alg_name = "sampling";
+        num_repeat = 100;
     } 
     else if(argc != 4){
         cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
             exact_rev::Exact_revised(p_set, u, k, w, SCORE_SELECT, theta);
         }
         if(alg_name.compare("sampling") == 0){
-            sampling::sampling(p_set, u, k, w, SCORE_SELECT, theta);
+            sampling::sampling(p_set, u, k, w, RAND_SELECT, theta);
         }
         if(alg_name.compare("optimal") == 0){
             optimal::optimal(p_set, u, k, w, SCORE_SELECT, theta);

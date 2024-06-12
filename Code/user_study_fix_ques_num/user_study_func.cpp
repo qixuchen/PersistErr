@@ -2,7 +2,7 @@
 
 using namespace std;
 
-string vline = "--------------------------------------------------------";
+string vline = "--------------------------------------------------------------------";
 
 
 void enter_recover(){
@@ -103,7 +103,8 @@ void intro(){
            << "your favorite airbnb." << endl << endl;
     cout << "In our research project, we want to study several recommendation algorithms and see whether they" << endl
            << "can help you find your favorite airbnb if some **incorrect** input is given by the user." << endl << endl;
-    cout << "This survey consists of 2 parts. Based on your answers in Part 1, there is a small chance that " << endl
+    cout << "This survey consists of 2 sections. Each section has 2 parts. " << endl << endl;
+    cout << "For each section, based on your answers in Part 1, there is a small chance that " << endl
            << "Part 2 is skipped." << endl << endl;
     // enter_to_continue();
     enter_recover();
@@ -111,27 +112,43 @@ void intro(){
 }
 
 void part1_info(){
-    cout << "-----------------------------------------------------------------------------------------------" << endl ;
-    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
-    cout << "                                    Beginning of Section 2" << endl << endl;
-    cout << "-----------------------------------------------------------------------------------------------" << endl ;
-    cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
-    enter_to_continue();
-
-    cout << "In Section 2, we want to evaluate algorithm's performance with a limited number of questions." << endl << endl;
-    cout << "The flow of Sections 2 is similar to Section 1. However, each algorithm will ask you at most " << endl 
-        << "10 questions before making its recommendations. " << endl << endl;
-    enter_to_continue();
-
     cout << "===============================================================================================" << endl << endl;
     cout << "                                     Beginning of Part 1" << endl << endl;
     cout << "===============================================================================================" << endl << endl;
     cout << "In Part 1, there are 6 algorithms and each will ask you some questions." << endl << endl;
     cout << "In each question, you will be presented 2 options of airbnbs and you need to pick the one that" << endl
-            << "you favor more." << endl << endl;
+            << "you favor more. For example, enter 1 if you think airbnb 1 is more preferred to airbnb 2." << endl << endl;
+    cout << "Each airbnb is described with the following 5 atrributes:" << endl << endl
+            << "    Price               Price per night" << endl
+            << "                        Range from USD 20 - 2000" << endl
+            << "    Cleanliness         Average rating on cleanliness of the airbnb" << endl
+            << "                        Range from 0 - 5" << endl
+            << "    Location            Average rating on location convenience" << endl
+            << "                        Range from 0 - 5" << endl
+            << "    Review PM           Average number of reviews in each month" << endl 
+            << "                        Range from 0 - 8.82" << endl
+            << "    Discount Rate       Discount rate of the rent" << endl 
+            << "                        Range from 0% - 60%" << endl << endl;
+    cout << "Note that the price here is the labelled price (before applying the discount)." << endl << endl;
+    enter_to_continue();
+    cout << endl;
 
     cout << "By the end of each algorithm, a list of airbnbs will be recommended by this algorithm." << endl;
-    cout << "Your task is to select 1 airbnb from the recommendation list that you think is the best." << endl << endl;
+    cout << "For example, a recommendation list may look like follows:" << endl << endl;
+
+    cout << "These are the airbnbs recommended by this algorithm:" << endl;
+    cout << "-------------------------------------------------------------------" << endl;
+    cout << "|          |Price(USD)|     Clean|  Location| Review PM| Discount |" << endl;
+    cout << "-------------------------------------------------------------------" << endl;
+    cout << "|  Option 1|        74|      4.77|      4.57|      8.16|        5%|" << endl;
+    cout << "-------------------------------------------------------------------" << endl;
+    cout << "|  Option 2|        46|      4.73|      4.83|      2.00|        0%|" << endl;
+    cout << "-------------------------------------------------------------------" << endl;
+    cout << "|  Option 3|        85|      5.00|      4.37|      7.80|        5%|" << endl;
+    cout << "-------------------------------------------------------------------" << endl << endl;
+
+    cout << "You will need to select 1 airbnb from the recommendation list that you think is the best." << endl;
+    cout << "For example, enter 3 if you think option 3 is your favorite among the recommended airbnbs." << endl << endl;
     enter_to_continue();
     cout << endl;
 }
@@ -185,10 +202,10 @@ void part2_end(){
 void end(){
     cout << "-----------------------------------------------------------------------------------------------" << endl ;
     cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
-    cout << "                                       End of Section 2" << endl << endl;
+    cout << "                                       End of Section 1" << endl << endl;
     cout << "-----------------------------------------------------------------------------------------------" << endl ;
     cout << "-----------------------------------------------------------------------------------------------" << endl << endl;
-    cout << "Section completed 2 / 4." << endl << endl;
+    cout << "Section completed 1 / 2." << endl << endl;
     enter_to_continue();
     // cout << "Your completion code is: C5EPB200" << endl;
 }
@@ -196,7 +213,7 @@ void end(){
 
 void print_table_title(ostream &os){
     char buffer[1024];
-    sprintf(buffer, "|%10s|%10s|%10s|%10s|%10s|", " ", "Price(USD)", "Clean", "Location", "Review PM");
+    sprintf(buffer, "|%10s|%10s|%10s|%10s|%10s|%10s|", " ", "Price(USD)", "Clean", "Location", "Review PM", "Discount ");
     cout << vline << endl;
     cout << buffer << endl;
 }
@@ -207,8 +224,8 @@ string format_opt(const point_t *p, const int opt){
     string option = "Option " + to_string(opt);
     // sprintf(buffer, "|%10s|%10.0f|%10.0f|%10.0f|%10.0f|", option.c_str(), p->coord[0], p->coord[1], 
     //             p->coord[2], p->coord[3]);
-    sprintf(buffer, "|%10s|%10.0f|%10.2f|%10.2f|%10.2f|", option.c_str(), p->coord[0], p->coord[1], 
-                p->coord[2], p->coord[3]);
+    sprintf(buffer, "|%10s|%10.0f|%10.2f|%10.2f|%10.2f|%9d%%|", option.c_str(), p->coord[0], p->coord[1], 
+                p->coord[2], p->coord[3], int(p->coord[4]));
     return string(buffer);
 }
 
@@ -390,14 +407,14 @@ void write_cf_info(const int alg_id, const vector<int> &cr_belong){
 
 void print_alg_start(const int alg_num){
     cout << vline << endl;
-    cout << "                  Algorithm " << alg_num+1 << " begins" << endl;
+    cout << "                      Algorithm " << alg_num+1 << " begins" << endl;
     cout << vline << endl;
 }
 
 
 void print_alg_end(const int alg_num){
     cout << vline << endl;
-    cout << "                  Algorithm " << alg_num+1 << " ends" << endl;
+    cout << "                      Algorithm " << alg_num+1 << " ends" << endl;
     cout << vline << endl << endl << endl << endl;
 }
 

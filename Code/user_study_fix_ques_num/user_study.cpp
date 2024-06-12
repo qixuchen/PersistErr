@@ -163,7 +163,7 @@ int user_study_main_body(){
     int max_round = 10;
 
     srand(time(NULL));
-    point_set_t *P0 = read_points((char*)"airbnb.txt");
+    point_set_t *P0 = read_points((char*)"airbnb_discount.txt");
     //point_set_t *P0 = read_points((char*)"car.txt");
 
     std::vector<point_t *> p_set, p_1, p_2;
@@ -175,7 +175,7 @@ int user_study_main_body(){
     // p_2 = scale_up(p_set);
     point_set_t *P = point_reload(p_set);
 
-    // intro();
+    intro();
 
     if(jump <= 1){
         part1_info();
