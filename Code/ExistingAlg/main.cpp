@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
         num_repeat = 100;
     } 
     else if(argc != 4){
-        cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
-        cout << "ALG_NAME: exact | sampling | optimal" << endl;
+        cout << "usage: ./ExistingAlg NUM_REPEAT ALG_NAME INPUT THETA" << endl;
+        cout << "ALG_NAME: hdpi | persist | util ..." << endl;
         exit(-1);
     }
     else{

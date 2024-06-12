@@ -25,12 +25,12 @@ int main(int argc, char *argv[])
     string input_file, alg_name;
     if(argc == 1){
         input_file = "4d100k.txt";
-        alg_name = "sefc_v2";
-        num_repeat = 100;
+        alg_name = "sampling";
+        num_repeat = 10;
     } 
     else if(argc != 4){
-        cout << "usage: ./prog NUM_REPEAT ALG_NAME INPUT theta" << endl;
-        cout << "ALG_NAME: exact | sampling | optimal" << endl;
+        cout << "usage: ./PersistErr NUM_REPEAT ALG_NAME INPUT THETA" << endl;
+        cout << "ALG_NAME: exact | optimal" << endl;
         exit(-1);
     }
     else{

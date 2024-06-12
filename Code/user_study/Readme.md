@@ -1,20 +1,16 @@
 This Directory contains the code for user study on the follwing algorithms.
 
-The following algorithms are included in the user study:
+(1). *SS-score* (ours)
 
-(1). *SE-score* (ours)
+(2). *Verify-Point*
 
-(2). *SS-score* (ours)
+(3). *HD-PI*
 
-(3). *Verify-Point*
+(4). *Pref-Learn*
 
-(4). *HD-PI*
+(5). *Active-Ranking*
 
-(5). *Pref-Learn*
-
-(6). *Active-Ranking*
-
-The real datasets `airbnb` used in the user study can be found in another directory `input`.
+The real datasets `airbnb` used in the user study can be found in the dataset directory `input`.
 Link to the original dataset can be found in our paper.
 
 Make sure there is a folder called `output` and a folder called `logs` under the directory `user_study`.
@@ -83,17 +79,16 @@ Each airbnb consist of 4 numbers representing attributes `daily price`, `cleanli
 ### Output
 The output is the content of the user study. The instruction in the user study is self-explanatory.
 
-There are in total 6 algorithms in the user study.
+There are in total 5 algorithms in the user study.
 
 Their performance is recorded under directory `user_study/logs`.
 
-`1.txt` to `6.txt` each records the performance of each algorithm. See the following table for their correspondance:
+`1.txt` to `6.txt` each records the performance of each algorithm. See the following table for their correspondance (alg3 is an algorithm not presented in the paper):
 
 id | algorithm name |
 -----|-----|
 alg 1 | *Verify-Point*|
 alg 2 | *HD-PI* |
-alg 3 | *SE-score* |
 alg 4 | *SS-score* |
 alg 5 | *Active-Ranking* |
 alg 6 | *Pref_Learn* |

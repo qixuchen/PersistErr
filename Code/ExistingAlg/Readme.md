@@ -62,7 +62,17 @@ Under directory `ExistingAlg`, run the following:
 ### Execution
 Under directory `ExistingAlg/build`, run
 
+
+    ./ExistingAlg NUM_REPEAT ALG_NAME INPUT THETA
+
+where `NUM_REPEAT` is the number of times to repeat, `ALG_NAME` is the name of the algorithm, `INPUT` is the input dataset, and `THETA` is the error rate.
+
+You may also simply run
+
 	./ExistingAlg
+
+which uses the default set of parameters.
+
 
 ### Input
 The datasets tested in our paper can be found under another directory called `input`.
@@ -86,4 +96,17 @@ A toy 3-d dataset with 4 records:
 ### Output
 The output will be shown on the console. It runs an algorithm (e.g. an algorithm with name `Alg`) for a number of rounds (e.g., 100 rounds).  
 
-At the end of the output, it displays the `accuracy`, `avg question num` and `avg time` of the tested algorithm `Alg`.
+The first two lines of the output shows the dataset and algorithm names. At the end of the output, it displays the `correct count`, `avg question num` and `avg time` of the tested algorithm `Alg`. The following is a sample output.
+
+    ../../input/4d100k.txt
+    util
+    round 0
+    round 1
+    ...
+    ...
+    round 98
+    round 99
+    correct count: 89
+    avg question num: 30.23
+    avg return size: 5
+    avg time: 62.6431

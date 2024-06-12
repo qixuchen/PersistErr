@@ -5,9 +5,7 @@ This Directory contains the source code of the proposed algorithms.
 
 (1). *FC* (can be found in directory `optimal`)
 
-(2). *SE-random* and *SE-score* (can be found in directory `exact`)
-
-(3). *SS-random* and *SS-score* (can be found in directory `sampling`)
+(2). *SS-random* and *SS-score* (can be found in directory `sampling`)
   
 Make sure there is a folder called `output` under the directory `PersistErr`.
 They will be used for storing some intermediate results.
@@ -56,7 +54,15 @@ Under directory `PersistErr`, run the following:
 ### Execution
 Under directory `PersistErr/build`, run
 
+    ./PersistErr NUM_REPEAT ALG_NAME INPUT THETA
+
+where `NUM_REPEAT` is the number of times to repeat, `ALG_NAME` is the name of the algorithm, `INPUT` is the input dataset, and `THETA` is the error rate.
+
+You may also simply run
+
 	./PersistErr
+
+which uses the default set of parameters.
 
 ### Input
 The datasets tested in our paper can be found under another directory called `input`.
@@ -69,7 +75,7 @@ A dataset has the following format:
     ...
 where `num_of_record` is the total number of record in the dataset, and `dim` is the dimensionality.
 
-A toy 3-d dataset with 4 records:
+For example, here is a toy 3-d dataset with 4 records:
 
     4 3
     1   0   0
@@ -78,6 +84,19 @@ A toy 3-d dataset with 4 records:
     0.5 0.5 0
 	
 ### Output
-The output will be shown on the console. It runs an algorithm (e.g. an algorithm with name `Alg`) for a number of rounds (e.g., 100 rounds).  
+The output will be shown on the console. It runs an algorithm (e.g. an algorithm with name `Alg`) for a number of rounds (e.g., 100 rounds).   
 
-At the end of the output, it displays the `accuracy`, `avg question num` and `avg time` of the tested algorithm `Alg`.
+The first two lines of the output shows the dataset and algorithm names. At the end of the output, it displays the `correct count`, `avg question num` and `avg time` of the tested algorithm `Alg`. The following is a sample output.
+
+    ../../input/4d100k.txt
+    sampling
+    round 0
+    round 1
+    ...
+    ...
+    round 98
+    round 99
+    correct count: 98
+    avg question num: 19.35
+    avg return size: 4.72
+    avg time: 7257.64
