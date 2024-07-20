@@ -22,7 +22,7 @@ This package contains 5 directories under `Code`:
 
 	(6). *Active-Ranking*
 
-3. Directory `quest_type`, which contains the source code for variants of *FC*, *SE-random*, *SE-score*, *SS-random* and *SS-score*. The following variants are provided:
+3. Directory `quest_type`, which contains the source code for variants of *FC*, *SS-random* and *SS-score*. The following variants are provided:
 	
 	(1). Display *s* points in each round and ask the user to select the favorite point (instead of pairwise comparison)
 	
